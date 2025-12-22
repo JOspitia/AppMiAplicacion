@@ -1,0 +1,137 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------
+  # 1. FRONTEND APP (Angular + Nginx)
+  # ---------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend-app
+    container_name: app_frontend
+    ports:
+      - "8080:8080" # Mapeo 8080:8080 para compatibilidad con Cloudflare Tunnel
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: on-failure
+
+  # ---------------------------------------------------------------------
+  # 2. BACKEND API (Spring Boot)
+  # ---------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend-api
+    container_name: app_backend
+    ports:
+      - "8081:8080" # Mapeo opcional para acceso directo al API (desde Postman etc)
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/myapplication_test
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_FLYWAY_ENABLED=true
+      - SPRING_FLYWAY_BASELINE_ON_MIGRATE=true
+      - SPRING_FLYWAY_VALIDATE_ON_MIGRATE=false
+      - SPRING_FLYWAY_OUT_OF_ORDER=true
+      - SPRING_FLYWAY_IGNORE_MIGRATION_PATTERNS=*:missing
+      - SPRING_FLYWAY_SCHEMAS=configuration,security,business,public_access
+      - STORAGE_S3_ENDPOINT=http://minio:9000
+      - STORAGE_S3_ACCESS_KEY=minioadmin
+      - STORAGE_S3_SECRET_KEY=minioadmin
+      - STORAGE_S3_BUCKET_NAME=mi-bucket-archivos
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      - app-network
+    stdin_open: true
+    tty: true
+    restart: on-failure
+    volumes:
+      # Volúmenes para Hot Reload (Ajustados a la estructura /backend-api)
+      - ./backend-api/target/classes:/app/BOOT-INF/classes
+      - ./backend-api/src/main/resources/templates:/app/BOOT-INF/classes/templates
+
+  # ---------------------------------------------------------------------
+  # 3. BASE DE DATOS (POSTGRES)
+  # ---------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: myapplication_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: always
+
+  # ---------------------------------------------------------------------
+  # 4. ALMACENAMIENTO (MINIO)
+  # ---------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: minio_storage
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - app-network
+    restart: always
+
+  # ---------------------------------------------------------------------
+  # 5. INICIALIZACIÓN DE MINIO
+  # ---------------------------------------------------------------------
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio_init
+    depends_on:
+      - minio
+    networks:
+      - app-network
+    volumes:
+      - ./minio_setup:/scripts
+    entrypoint: /bin/sh
+    command: /scripts/init.sh
+    restart: on-failure
+
+  # ---------------------------------------------------------------------
+  # 6. AUTOMATIZACIÓN (N8N)
+  # ---------------------------------------------------------------------
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n_app
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=n8n_app
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://n8n_app:5678/
+      - GENERIC_TIMEZONE=America/Bogota
+      - TZ=America/Bogota
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
+  n8n_data:

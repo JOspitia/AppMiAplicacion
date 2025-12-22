@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@import "primeicons/primeicons.css";
+
+@theme {
+  --color-primary: #4f46e5;
+  /* Indigo 600 */
+  --color-secondary: #0d9488;
+  /* Teal 600 */
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --border-glass: rgba(255, 255, 255, 0.3);
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.dark .glass {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Override de PrimeNG para que use tus fuentes */
+.p-component {
+  font-family: var(--font-sans);
+}

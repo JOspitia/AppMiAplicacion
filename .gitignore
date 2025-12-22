@@ -1,0 +1,26 @@
+# General
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db
+
+# Backend (Spring Boot)
+backend-api/target/
+backend-api/.mvn/wrapper/maven-wrapper.jar
+backend-api/.settings/
+backend-api/.classpath
+backend-api/.project
+
+# Frontend (Angular)
+frontend-app/node_modules/
+frontend-app/dist/
+frontend-app/.angular/
+frontend-app/tmp/
+frontend-app/out-tsc/
+frontend-app/bazel-out/
+frontend-app/npm-debug.log
+frontend-app/yarn-error.log
+
+# Docker/Environment
+.env
