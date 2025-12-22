@@ -1,15 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
 @import "primeicons/primeicons.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@theme {
-  --color-primary: #4f46e5;
-  /* Indigo 600 */
-  --color-secondary: #0d9488;
-  /* Teal 600 */
-  --font-sans: "Plus Jakarta Sans", sans-serif;
+/* Capa base para asegurar la fuente */
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
 
+/* Configuraciones globales */
+:root {
+  --primary-color: #6366f1;
   --bg-glass: rgba(255, 255, 255, 0.7);
   --border-glass: rgba(255, 255, 255, 0.3);
 }
