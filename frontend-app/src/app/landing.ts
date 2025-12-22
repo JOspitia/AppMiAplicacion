@@ -241,4 +241,43 @@ import { RouterModule } from '@angular/router';
     </div>
   `
 })
-export class LandingComponent { }
+export class LandingComponent implements OnInit, OnDestroy {
+  isDarkMode = false;
+
+  // Images placeholder array for when we implement the full carousel later
+  images: string[] = [
+    'assets/images/landing/Inicio.png',
+    'assets/images/landing/Login.png'
+  ];
+
+  constructor() { }
+
+  ngOnInit() {
+    // Check system preference or saved theme
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      this.isDarkMode = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      this.applyTheme();
+    }
+  }
+
+  toggleTheme() {
+    this.isDarkMode = !this.isDarkMode;
+    this.applyTheme();
+    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+  }
+
+  applyTheme() {
+    if (typeof document !== 'undefined') {
+      if (this.isDarkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }
+
+  ngOnDestroy() {
+    // Cleanup if needed
+  }
+}
