@@ -2,11 +2,15 @@
 # Configurar el cliente de MinIO (mc) para conectar al servidor
 /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin
 
-# Crear el bucket si no existe
-/usr/bin/mc mb myminio/mi-bucket-archivos || true
+# Crear buckets si no existen
+/usr/bin/mc mb myminio/public-assets || true
+/usr/bin/mc mb myminio/private-assets || true
 
-# Configurar el bucket como PRIVADO (Seguridad para APP)
-/usr/bin/mc anonymous set none myminio/mi-bucket-archivos
+# Configurar políticas
+# Permite lectura pública para logos y fotos
+/usr/bin/mc anonymous set download myminio/public-assets
+# Bloqueo total para archivos privados
+/usr/bin/mc anonymous set none myminio/private-assets
 
-echo "MinIO configurado correctamente."
+echo "MinIO configurado correctamente con public-assets y private-assets."
 exit 0

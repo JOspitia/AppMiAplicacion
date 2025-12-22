@@ -7,16 +7,22 @@ module.exports = {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+                sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui'],
             },
             colors: {
                 primary: {
-                    DEFAULT: '#6366f1', // Indigo 500
-                    light: '#818cf8',
-                    dark: '#4f46e5',
+                    DEFAULT: 'var(--primary-color)',
+                    hover: 'var(--primary-hover)',
                 },
-                accent: {
-                    DEFAULT: '#a855f7', // Purple 500
+                success: 'var(--success-color)',
+                warning: 'var(--warning-color)',
+                danger: 'var(--danger-color)',
+                info: 'var(--info-color)',
+                slate: {
+                    50: '#f8fafc',
+                    100: '#f1f5f9',
+                    800: '#1e293b',
+                    900: '#0f172a',
                 }
             }
         },

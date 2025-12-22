@@ -1,39 +1,62 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @import "primeicons/primeicons.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Capa base para asegurar la fuente */
+/* Global Design tokens */
+:root {
+  --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --info-color: #0ea5e9;
+
+  --bg-light: #f8fafc;
+  --bg-card: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-main: #f1f5f9;
+}
+
+.dark {
+  --bg-light: #0f172a;
+  --bg-card: #1e293b;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-main: rgba(255, 255, 255, 0.05);
+}
+
 @layer base {
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    margin: 0;
   }
 }
 
-/* Configuraciones globales */
-:root {
-  --primary-color: #6366f1;
-  --bg-glass: rgba(255, 255, 255, 0.7);
-  --border-glass: rgba(255, 255, 255, 0.3);
-}
-
-/* Glassmorphism Utility */
+/* Glassmorphism */
 .glass {
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-glass);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .dark .glass {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Override de PrimeNG para que use tus fuentes */
+/* PrimeNG General Overrides */
 .p-component {
-  font-family: var(--font-sans);
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* Badge Utility */
+.badge-indigo {
+  @apply bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20;
 }
