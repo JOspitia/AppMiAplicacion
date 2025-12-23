@@ -23,6 +23,11 @@ Para evitar que la experiencia del usuario se interrumpa al expirar el Access To
 -   **Protección contra Bucles**: Implementa un header personalizado `X-Interceptor-Retry` para identificar peticiones ya reintentadas. Si una petición reintentada falla de nuevo, se cancela el flujo para evitar bucles infinitos.
 -   **Reintento Transparente**: Una vez renovado el token, el interceptor clona la petición original añadiendo el header de marca y la reenvía sin que el usuario note el fallo inicial.
 
+-   **Unificación CSRF + Refresh**: Se implementó un **interceptor unificado** (frontend) que maneja ambos casos:
+    - En caso de **403 Forbidden** (p. ej. CSRF desincronizado) hace una llamada ligera a `/api/profile/me` para forzar la creación de la cookie `XSRF-TOKEN` y reintenta la petición original.
+    - En caso de **401 Unauthorized** ejecuta la rutina de refresh-token y reintenta la petición original. Esto evita que se intenten refrescar tokens cuando el problema real es CSRF.
+    - Para evitar bucles, el interceptor marca reintentos con cabeceras (`X-Interceptor-Retry`, `X-CSRF-Retry`) y evita reentradas sobre la propia llamada de prefeteo.
+
 > **Nota de Desarrollo**: Para pruebas, el token JWT se ha configurado con una expiración corta (30s) para validar visualmente el flujo de refresco. En producción, esto debe ajustarse a 15 min (JWT) y 7 días (Refresh Token).
 
 ---
@@ -90,6 +95,10 @@ Medidas complementarias implementadas en este repositorio:
 - **Cookies seguras**: los tokens se envían como cookies `HttpOnly`, `Secure` y `SameSite=Strict` (ya implementado en `AuthController`).
 
 - **Monitorización**: habilita un endpoint para recibir reports CSP (o usa un servicio) para revisar violaciones y ajustar la política.
+
+### Registros y diagnósticos añadidos
+-   **Logs de Refresh**: El endpoint `/api/auth/refreshtoken` ahora registra la cabecera `X-XSRF-TOKEN` y el `Cookie` header cuando se recibe una petición de refresh, para facilitar el diagnóstico de fallos de cookie/CSRF.
+-   **AccessDenied Logging**: Se añadió un `ControllerAdvice` (`SecurityExceptionHandler`) que registra detalles cuando se lanza `AccessDeniedException` (403), incluyendo la ruta, método, `X-XSRF-TOKEN` y las cookies presentes en la petición.
 
 Resumen: la configuración actual proporciona una buena base, pero **recomiendo endurecer la CSP en producción** (eliminar `unsafe-inline`, usar nonces/hashes para inline legítimo y aplicar una política más estricta en `/login`). Implementa `Report-Only` primero para recoger datos y luego pasa a bloqueo total.
 

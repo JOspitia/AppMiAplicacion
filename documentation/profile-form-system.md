@@ -60,9 +60,11 @@ Componente reutilizable (`shared/components/address-builder`) diseñado para sol
 
 ### 3.2 Seguridad y Resiliencia
 1.  **Protección XSRF**: Configuración en `app.config.ts` para sincronizar `XSRF-TOKEN`.
-2.  **AuthInterceptor (Silent Refresh)**:
-    -   Detecta tokens expirados y renovados automáticamente.
-    -   **Loop Protection**: Header `X-Interceptor-Retry` para evitar recursión infinita.
+2.  **AuthInterceptor (Silent Refresh y CSRF recovery)**:
+    -   Detecta tokens expirados y renovados automáticamente (401 → refresh) y reintenta la petición original.
+    -   Detecta 403 (CSRF desincronizado) y realiza un prefeteo a `/api/profile/me` para forzar la creación de la cookie `XSRF-TOKEN` antes de reintentar.
+    -   **Loop Protection**: Cabeceras `X-Interceptor-Retry` y `X-CSRF-Retry` para evitar reentradas infinitas.
+    -   **Nota para desarrolladores**: Se eliminó la lógica de reintento específica en componentes (p. ej. `change-password`), la cual ahora depende del interceptor centralizado para mantener el código UI limpio y evitar duplicidad de lógica.
     -   Mantiene la integridad de los datos en formularios largos durante el refresco.
 
 ---
