@@ -135,17 +135,4 @@ export class ChangePasswordComponent implements OnInit {
             }
         }).add(() => this.submitting.set(false));
     }
-    private retrySubmit(oldPassword: string, newPassword: string, confirmPassword: string) {
-        this.errorMessage.set(null);
-        this.profileService.changePassword(oldPassword, newPassword, confirmPassword).subscribe({
-            next: () => {
-                this.successMessage.set('Contraseña actualizada correctamente. Serás redirigido al perfil.');
-                setTimeout(() => this.router.navigate(['/core/management/users/profile']), 1200);
-            },
-            error: (err) => {
-                const msg = err?.error?.message || err?.message || 'Error al cambiar la contraseña';
-                this.errorMessage.set(msg);
-            }
-        }).add(() => this.submitting.set(false));
-    }
 }
