@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.project</groupId>
-	<artifactId>backend-api</artifactId>
+	<artifactId>backend_api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>backend-api</name>
+	<name>backend_api</name>
 	<description>SaaS Backend API</description>
 	<properties>
 		<java.version>21</java.version>

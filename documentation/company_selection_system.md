@@ -100,7 +100,7 @@ selectCompany(companyId: string): void {
 ### Componentes Backend (Spring Boot)
 
 #### B. `CompanyController` (Implementado)
-**Ubicación**: `backend-api/src/main/java/com/project/backend_api/controller/CompanyController.java`
+**Ubicación**: `backend_api/src/main/java/com/project/backend_api/controller/CompanyController.java`
 
 **Endpoints**:
 

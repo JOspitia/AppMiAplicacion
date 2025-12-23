@@ -21,7 +21,7 @@ services:
   # ---------------------------------------------------------------------
   backend:
     build:
-      context: ./backend-api
+      context: ./backend_api
     container_name: app_backend
     ports:
       - "8081:8080" # Mapeo opcional para acceso directo al API (desde Postman etc)
@@ -51,9 +51,9 @@ services:
     tty: true
     restart: on-failure
     volumes:
-      # Volúmenes para Hot Reload (Ajustados a la estructura /backend-api)
-      - ./backend-api/target/classes:/app/BOOT-INF/classes
-      - ./backend-api/src/main/resources/templates:/app/BOOT-INF/classes/templates
+      # Volúmenes para Hot Reload (Ajustados a la estructura /backend_api)
+      - ./backend_api/target/classes:/app/BOOT-INF/classes
+      - ./backend_api/src/main/resources/templates:/app/BOOT-INF/classes/templates
 
   # ---------------------------------------------------------------------
   # 3. BASE DE DATOS (POSTGRES)
