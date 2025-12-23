@@ -123,7 +123,7 @@ export class ChangePasswordComponent implements OnInit {
         this.errorMessage.set(null);
         const { oldPassword, newPassword, confirmPassword } = this.form.value;
 
-        // Let the CsrfInterceptor handle any transient 403 by prefetching CSRF and retrying.
+        // Let the global auth interceptor handle any transient 403 (CSRF) or 401 (refresh) and retry as needed.
         this.profileService.changePassword(oldPassword, newPassword, confirmPassword).subscribe({
             next: () => {
                 this.successMessage.set('Contraseña actualizada correctamente. Serás redirigido al perfil.');
