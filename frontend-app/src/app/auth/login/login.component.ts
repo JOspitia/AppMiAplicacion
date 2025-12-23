@@ -30,7 +30,7 @@ import { AuthService } from '../../core/services/auth.service';
 
       <!-- Top Left: Back Button -->
       <a 
-        routerLink="/"
+        href="/"
         class="absolute top-6 left-6 z-50 group inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/50 dark:bg-white/5 backdrop-blur-md text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-300 hover:text-primary transition-all border border-slate-200 dark:border-white/10 shadow-sm"
       >
         <i class="pi pi-arrow-left transition-transform group-hover:-translate-x-1"></i>
@@ -70,6 +70,7 @@ import { AuthService } from '../../core/services/auth.service';
                 pInputText 
                 id="usernameOrEmail" 
                 formControlName="usernameOrEmail" 
+                autocomplete="username"
                 class="w-full !rounded-2xl !py-4 !pl-11 !bg-slate-50 dark:!bg-[#0f172a] !border-slate-200 dark:!border-slate-700 text-slate-900 dark:text-slate-100 focus:!border-primary focus:!ring-4 focus:!ring-primary/10 transition-all font-semibold placeholder:text-slate-400" 
                 placeholder="Identificador de usuario" 
               />
@@ -88,6 +89,8 @@ import { AuthService } from '../../core/services/auth.service';
               [feedback]="false" 
               [toggleMask]="true" 
               styleClass="w-full" 
+              autocomplete="new-password"
+              (paste)="$event.preventDefault()"
               inputStyleClass="w-full !rounded-2xl !py-4 !pl-4 !bg-slate-50 dark:!bg-[#0f172a] !border-slate-200 dark:!border-slate-700 text-slate-900 dark:text-slate-100 focus:!border-primary focus:!ring-4 focus:!ring-primary/10 transition-all font-semibold placeholder:text-slate-400" 
               placeholder="••••••••">
             </p-password>
@@ -188,7 +191,17 @@ export class LoginComponent implements OnInit {
       this.error = '';
       this.loginForm.disable();
 
-      this.authService.login(this.loginForm.value).subscribe({
+      const raw = this.loginForm.get('password')?.value || '';
+
+      // Compute SHA-256 client hash and send both raw and clientHash for server-side migration
+      this.sha256Hex(raw).then(clientHash => {
+        const payload = {
+          usernameOrEmail: this.loginForm.get('usernameOrEmail')?.value,
+          password: raw,
+          clientHash: clientHash
+        };
+
+        this.authService.login(payload).subscribe({
         next: (response) => {
           this.loading = false;
 
@@ -224,8 +237,22 @@ export class LoginComponent implements OnInit {
             console.error('Login error', err);
           }
         }
+        });
+      }).catch(err => {
+        console.error('Hashing failed', err);
+        this.loading = false;
+        this.loginForm.enable();
+        this.error = 'Error interno. Intente nuevamente.';
       });
     }
+  }
+
+  private async sha256Hex(message: string): Promise<string> {
+    const enc = new TextEncoder();
+    const data = enc.encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
   startCountdown(seconds: number) {

@@ -4,6 +4,7 @@ import { LandingComponent } from './landing';
 import { TermsComponent } from './public/terms.component';
 import { PrivacyComponent } from './public/privacy.component';
 import { CookiesComponent } from './public/cookies.component';
+import { SecurityInfoComponent } from './public/security-info.component';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register';
 import { SelectCompanyComponent } from './auth/select-company/select-company.component';
@@ -18,6 +19,19 @@ export const routes: Routes = [
     { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
     { path: 'select-company', component: SelectCompanyComponent },
 
+    // 1. Public Website (PublicLayout)
+    {
+        path: '',
+        component: PublicLayoutComponent,
+        children: [
+            { path: '', component: LandingComponent, pathMatch: 'full', canActivate: [guestGuard] },
+            { path: 'terms', component: TermsComponent },
+            { path: 'privacy', component: PrivacyComponent },
+            { path: 'cookies', component: CookiesComponent },
+            { path: 'security', component: SecurityInfoComponent }
+        ]
+    },
+
     // 2. Internal Application (MainLayout + Auth Guard)
     {
         path: '',
@@ -26,19 +40,8 @@ export const routes: Routes = [
         children: [
             { path: 'home', component: HomeComponent },
             { path: 'core/management/users/profile', loadComponent: () => import('./core/management/users/profile/profile').then(m => m.ProfileComponent) },
+            { path: 'core/management/users/profile/change-password', loadComponent: () => import('./core/management/users/profile/change-password.component').then(m => m.ChangePasswordComponent) },
             { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] }
-        ]
-    },
-
-    // 3. Public Website (PublicLayout)
-    {
-        path: '',
-        component: PublicLayoutComponent,
-        children: [
-            { path: '', component: LandingComponent, pathMatch: 'full', canActivate: [guestGuard] },
-            { path: 'terms', component: TermsComponent },
-            { path: 'privacy', component: PrivacyComponent },
-            { path: 'cookies', component: CookiesComponent }
         ]
     },
 

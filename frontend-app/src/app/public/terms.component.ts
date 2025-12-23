@@ -14,7 +14,7 @@ import { RouterModule } from '@angular/router';
       
       <div class="relative max-w-6xl mx-auto px-6 z-10">
         <!-- Back Button -->
-        <a routerLink="/" class="group inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary hover:bg-white dark:hover:bg-slate-700 transition-all mb-12 border border-slate-100 dark:border-white/5 shadow-sm">
+        <a href="/" class="group inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary hover:bg-white dark:hover:bg-slate-700 transition-all mb-12 border border-slate-100 dark:border-white/5 shadow-sm">
           <i class="pi pi-arrow-left transition-transform group-hover:-translate-x-1"></i>
           Volver al inicio
         </a>

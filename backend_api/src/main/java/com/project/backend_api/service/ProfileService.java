@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +75,10 @@ public class ProfileService {
     public boolean verifyPassword(UUID userId, String password) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        return passwordEncoder.matches(password, user.getPassword());
+        // Support both raw and client-side SHA-256 hashed stored passwords
+        if (passwordEncoder.matches(password, user.getPassword())) return true;
+        String sha = sha256Hex(password);
+        return sha != null && passwordEncoder.matches(sha, user.getPassword());
     }
 
     @Transactional
@@ -85,12 +90,40 @@ public class ProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+
+        // First, try matching the raw password (legacy / default case)
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new RuntimeException("La contraseña actual es incorrecta");
+            // If raw didn't match, try the client-side SHA-256 migration case: stored password
+            // might be bcrypt(sha256(rawPassword)). In that case accept the SHA match and
+            // migrate the stored password to use the SHA of the new password (so behavior is
+            // consistent with the login migration).
+            String shaOld = sha256Hex(oldPassword);
+            if (shaOld == null || !passwordEncoder.matches(shaOld, user.getPassword())) {
+                throw new RuntimeException("La contraseña actual es incorrecta");
+            }
+
+            // OK: old matched as bcrypt(sha256(oldPassword)), so encode bcrypt(sha256(newPassword))
+            user.setPassword(passwordEncoder.encode(sha256Hex(newPassword)));
+            userRepository.save(user);
+            return;
         }
 
+        // Normal flow: oldPassword matched as raw; store bcrypt(newPassword)
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    private String sha256Hex(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) sb.append(String.format("%02x", b & 0xff));
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            // This should never happen in JVMs that provide SHA-256
+            return null;
+        }
     }
 
     @Transactional

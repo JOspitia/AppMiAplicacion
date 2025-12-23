@@ -20,6 +20,7 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import jakarta.servlet.DispatcherType;
 
 import java.util.List;
 
@@ -27,94 +28,96 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtTokenFilter jwtTokenFilter;
+        @Autowired
+        private JwtTokenFilter jwtTokenFilter;
 
-    @Autowired
-    private RateLimitFilter rateLimitFilter;
+        @Autowired
+        private RateLimitFilter rateLimitFilter;
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
+        @Autowired
+        private CustomUserDetailsService userDetailsService;
 
-    @Autowired
-    private CsrfCookieFilter csrfCookieFilter;
+        @Autowired
+        private CsrfCookieFilter csrfCookieFilter;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/auth/**", "/api/public/**", "/api/assets/**",
-                                "/api/companies/**"))
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/public/**", "/api/assets/**", "/api/companies/current")
-                        .permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .headers(headers -> {
-                    headers.referrerPolicy(referrer -> referrer
-                            .policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN));
+        // CSP used for Report-Only responses (start strict but allow style inline temporarily)
+        public static final String CSP_REPORT_ONLY = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; upgrade-insecure-requests;";
 
-                    headers.contentSecurityPolicy(csp -> csp
-                            .policyDirectives("default-src 'self'; " +
-                                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://sdk.mercadopago.com https://cdn.jsdelivr.net https://npmcdn.com https://ajax.googleapis.com https://cdnjs.cloudflare.com https://*.mercadopago.com https://*.mercadolibre.com https://*.mlstatic.com https://static.cloudflareinsights.com; "
-                                    +
-                                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.mercadopago.com https://*.mlstatic.com; "
-                                    +
-                                    "font-src 'self' https://fonts.gstatic.com https://*.mercadopago.com https://*.mlstatic.com; "
-                                    +
-                                    "img-src 'self' data: blob: https://*; " +
-                                    "connect-src 'self' https://*; " +
-                                    "frame-src 'self' https://*.mercadopago.com https://*.mercadopago.com.co https://*.mercadolibre.com https://*.mercadolibre.com.co;"));
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(csrf -> csrf
+                                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                                                .ignoringRequestMatchers("/api/auth/**", "/api/public/**",
+                                                                "/api/assets/**",
+                                                                "/api/companies/**", "/error"))
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                                                .requestMatchers("/api/auth/**", "/api/public/**", "/api/assets/**",
+                                                                "/api/companies/current", "/error")
+                                                .permitAll()
+                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                                .anyRequest().authenticated())
+                                .headers(headers -> {
+                                        headers.referrerPolicy(referrer -> referrer
+                                                        .policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN));
 
-                    headers.permissionsPolicyHeader(permissions -> permissions
-                            .policy("camera=(), microphone=(), geolocation=()"));
+                                        /* Report-Only CSP: does not block, but informs of violations. */
+                                        headers.contentSecurityPolicy(csp -> csp
+                                                        .policyDirectives(CSP_REPORT_ONLY)
+                                                        .reportOnly());
 
-                    headers.httpStrictTransportSecurity(hsts -> hsts
-                            .includeSubDomains(true)
-                            .preload(true)
-                            .maxAgeInSeconds(31536000));
-                })
-                // Force CSRF Cookie generation
-                .addFilterAfter(csrfCookieFilter,
-                        org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
-                // Add Rate Limiting filter BEFORE authentication
-                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                                        /* Additional hardening headers */
+                                        headers.contentTypeOptions(); // X-Content-Type-Options: nosniff
+                                        headers.frameOptions(frame -> frame.deny()); // X-Frame-Options: DENY
 
-        return http.build();
-    }
+                                        headers.permissionsPolicyHeader(permissions -> permissions
+                                                        .policy("camera=(), microphone=(), geolocation=()"));
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
+                                        headers.httpStrictTransportSecurity(hsts -> hsts
+                                                        .includeSubDomains(true)
+                                                        .preload(true)
+                                                        .maxAgeInSeconds(31536000));
+                                })
+                                .addFilterAfter(csrfCookieFilter,
+                                                org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
+                                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+                                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+                return authConfig.getAuthenticationManager();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://appmiaplicacion.com", "http://localhost:4200"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
+
+        @Bean
+        public DaoAuthenticationProvider authenticationProvider() {
+                DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+                authProvider.setUserDetailsService(userDetailsService);
+                authProvider.setPasswordEncoder(passwordEncoder());
+                return authProvider;
+        }
+
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(List.of("https://appmiaplicacion.com", "http://localhost:4200"));
+                configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+                configuration.setAllowCredentials(true);
+                configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 }

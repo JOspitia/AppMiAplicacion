@@ -5,7 +5,7 @@ import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors, withFetch, withXsrfConfiguration } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withFetch, withXsrfConfiguration, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 const MyPreset = definePreset(Aura, {
@@ -51,6 +51,8 @@ export const appConfig: ApplicationConfig = {
         }
       },
       ripple: true
-    })
+    }),
+
+
   ]
 };

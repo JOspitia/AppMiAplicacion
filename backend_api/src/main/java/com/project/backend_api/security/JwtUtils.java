@@ -36,6 +36,13 @@ public class JwtUtils {
                 .compact();
     }
 
+    /**
+     * Compute the expiration Date that will be used for a newly generated token.
+     * Useful to persist token expiry alongside the login event.
+     */
+    public java.util.Date computeExpirationDateFromNow() {
+        return new Date((new Date()).getTime() + jwtExpirationMs);
+    }
     private Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }

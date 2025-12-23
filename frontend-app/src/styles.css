@@ -21,6 +21,10 @@
   --border-main: #f1f5f9;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 .dark {
   --bg-light: #0f172a;
   --bg-card: #1e293b;

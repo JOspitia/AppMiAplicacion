@@ -16,6 +16,7 @@ import { AddressBuilderComponent } from '../../../../shared/components/address-b
 import { PrimeDropdownSettingsDirective } from '../../../../shared/directives/primeng-dropdown-settings.directive';
 import { PrimeDatePickerSettingsDirective } from '../../../../shared/directives/primeng-datepicker-settings.directive';
 import { ProfileService, UserProfile } from '../../../services/profile.service';
+import { AlertComponent } from '../../../../shared/components/alert/alert.component';
 
 @Component({
     selector: 'app-profile',
@@ -37,10 +38,12 @@ import { ProfileService, UserProfile } from '../../../services/profile.service';
         IconComponent,
         AddressBuilderComponent,
         PrimeDropdownSettingsDirective,
-        PrimeDatePickerSettingsDirective
+        PrimeDatePickerSettingsDirective,
+        AlertComponent
     ],
     template: `
     <div class="px-6 py-8 w-full min-h-screen font-sans bg-slate-50/50 dark:bg-transparent animate-fade-in">
+
         <!-- Header Section -->
         <div class="max-w-4xl mx-auto mb-10">
             <div class="flex items-center justify-between mb-4">
@@ -59,13 +62,9 @@ import { ProfileService, UserProfile } from '../../../services/profile.service';
             </p>
         </div>
 
-        <!-- Success Alert -->
-        <div *ngIf="successMessage()" class="max-w-4xl mx-auto mb-8 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 px-6 py-4 rounded-[2rem] flex items-center shadow-lg shadow-emerald-500/5 animate-slide-up">
-            <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center mr-4">
-                <app-icon icon="check" class="w-4 h-4 text-emerald-500"></app-icon>
-            </div>
-            <span class="font-bold text-sm">{{ successMessage() }}</span>
-        </div>
+        <!-- Alerts -->
+        <app-alert *ngIf="successMessage()" type="success" [message]="successMessage()" [autoHide]="6000" (closed)="successMessage.set(null)"></app-alert>
+        <app-alert *ngIf="errorMessage()" type="error" [message]="errorMessage()" [autoHide]="6000" (closed)="errorMessage.set(null)"></app-alert>
 
         <!-- Main Card Container -->
         <div class="max-w-4xl mx-auto">
@@ -232,8 +231,10 @@ import { ProfileService, UserProfile } from '../../../services/profile.service';
                                 <div class="absolute inset-0 bg-indigo-500/10 rounded-[3rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 <app-icon icon="key" class="w-12 h-12 relative z-10"></app-icon>
                             </div>
-                            <h2 class="text-3xl font-black text-slate-800 dark:text-white mb-3">Cambiar Contraseña</h2>
-                            <p class="text-sm text-slate-500 dark:text-slate-400">Te recomendamos actualizar tu contraseña cada 90 días para mayor seguridad.</p>
+                            <div class="flex items-center justify-center flex-col">
+                                <h2 class="text-3xl font-black text-slate-800 dark:text-white mb-3">Cambiar Contraseña</h2>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Te recomendamos actualizar tu contraseña cada 90 días para mayor seguridad.</p>
+                            </div>
                         </div>
 
                         <form [formGroup]="passwordForm" (ngSubmit)="onUpdatePassword()" class="space-y-8">
@@ -258,7 +259,7 @@ import { ProfileService, UserProfile } from '../../../services/profile.service';
                                 </div>
                             </div>
 
-                            <div *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched" class="p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-2xl flex items-center justify-center gap-2 text-rose-500 animate-bounce">
+                            <div *ngIf="passwordForm.errors?.['mismatch'] && (passwordForm.get('confirmPassword')?.touched || passwordForm.dirty)" class="p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-2xl flex items-center justify-center gap-2 text-rose-500 animate-bounce">
                                 <app-icon icon="shield" class="w-4 h-4"></app-icon>
                                 <span class="text-xs font-bold">Las contraseñas no coinciden.</span>
                             </div>
@@ -327,6 +328,7 @@ export class ProfileComponent implements OnInit {
     activeTab = signal<'info' | 'security'>('info');
     loading = signal(false);
     successMessage = signal<string | null>(null);
+    errorMessage = signal<string | null>(null);
     emailUnlocked = signal(false);
     showPasswordDialog = false;
     showAddressBuilder = false;
@@ -486,6 +488,8 @@ export class ProfileComponent implements OnInit {
             error: (err) => {
                 console.error('[Profile] Error:', err);
                 this.loading.set(false);
+                const msg = err?.error?.message || 'Error al actualizar el perfil';
+                this.showError(msg);
             }
         });
     }
@@ -502,7 +506,7 @@ export class ProfileComponent implements OnInit {
                     this.verificationPassword = '';
                 }
             },
-            error: () => this.loading.set(false)
+            error: (err) => { this.loading.set(false); const msg = err?.error?.message || 'Error al verificar la contraseña'; this.showError(msg); }
         });
     }
 
@@ -516,7 +520,7 @@ export class ProfileComponent implements OnInit {
                 this.newEmail = '';
                 this.emailUnlocked.set(false);
             },
-            error: () => this.loading.set(false)
+            error: (err) => { this.loading.set(false); const msg = err?.error?.message || 'Error al solicitar cambio de correo'; this.showError(msg); }
         });
     }
 
@@ -530,14 +534,22 @@ export class ProfileComponent implements OnInit {
                 this.showSuccess('Tu contraseña ha sido robustecida con éxito');
                 this.passwordForm.reset();
             },
-            error: () => this.loading.set(false)
+            error: (err) => { this.loading.set(false); const msg = err?.error?.message || 'Error al cambiar la contraseña'; this.showError(msg); }
         });
     }
 
     private showSuccess(msg: string) {
         this.successMessage.set(msg);
+        this.errorMessage.set(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(() => this.successMessage.set(null), 6000);
+    }
+
+    private showError(msg: string) {
+        this.errorMessage.set(msg);
+        this.successMessage.set(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => this.errorMessage.set(null), 6000);
     }
 
     // Address Builder - Uses shared AddressBuilderComponent

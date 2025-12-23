@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Title, Meta } from '@angular/platform-browser';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { RouterModule } from '@angular/router';
@@ -171,6 +172,23 @@ import { ContactFormComponent } from './public/contact-form/contact-form';
   `
 })
 export class LandingComponent implements OnInit {
+    private titleService = inject(Title);
+    private metaService = inject(Meta);
+
     constructor() { }
-    ngOnInit() { }
+
+    ngOnInit() {
+        try {
+            this.titleService.setTitle('MiAplicación | Automatiza tu Gestión Empresarial y Automatización SaaS');
+            this.metaService.updateTag({ name: 'description', content: 'Plataforma SaaS para centralizar la gestión de tu equipo. Automatiza flujos de trabajo, gestiona tu bolsa de empleo y protege tus datos con seguridad de grado bancario.' });
+            this.metaService.updateTag({ property: 'og:title', content: 'MiAplicación: Gestión de RRHH Inteligente' });
+            this.metaService.updateTag({ property: 'og:description', content: 'Centraliza tu equipo y automatiza procesos con total seguridad.' });
+            this.metaService.updateTag({ property: 'og:type', content: 'website' });
+            this.metaService.updateTag({ property: 'og:url', content: 'https://www.appmiaplicacion.com' });
+            this.metaService.updateTag({ property: 'og:image', content: '/api/public/assets/images/logo.png' });
+        } catch (e) {
+            const errMsg = (e as any)?.message ?? String(e);
+            console.warn('Could not set meta tags on landing:', errMsg);
+        }
+    }
 }

@@ -3,17 +3,17 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-privacy',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  template: `
+   selector: 'app-privacy',
+   standalone: true,
+   imports: [CommonModule, RouterModule],
+   template: `
     <main class="relative pt-32 pb-20 overflow-hidden bg-white dark:bg-slate-900 font-sans">
       <!-- Ornaments -->
       <div class="absolute top-0 left-0 -translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-sky-400/5 blur-[120px] rounded-full pointer-events-none"></div>
       
       <div class="relative max-w-6xl mx-auto px-6 z-10">
         <!-- Back Button -->
-        <a routerLink="/" class="group inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-all mb-12 border border-slate-100 dark:border-white/5 shadow-sm">
+        <a href="/" class="group inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-all mb-12 border border-slate-100 dark:border-white/5 shadow-sm">
           <i class="pi pi-arrow-left transition-transform group-hover:-translate-x-1"></i>
           Volver al inicio
         </a>
@@ -81,11 +81,11 @@ import { RouterModule } from '@angular/router';
                </section>
 
                <!-- Section 2 -->
-               <section id="finalidad" class="scroll-mt-32">
+               <section id="finalidad" class="scroll-mt-32 group">
                  <div class="flex gap-8">
-                    <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 dark:border-white/5">
-                      <i class="pi pi-check-square text-2xl"></i>
-                    </div>
+                     <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all shadow-sm border border-slate-100 dark:border-white/5">
+                        <i class="pi pi-check-square text-2xl"></i>
+                     </div>
                     <div class="flex-1">
                       <h2 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-8">2. Finalidad del Uso</h2>
                       <p class="text-lg text-slate-500 dark:text-slate-400 mb-10">Tratamos los datos ingresados exclusivamente para el funcionamiento de los módulos SaaS:</p>
@@ -113,10 +113,10 @@ import { RouterModule } from '@angular/router';
                </section>
 
                <!-- Section 3 -->
-               <section id="sensibles" class="scroll-mt-32">
+               <section id="sensibles" class="scroll-mt-32 group">
                   <div class="flex gap-8">
-                     <div class="w-16 h-16 rounded-3xl bg-primary flex items-center justify-center text-white shadow-xl shadow-primary/30">
-                       <i class="pi pi-exclamation-circle text-2xl"></i>
+                     <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all shadow-sm border border-slate-100 dark:border-white/5">
+                        <i class="pi pi-exclamation-circle text-2xl"></i>
                      </div>
                      <div class="flex-1">
                         <h2 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-8">3. Datos Sensibles</h2>
@@ -134,13 +134,33 @@ import { RouterModule } from '@angular/router';
                </section>
 
                <!-- Section 4 -->
-               <section id="derechos" class="scroll-mt-32">
+               <section id="registro-seguridad" class="scroll-mt-32 group">
                   <div class="flex gap-8">
-                     <div class="w-16 h-16 rounded-3xl bg-sky-500 flex items-center justify-center text-white shadow-xl shadow-sky-500/30">
-                       <i class="pi pi-user-plus text-2xl"></i>
+                     <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all shadow-sm border border-slate-100 dark:border-white/5">
+                        <i class="pi pi-shield text-2xl"></i>
                      </div>
                      <div class="flex-1">
-                        <h2 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-10">4. Tus Derechos</h2>
+                        <h2 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-8">4. Registro de seguridad</h2>
+                        <div class="p-8 rounded-[2rem] bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5">
+                           <p class="text-lg text-slate-500 dark:text-slate-400 mb-4">
+                             Para garantizar la seguridad de su cuenta y prevenir ataques (por ejemplo, fuerza bruta), el sistema registra la dirección IP y datos básicos del cliente (tipo de dispositivo / User-Agent) en cada intento de inicio de sesión.
+                           </p>
+                           <p class="text-sm text-slate-500 dark:text-slate-400">
+                             Estos datos se conservan exclusivamente con fines de auditoría y protección de la integridad del sistema, y se tratan conforme a la legislación aplicable. Si desea ejercer derechos de acceso, rectificación o supresión, contáctenos a <span class="font-bold">jjohanospitia@gmail.com</span>.
+                           </p>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+
+               <!-- Section 5 -->
+               <section id="derechos" class="scroll-mt-32 group">
+                  <div class="flex gap-8">
+                     <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all shadow-sm border border-slate-100 dark:border-white/5">
+                        <i class="pi pi-user-plus text-2xl"></i>
+                     </div>
+                     <div class="flex-1">
+                        <h2 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-10">5. Tus Derechos</h2>
                         <div class="space-y-4">
                            <div class="p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/40 flex items-start gap-4 border border-slate-100 dark:border-white/5">
                               <div class="w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-500/20 text-sky-500 flex items-center justify-center shrink-0">1</div>
@@ -191,6 +211,10 @@ import { RouterModule } from '@angular/router';
                        <span class="w-2 h-1 bg-slate-200 dark:bg-slate-700 group-hover:w-4 group-hover:bg-primary transition-all"></span>
                        Sensibles
                     </a>
+                    <a href="privacy#registro-seguridad" class="group flex items-center gap-4 text-[11px] font-black text-slate-500 hover:text-primary transition-all uppercase">
+                       <span class="w-2 h-1 bg-slate-200 dark:bg-slate-700 group-hover:w-4 group-hover:bg-primary transition-all"></span>
+                       Registro de seguridad
+                    </a>
                     <a href="privacy#derechos" class="group flex items-center gap-4 text-[11px] font-black text-slate-500 hover:text-primary transition-all uppercase">
                        <span class="w-2 h-1 bg-slate-200 dark:bg-slate-700 group-hover:w-4 group-hover:bg-primary transition-all"></span>
                        Derechos
@@ -203,7 +227,7 @@ import { RouterModule } from '@angular/router';
                   <i class="pi pi-lock text-4xl mb-6 text-primary"></i>
                   <h5 class="text-xl font-black mb-4">Seguridad ISO</h5>
                   <p class="text-xs text-slate-400 leading-relaxed mb-8">Utilizamos estándares de encriptación para asegurar que tu información corporativa esté siempre protegida.</p>
-                  <a routerLink="/#contact" class="flex items-center justify-center p-4 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase transition-all tracking-widest">
+                  <a routerLink="/security" class="flex items-center justify-center p-4 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase transition-all tracking-widest">
                     Consultar Seguridad
                   </a>
                </div>
@@ -215,7 +239,7 @@ import { RouterModule } from '@angular/router';
       </div>
     </main>
   `,
-  styles: [`
+   styles: [`
     :host { display: block; }
     html { scroll-behavior: smooth; }
   `]

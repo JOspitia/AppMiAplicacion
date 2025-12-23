@@ -22,13 +22,16 @@ public class LoginLog {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     private String token;
 
     @Column(name = "login_time", nullable = false)
     private LocalDateTime loginTime;
+
+    @Column(name = "expiration_time")
+    private LocalDateTime expirationTime;
 
     @Column(name = "ip_address")
     private String ipAddress;
@@ -38,4 +41,11 @@ public class LoginLog {
 
     @Builder.Default
     private Boolean active = true;
+
+    // New audit fields
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "failure_reason")
+    private String failureReason;
 }

@@ -6,7 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml, Title, Meta } from '@angular/platform-browser';
 import { DashboardService, ModuleDto } from '../services/dashboard.service';
 import { IconComponent } from '../../shared/components/icon.component';
 
@@ -291,6 +291,8 @@ export class MainLayoutComponent implements OnInit {
     private router = inject(Router);
     private dashboardService = inject(DashboardService);
     private sanitizer = inject(DomSanitizer);
+    private titleService = inject(Title);
+    private metaService = inject(Meta);
 
     // State
     isSidebarCollapsed = signal(false);
@@ -321,6 +323,23 @@ export class MainLayoutComponent implements OnInit {
     }
 
     ngOnInit() {
+        // SEO / Metadata
+        try {
+            this.titleService.setTitle('MiAplicación | Automatiza tu Gestión Empresarial y Automatización SaaS');
+            this.metaService.updateTag({ name: 'description', content: 'Plataforma SaaS para centralizar la gestión de tu equipo. Automatiza flujos de trabajo, gestiona tu bolsa de empleo y protege tus datos con seguridad de grado bancario.' });
+            this.metaService.updateTag({ property: 'og:title', content: 'MiAplicación: Gestión de RRHH Inteligente' });
+            this.metaService.updateTag({ property: 'og:description', content: 'Centraliza tu equipo y automatiza procesos con total seguridad.' });
+            this.metaService.updateTag({ property: 'og:type', content: 'website' });
+            this.metaService.updateTag({ property: 'og:url', content: 'https://www.appmiaplicacion.com' });
+        } catch (e) {
+            // Best-effort: don't break the UI if platform-browser is unavailable in some environments
+            const errMsg = (e as any)?.message ?? String(e);
+            console.warn('Could not set meta tags:', errMsg);
+        }
+
+        // Ensure the default logo is the public asset (overrides candidate order)
+        this.logoUrl.set('/api/public/assets/images/logo.png');
+
         this.loadTheme();
         this.loadCurrentCompany();
         this.loadUserInfo();

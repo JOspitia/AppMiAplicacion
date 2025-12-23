@@ -20,6 +20,7 @@ import java.io.IOException;
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private final RateLimitingService rateLimitingService;
+    private final com.project.backend_api.repository.LoginLogRepository loginLogRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -45,11 +46,45 @@ public class RateLimitFilter extends OncePerRequestFilter {
             ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 
             if (!probe.isConsumed()) {
-                // BLOCKED: No tokens remaining, return 429 error
+                // BLOCKED: No tokens remaining, return 429 error with Retry-After and JSON body
+                long nanosToWait = probe.getNanosToWaitForRefill();
+                long secondsToWait = java.util.concurrent.TimeUnit.NANOSECONDS.toSeconds(nanosToWait) + 1; // round up
+
+                // Logging for audit
+                org.slf4j.LoggerFactory.getLogger(RateLimitFilter.class)
+                        .warn("Rate limit exceeded for IP {} - retry after {}s", ip, secondsToWait);
+
+                // --- NUEVO: GUARDAR EN BASE DE DATOS ---
+                try {
+                    com.project.backend_api.model.LoginLog auditLog = com.project.backend_api.model.LoginLog.builder()
+                            .ipAddress(ip)
+                            .loginTime(java.time.LocalDateTime.now())
+                            .expirationTime(null)
+                            .userAgent(request.getHeader("User-Agent"))
+                            .status("BLOCKED")
+                            .failureReason("Rate Limit Exceeded (429)")
+                            .active(false)
+                            .build();
+
+                    loginLogRepository.save(auditLog);
+                } catch (Exception e) {
+                    org.slf4j.LoggerFactory.getLogger(RateLimitFilter.class).error("No se pudo guardar el log de auditoría: {}", e.getMessage());
+                }
+                // ---------------------------------------
+
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
-                response.getWriter().write("{\"message\": \"Demasiados intentos. Por favor espere 1 minuto.\"}");
+
+                // Add security headers so blocked responses are also hardened
+                response.addHeader("X-Content-Type-Options", "nosniff");
+                response.addHeader("X-Frame-Options", "DENY");
+                response.addHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+                response.addHeader("Content-Security-Policy-Report-Only", SecurityConfig.CSP_REPORT_ONLY.replaceAll("[\\r\\n]", ""));
+
+                // Inform client how long to wait
+                response.addHeader("Retry-After", String.valueOf(secondsToWait));
+                response.getWriter().write("{\"message\": \"Demasiados intentos. Por favor espere " + secondsToWait + " segundos.\", \"retry_after_seconds\": " + secondsToWait + "}");
                 return; // Stop execution here
             }
 

@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 
@@ -39,6 +40,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AuthController {
 
+        private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AuthController.class);
+
         private final AuthenticationManager authenticationManager;
         private final JwtUtils jwtUtils;
         private final LoginLogRepository loginLogRepository;
@@ -46,6 +49,11 @@ public class AuthController {
         private final RefreshTokenService refreshTokenService;
         private final CompanyRepository companyRepository;
         private final UserCompanyRoleRepository userCompanyRoleRepository;
+        private final com.project.backend_api.repository.UserRepository userRepository;
+        private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+        @Value("${app.security.cookie-secure:false}")
+        private boolean cookieSecure;
 
         @PostMapping("/register")
         public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -65,11 +73,50 @@ public class AuthController {
                         HttpServletResponse response) {
 
                 try {
-                        // 1. Authenticate
-                        Authentication authentication = authenticationManager.authenticate(
-                                        new UsernamePasswordAuthenticationToken(
-                                                        loginRequest.usernameOrEmail(),
-                                                        loginRequest.password()));
+                        // 1. Authenticate: support client-side hash migration.
+                        Authentication authentication = null;
+
+                        String clientHash = loginRequest.clientHash();
+                        String presentedPassword = loginRequest.password();
+
+                        // If client sent a clientHash (sha256), try authenticating using it first
+                        if (clientHash != null && !clientHash.isBlank()) {
+                                try {
+                                        authentication = authenticationManager.authenticate(
+                                                        new UsernamePasswordAuthenticationToken(
+                                                                        loginRequest.usernameOrEmail(),
+                                                                        clientHash));
+                                } catch (org.springframework.security.core.AuthenticationException ex) {
+                                        authentication = null;
+                                }
+                        }
+
+                        // If not authenticated yet, try with presented (raw) password
+                        if (authentication == null) {
+                                authentication = authenticationManager.authenticate(
+                                                new UsernamePasswordAuthenticationToken(
+                                                                loginRequest.usernameOrEmail(),
+                                                                presentedPassword));
+
+                                // If login with raw succeeded and clientHash present, migrate stored password
+                                if (clientHash != null && !clientHash.isBlank()) {
+                                        try {
+                                                // Load user and update password to bcrypt(clientHash)
+                                                java.util.Optional<com.project.backend_api.model.User> optUser =
+                                                                userRepository.findByUsernameOrEmail(
+                                                                                loginRequest.usernameOrEmail(),
+                                                                                loginRequest.usernameOrEmail());
+                                                if (optUser.isPresent()) {
+                                                        com.project.backend_api.model.User u = optUser.get();
+                                                        u.setPassword(passwordEncoder.encode(clientHash));
+                                                        userRepository.save(u);
+                                                }
+                                        } catch (Exception e) {
+                                                // Migration failure shouldn't block login; log it
+                                                System.err.println("Password migration failed: " + e.getMessage());
+                                        }
+                                }
+                        }
 
                         // 2. Generate JWT
                         String jwt = jwtUtils.generateToken(authentication);
@@ -98,12 +145,15 @@ public class AuthController {
                                         .toList();
 
                         // 4. Log the login
+                        java.util.Date expDate = jwtUtils.computeExpirationDateFromNow();
                         LoginLog log = LoginLog.builder()
                                         .user(user)
                                         .token(jwt.substring(0, Math.min(jwt.length(), 20)) + "...")
                                         .loginTime(LocalDateTime.now())
-                                        .ipAddress(request.getRemoteAddr())
+                                        .expirationTime(LocalDateTime.ofInstant(expDate.toInstant(), java.time.ZoneId.systemDefault()))
+                                        .ipAddress(getClientIp(request))
                                         .userAgent(request.getHeader("User-Agent"))
+                                        .status("SUCCESS")
                                         .active(true)
                                         .build();
                         loginLogRepository.save(log);
@@ -115,7 +165,7 @@ public class AuthController {
                         // Access Token Cookie
                         ResponseCookie jwtCookie = ResponseCookie.from("accessToken", jwt)
                                         .httpOnly(true)
-                                        .secure(false) // True in Prod
+                                        .secure(cookieSecure) // Configurable: true in Prod
                                         .path("/")
                                         .maxAge(15 * 60) // 15 mins
                                         // .maxAge(30) // 30 seconds
@@ -125,16 +175,19 @@ public class AuthController {
                         // Refresh Token Cookie
                         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
                                         .httpOnly(true)
-                                        .secure(false) // True in Prod
+                                        .secure(cookieSecure) // Configurable: true in Prod
                                         .path("/api/auth/refreshtoken") // Security hardening: only sent to refresh
                                                                         // endpoint
                                         .maxAge(7 * 24 * 60 * 60) // 7 days
                                         .sameSite("Strict")
                                         .build();
 
+                        org.springframework.http.HttpHeaders respHeaders = new org.springframework.http.HttpHeaders();
+                        respHeaders.add(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+                        respHeaders.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
                         return ResponseEntity.ok()
-                                        .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                                        .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                        .headers(respHeaders)
                                         .body(LoginResponse.builder()
                                                         .message("Login exitoso")
                                                         .role(authentication.getAuthorities().toString())
@@ -148,9 +201,14 @@ public class AuthController {
 
         @PostMapping("/refreshtoken")
         public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
+                String csrfHeader = request.getHeader("X-XSRF-TOKEN");
+                String cookieHeader = request.getHeader("Cookie");
+                logger.info("Refresh token request to {}. X-XSRF-TOKEN='{}'. CookieHeader='{}'", request.getRequestURI(), csrfHeader, cookieHeader);
+
                 String refreshToken = jwtUtils.parseJwtFromCookie(request, "refreshToken"); // We need a method in
                                                                                             // JwtUtils or just get
                                                                                             // manually
+                logger.debug("Parsed refresh token from cookie: {}", refreshToken);
 
                 if (refreshToken != null && refreshToken.length() > 0) {
                         return refreshTokenService.findByToken(refreshToken)
@@ -171,43 +229,95 @@ public class AuthController {
 
                                                 ResponseCookie jwtCookie = ResponseCookie.from("accessToken", token)
                                                                 .httpOnly(true)
-                                                                .secure(false)
+                                                                .secure(cookieSecure)
                                                                 .path("/")
                                                                 .maxAge(15 * 60) // 15 mins
                                                                 .sameSite("Strict")
                                                                 .build();
 
+                                                org.springframework.http.HttpHeaders respHeaders = new org.springframework.http.HttpHeaders();
+                                                respHeaders.add(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+                                                logger.info("Refresh successful for user {} (issued new access cookie)", user.getUsername());
                                                 return ResponseEntity.ok()
-                                                                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                                                                .headers(respHeaders)
                                                                 .body(java.util.Map.of("message",
                                                                                 "Token refreshed successfully"));
                                         })
-                                        .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
+                                        .orElseThrow(() -> {
+                                            logger.warn("Refresh token '{}' not found in database", refreshToken);
+                                            return new RuntimeException("Refresh token is not in database!");
+                                        });
                 }
+
+                logger.warn("Refresh token empty in request; cookies: {}", cookieHeader);
                 return ResponseEntity.badRequest().body("Refresh Token is empty!");
         }
 
         @PostMapping("/logout")
-        public ResponseEntity<?> logout(HttpServletRequest request) {
+        public ResponseEntity<?> logout(HttpServletRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
                 // Optional: Get user from request context to delete precise token
-                // For now, let's clear cookies. In a strict impl, we delete by user ID or token
-                // value.
+                // For audit purposes, log logout event BEFORE clearing cookies
+                try {
+                        com.project.backend_api.model.User logUser = null;
+                        if (userDetails != null && userDetails.getUser() != null) {
+                                java.util.Optional<com.project.backend_api.model.User> optUser = userRepository.findById(userDetails.getUser().getId());
+                                if (optUser.isPresent()) {
+                                        logUser = optUser.get();
+                                }
+                        }
+
+                        // If we still don't have the user (e.g., SecurityContext cleared), try parsing the access token
+                        if (logUser == null) {
+                                try {
+                                        String token = jwtUtils.parseJwtFromCookie(request, "accessToken");
+                                        if (token != null && jwtUtils.validateJwtToken(token)) {
+                                                String username = jwtUtils.getUserNameFromJwtToken(token);
+                                                java.util.Optional<com.project.backend_api.model.User> optUser2 = userRepository.findByUsernameOrEmail(username, username);
+                                                if (optUser2.isPresent()) {
+                                                        logUser = optUser2.get();
+                                                }
+                                        }
+                                } catch (Exception ignored) {
+                                        // Best-effort; don't block logout on token parse errors
+                                }
+                        }
+
+                        LoginLog.LoginLogBuilder builder = LoginLog.builder()
+                                        .ipAddress(getClientIp(request))
+                                        .loginTime(LocalDateTime.now())
+                                        .status("LOGOUT")
+                                        .failureReason("Cierre de sesión voluntario")
+                                        .userAgent(request.getHeader("User-Agent"))
+                                        .active(false);
+
+                        if (logUser != null) {
+                                builder.user(logUser);
+                        }
+
+                        loginLogRepository.save(builder.build());
+                } catch (Exception e) {
+                        org.slf4j.LoggerFactory.getLogger(AuthController.class)
+                                        .warn("No se pudo persistir el log de logout: {}", e.getMessage());
+                }
 
                 // Delete cookies
                 ResponseCookie jwtCookie = ResponseCookie.from("accessToken", "")
-                                .httpOnly(true).secure(false).path("/").maxAge(0).sameSite("Strict").build();
+                                .httpOnly(true).secure(cookieSecure).path("/").maxAge(0).sameSite("Strict").build();
                 ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
-                                .httpOnly(true).secure(false).path("/api/auth/refreshtoken").maxAge(0)
+                                .httpOnly(true).secure(cookieSecure).path("/api/auth/refreshtoken").maxAge(0)
                                 .sameSite("Strict").build();
 
                 ResponseCookie companyCookie = ResponseCookie.from("companyContext", "")
-                                .httpOnly(true).secure(false).path("/api").maxAge(0).sameSite("Strict").build();
+                                .httpOnly(true).secure(cookieSecure).path("/api").maxAge(0).sameSite("Strict").build();
+
+                org.springframework.http.HttpHeaders respHeaders = new org.springframework.http.HttpHeaders();
+                respHeaders.add(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+                respHeaders.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+                respHeaders.add(HttpHeaders.SET_COOKIE, companyCookie.toString());
 
                 return ResponseEntity.ok()
-                                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                                .header(HttpHeaders.SET_COOKIE, companyCookie.toString())
-                                .body("Logout exitoso");
+                                .headers(respHeaders)
+                                .body(java.util.Map.of("message", "Logout exitoso"));
         }
 
         @GetMapping("/me")
@@ -226,5 +336,14 @@ public class AuthController {
                 response.put("isSuperAdmin", user.getIsSuperAdmin());
 
                 return ResponseEntity.ok(response);
+        }
+
+        // Método auxiliar para obtener la IP real detrás de proxies o balanceadores
+        private String getClientIp(HttpServletRequest request) {
+                String ip = request.getHeader("X-Forwarded-For");
+                if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+                        return request.getRemoteAddr();
+                }
+                return ip.split(",")[0].trim();
         }
 }

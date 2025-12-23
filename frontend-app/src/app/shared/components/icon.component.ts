@@ -22,8 +22,24 @@ export class IconComponent {
     private sanitizer = inject(DomSanitizer);
 
     @Input() icon: string = '';
+
+    // Backward-compatible alias: allow using `[name]` as input in templates
+    @Input('name') set name(value: string) { if (value) this.icon = value; }
+
     @Input() iconClass: string = '';
     @Input() svgClass: string = 'w-5 h-5';
+
+    // Optional numeric size attribute (e.g. size="18") to set inline Tailwind arbitrary width/height
+    @Input() set size(value: string | number | undefined) {
+        if (value === undefined || value === null) return;
+        const v = typeof value === 'number' ? value : parseInt(String(value), 10);
+        if (!isNaN(v)) {
+            // Using arbitrary value syntax so values like 18 become w-[18px]
+            this.svgClass = `w-[${v}px] h-[${v}px]`;
+            // For icon fonts, apply a similar size class so icons scale
+            this.iconClass = `w-[${v}px] h-[${v}px]`;
+        }
+    }
 
     isSvg(): boolean {
         return !!(this.icon && this.icon.trim().startsWith('<svg'));

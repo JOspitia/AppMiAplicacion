@@ -5,6 +5,7 @@ import { Observable, tap } from 'rxjs';
 export interface LoginRequest {
     usernameOrEmail?: string;
     password?: string;
+    clientHash?: string;
 }
 
 export interface RegisterRequest {
