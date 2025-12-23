@@ -56,6 +56,139 @@
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
+@layer components {
+  /* ========================================
+     PRIME-NG STRUCTURAL FIXES (The "Invisible Wrapper" Solution)
+     Forces internal wrappers to behave like full-width block elements
+     ======================================== */
+
+  /* 1. Force PrimeNG wrappers to take full width */
+  .p-component,
+  .p-inputwrapper {
+    width: 100%;
+  }
+
+  /* 2. Force standard height (h-11/44px) and flex alignment on containers */
+  .p-select,
+  .p-dropdown,
+  .p-calendar,
+  .p-datepicker,
+  .p-multiselect,
+  .p-password {
+    @apply w-full h-11 flex items-center !important;
+  }
+
+  /* 3. Vertically center text inside Dropdowns/Selects */
+  .p-select .p-select-label,
+  .p-dropdown .p-dropdown-label {
+    @apply h-full flex items-center pt-0 pb-0 px-4 !important;
+  }
+
+  /* 4. Align internal icons (Dropdown arrows, Datepicker calendars) */
+  .p-select-dropdown,
+  .p-dropdown-trigger,
+  .p-datepicker-trigger {
+    @apply flex items-center justify-center h-full w-10 text-slate-400 !important;
+    /* w-10 = 40px trigger area */
+  }
+
+  /* 5. Datepicker specific input fixes */
+  /* 5. Datepicker specific input fixes */
+  .p-datepicker input,
+  .p-calendar input {
+    @apply h-full w-full border-none outline-none bg-transparent px-4 !important;
+    /* Input takes full height of container */
+  }
+
+  /* 6. Password specific fixes */
+  .p-password input {
+    @apply h-full w-full !important;
+  }
+
+  /* ========================================
+     PREMIUM COMPONENT STYLING (Visual Layer)
+     ======================================== */
+
+  /* Master Input Class - Applies to all text inputs */
+  .p-inputtext {
+    @apply h-11 text-sm rounded-2xl border-slate-200 dark:border-white/10 !important;
+    @apply bg-white dark:bg-white/5 !important;
+    @apply font-bold transition-all px-4 !important;
+    @apply focus:border-primary focus:ring-4 focus:ring-indigo-500/20 !important;
+  }
+
+  /* Dropdown/Select Visuals */
+  .p-select,
+  .p-dropdown {
+    @apply rounded-2xl border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 !important;
+    @apply focus-within:border-primary focus-within:ring-4 focus-within:ring-indigo-500/20 !important;
+  }
+
+  /* Datepicker Visuals */
+  .p-datepicker,
+  .p-calendar {
+    @apply rounded-2xl border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 !important;
+    @apply focus-within:border-primary focus-within:ring-4 focus-within:ring-indigo-500/20 !important;
+  }
+
+  /* Overlays (Dropdown/Datepicker panels) */
+  .p-select-overlay,
+  .p-dropdown-panel,
+  .p-datepicker-panel,
+  .p-calendar-panel {
+    @apply rounded-[2.5rem] border-slate-100 dark:border-white/10 shadow-2xl !important;
+    @apply backdrop-blur-3xl bg-white/90 dark:bg-slate-900/90 !important;
+  }
+
+  /* Password Input Standardization */
+  .p-password {
+    @apply rounded-2xl relative !important;
+  }
+
+  .p-password input {
+    /* Visuals are applied to the input inside p-password */
+    @apply border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 !important;
+    @apply focus:border-primary focus:ring-4 focus:ring-indigo-500/20 !important;
+  }
+
+  /* InputNumber Standardization */
+  .p-inputnumber,
+  .p-inputnumber-input {
+    @apply w-full h-11 !important;
+  }
+
+  /* Textarea Standardization */
+  .p-inputtextarea {
+    @apply min-h-[88px] text-sm rounded-2xl px-4 py-3 !important;
+    @apply border-slate-200 dark:border-white/10 !important;
+    @apply bg-white dark:bg-white/5 !important;
+  }
+
+  /* Dialog Glassmorphism */
+  .p-dialog {
+    @apply bg-white/90 dark:bg-slate-900/95 backdrop-blur-3xl !important;
+    @apply rounded-[4rem] border-white/20 dark:border-slate-800 shadow-2xl !important;
+  }
+
+  .p-dialog-header {
+    @apply bg-transparent p-10 pb-0 font-black !important;
+  }
+
+  .p-dialog-content {
+    @apply bg-transparent !important;
+  }
+
+  /* Button Standardization */
+  .p-button {
+    @apply h-11 rounded-2xl font-bold transition-all !important;
+    @apply shadow-sm hover:shadow-lg !important;
+  }
+
+  .p-button-lg {
+    @apply h-14 text-base !important;
+  }
+}
+
 /* Badge Utility */
 .badge-indigo {
   @apply bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20;

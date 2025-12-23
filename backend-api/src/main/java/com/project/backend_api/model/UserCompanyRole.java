@@ -30,6 +30,10 @@ public class UserCompanyRole {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private Role role;
+
     @Column(name = "role_name", nullable = false)
     @Builder.Default
     private String roleName = "EMPLOYEE";

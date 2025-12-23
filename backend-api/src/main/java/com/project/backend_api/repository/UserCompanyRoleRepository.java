@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -20,4 +21,6 @@ public interface UserCompanyRoleRepository extends JpaRepository<UserCompanyRole
     boolean existsByUserIdAndCompanyIdAndIsActiveTrue(@Param("userId") UUID userId, @Param("companyId") UUID companyId);
 
     List<UserCompanyRole> findByUserIdAndIsActiveTrue(UUID userId);
+
+    Optional<UserCompanyRole> findByUserIdAndCompanyIdAndIsActiveTrue(UUID userId, UUID companyId);
 }

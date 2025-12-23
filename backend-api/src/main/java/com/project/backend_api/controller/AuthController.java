@@ -25,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -199,5 +201,23 @@ public class AuthController {
                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                                 .body("Logout exitoso");
+        }
+
+        @GetMapping("/me")
+        public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+                if (userDetails == null) {
+                        return ResponseEntity.status(401).body("No autenticado");
+                }
+
+                User user = userDetails.getUser();
+                java.util.Map<String, Object> response = new java.util.HashMap<>();
+                response.put("id", user.getId());
+                response.put("username", user.getUsername());
+                response.put("email", user.getEmail());
+                response.put("firstName", user.getFirstName());
+                response.put("firstSurname", user.getFirstSurname());
+                response.put("isSuperAdmin", user.getIsSuperAdmin());
+
+                return ResponseEntity.ok(response);
         }
 }

@@ -11,10 +11,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyDto {
+public class CountryDto {
     private UUID id;
     private String name;
-    private String nit;
-    private String emailExtension;
-    private Boolean status;
+    private String code;
+    private String phoneCode;
 }

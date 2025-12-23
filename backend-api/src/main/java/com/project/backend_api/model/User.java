@@ -36,6 +36,9 @@ public class User {
     @Column(name = "first_surname", nullable = false)
     private String firstSurname;
 
+    @Column(name = "second_surname")
+    private String secondSurname;
+
     @Column(name = "is_super_admin", nullable = false)
     @Builder.Default
     private Boolean isSuperAdmin = false;
@@ -43,6 +46,35 @@ public class User {
     @Builder.Default
     private Boolean verified = false;
 
-    @Column(name = "created_at")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gender_id")
+    private Gender gender;
+
+    @Column(name = "date_of_birth")
+    private java.time.LocalDate dateOfBirth;
+
+    private Integer age;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "phone_extension")
+    private String phoneExtension;
+
+    private String address;
+    private String city;
+    private String country;
+    private String department;
+
+    @Column(name = "pending_email")
+    private String pendingEmail;
+
+    @Column(name = "pending_email_token")
+    private String pendingEmailToken;
+
+    @Column(name = "password_expiry_date")
+    private LocalDateTime passwordExpiryDate;
+
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 }

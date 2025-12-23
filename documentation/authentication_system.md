@@ -58,6 +58,10 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
     *   Asocia los metadatos de auditoría inicial.
 *   **`/logout`**:
     *   Invalida la sesión sobrescribiendo la cookie con `Max-Age=0`.
+*   **`/me`**:
+    *   Retorna la "fuente de la verdad" del usuario autenticado.
+    *   Incluye: ID, username, email, nombre completo y el flag `isSuperAdmin`.
+    *   Esencial para que el frontend (Guards y Layout) tome decisiones de UI en tiempo real.
 
 ### E. Modelo de Datos y Persistencia
 *   **Esquemas Flyway**:
@@ -116,7 +120,8 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
     *   Guarda registro en `login_logs`.
     *   Responde con Header: `Set-Cookie: accessToken=...; HttpOnly; SameSite=Strict; Path=/`.
 4.  **Navegador**: Recibe la respuesta y almacena la cookie de forma segura.
-5.  **Flujo Multi-Tenant (Auto-Skip)**:
+5.  **Carga de Perfil**: El frontend llama a `/api/auth/me` para obtener el contexto del usuario y configurar el layout.
+6.  **Flujo Multi-Tenant (Auto-Skip)**:
     *   **0 empresas**: Muestra error de acceso.
     *   **1 empresa**: El frontend llama automáticamente a `/api/companies/select` y redirige al Dashboard.
     *   **2+ empresas**: Redirige al `SelectCompanyComponent` para que el usuario elija.

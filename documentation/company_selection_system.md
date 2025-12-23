@@ -145,6 +145,7 @@ selectCompany(companyId: string): void {
           "companyId": "uuid-1"
         }
         ```
+    *   **Seguridad CSRF**: Este endpoint está excluido de la verificación CSRF estricta en `SecurityConfig.java` para facilitar el flujo de selección inicial, apoyándose en SameSite=Strict y CORS para la protección.
 
 ---
 

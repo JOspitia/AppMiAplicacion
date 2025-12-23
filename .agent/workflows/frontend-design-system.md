@@ -49,7 +49,7 @@ Para cualquier implementación, utiliza EXCLUSIVAMENTE estos tokens de color. No
 
 ## 2. Reglas de Unificación Visual
 
-1.  **Consistencia de Marca**: Todos los botones de acción principal (`CTA`) deben usar `--primary-color`. Solo usa `--success-color` para confirmaciones o indicadores de "Buen Estado".
+1.  **Consistencia de Marca**: Todos los botones de acción principal (`CTA`) y las **tarjetas de módulos funcionales** deben usar `--primary-color`. Solo usa `--success-color` para confirmaciones o indicadores de "Buen Estado". Esto asegura una interfaz coherente y profesional.
 2.  **Gradients Controlados**: Si usas gradientes, deben ser sutiles. Recomendado: `from-primary to-indigo-400` o `from-primary to-info`. **Evita mezclar colores cálidos con fríos en el mismo componente.**
 3.  **Menos es Más (Whitespace)**: En RR.HH. hay muchas tablas. No uses bordes negros. Usa `--border-main` y mucho padding.
 4.  **Iconografía**: Usa iconografía consistente (mismo grosor y estilo). Preferiblemente **Lucide Icons** o **PrimeIcons** si se usan correctamente.
@@ -62,6 +62,10 @@ Para cualquier implementación, utiliza EXCLUSIVAMENTE estos tokens de color. No
     - Uso de identificadores numéricos visuales para pasos.
     - Agrupación lógica de campos para reducir carga cognitiva.
     - Validaciones en tiempo real con componentes específicos (ej. Medidor de fuerza de Password).
+- **Layout de Cristal (Glassmorphism)**:
+    - Uso de `backdrop-blur-xl` en Header y Sidebar.
+    - Bordes translúcidos (`border-white/10` o `border-slate-800/10`) para separar áreas sin lineas duras.
+    - Fondos con transparencia controlada (`bg-white/80` o `bg-slate-900/80`).
 - **Componentes Globales (Cookie Consent)**:
     - Uso de `backdrop-blur` (Glassmorphism) para integrarse sin interrumpir.
     - Persistencia en `localStorage` para evitar recurrencia intrusiva.

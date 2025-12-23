@@ -36,13 +36,17 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+    @Autowired
+    private CsrfCookieFilter csrfCookieFilter;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/auth/**", "/api/public/**", "/api/assets/**"))
+                        .ignoringRequestMatchers("/api/auth/**", "/api/public/**", "/api/assets/**",
+                                "/api/companies/**"))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -73,6 +77,9 @@ public class SecurityConfig {
                             .preload(true)
                             .maxAgeInSeconds(31536000));
                 })
+                // Force CSRF Cookie generation
+                .addFilterAfter(csrfCookieFilter,
+                        org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
                 // Add Rate Limiting filter BEFORE authentication
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

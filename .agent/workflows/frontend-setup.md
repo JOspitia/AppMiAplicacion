@@ -61,34 +61,67 @@ Estética: Diseño centrado en el humano, paletas **Indigo/Teal**, Glassmorphism
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
+import { definePreset } from '@primeng/themes';
+
+const MyPreset = definePreset(Aura, {
+  semantic: {
+    primary: {
+        50: '{indigo.50}',
+        100: '{indigo.100}',
+        200: '{indigo.200}',
+        300: '{indigo.300}',
+        400: '{indigo.400}',
+        500: '{indigo.500}',
+        600: '{indigo.600}',
+        700: '{indigo.700}',
+        800: '{indigo.800}',
+        900: '{indigo.900}',
+        950: '{indigo.950}'
+    }
+  }
+});
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimationsAsync(),
+    provideHttpClient(
+        withFetch(),
+        withInterceptors([authInterceptor]),
+        withXsrfConfiguration({
+            cookieName: 'XSRF-TOKEN',
+            headerName: 'X-XSRF-TOKEN',
+        })
+    ),
     providePrimeNG({
       theme: {
-        preset: Aura,
+        preset: MyPreset,
         options: {
-          darkModeSelector: '.dark'
+          darkModeSelector: '.dark',
+          cssLayer: {
+             name: 'primeng',
+             order: 'tailwind-base, primeng, tailwind-utilities'
+          }
         }
-      }
+      },
+      ripple: true
     })
   ]
 };
 ```
 
-## 4. Configuración de Proxy (Puerto 8081 Backend)
+## 4. Configuración de Proxy (Puerto 8080 Backend)
 Crea el archivo `proxy.conf.json` en la raíz.
 
 ```json
 {
   "/api": {
-    "target": "http://localhost:8081",
+    "target": "http://localhost:8080",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
   }
 }
+
 ```
 
 En `angular.json`, busca "serve" y añade: `"options": { "proxyConfig": "proxy.conf.json" }`
