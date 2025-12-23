@@ -118,6 +118,7 @@ public class AuthController {
                                         .secure(false) // True in Prod
                                         .path("/")
                                         .maxAge(15 * 60) // 15 mins
+                                        // .maxAge(30) // 30 seconds
                                         .sameSite("Strict")
                                         .build();
 
@@ -156,10 +157,11 @@ public class AuthController {
                                         .map(refreshTokenService::verifyExpiration)
                                         .map(RefreshToken::getUser)
                                         .map(user -> {
-                                                // GENERATE NEW ACCESS TOKEN
-                                                // Use CustomUserDetailsService to get UserDetails from User entity for
-                                                // consistency
-                                                CustomUserDetails userDetails = new CustomUserDetails(user);
+                                                // Use CustomUserDetailsService logic: load roles to maintain
+                                                // permissions
+                                                java.util.List<com.project.backend_api.model.UserCompanyRole> roles = userCompanyRoleRepository
+                                                                .findByUserIdAndIsActiveTrue(user.getId());
+                                                CustomUserDetails userDetails = new CustomUserDetails(user, roles);
 
                                                 // Manually create authentication token (we trust the refresh token)
                                                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -177,7 +179,8 @@ public class AuthController {
 
                                                 return ResponseEntity.ok()
                                                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                                                                .body("Token refreshed successfully");
+                                                                .body(java.util.Map.of("message",
+                                                                                "Token refreshed successfully"));
                                         })
                                         .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
                 }
@@ -197,9 +200,13 @@ public class AuthController {
                                 .httpOnly(true).secure(false).path("/api/auth/refreshtoken").maxAge(0)
                                 .sameSite("Strict").build();
 
+                ResponseCookie companyCookie = ResponseCookie.from("companyContext", "")
+                                .httpOnly(true).secure(false).path("/api").maxAge(0).sameSite("Strict").build();
+
                 return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, companyCookie.toString())
                                 .body("Logout exitoso");
         }
 

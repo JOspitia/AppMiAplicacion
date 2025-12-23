@@ -19,29 +19,27 @@ El módulo de perfil permite al usuario gestionar su identidad digital, segurida
 Este componente actúa como contenedor inteligente dividido en dos pestañas lógicas:
 
 #### A. Pestaña "Información Personal"
+-   **Navegación Responsiva**: Las pestañas se adaptan a móviles (apilado vertical) con etiquetas de texto simplificadas.
 -   **Formulario Reactivo (`infoForm`)**:
     -   Campos bloqueados: Nombres, Email (requieren flujos especiales).
     -   Campos editables: Teléfono (con máscara), Género, Fecha de Nacimiento.
-    -   **Ubicación en Cascada**:
-        -   Selección de País -> Carga Departamentos (States).
-        -   Selección de Departamento -> Carga Ciudades.
-        -   Lógica reactiva: Al cambiar validadores o valores superiores, se limpian los dependientes.
+    -   **Ubicación en Cascada (Sequential Loading)**:
+        -   Carga automática al inicio: `Países -> Departamentos -> Ciudades` basado en los datos guardados.
+        -   Evita errores de visualización inicial donde los selectores aparecían vacíos.
     -   **Dirección**: Campo de solo lectura que activa el `AddressBuilderComponent`.
 
 #### B. Pestaña "Seguridad y Acceso"
 -   **Cambio de Contraseña (`passwordForm`)**:
+    -   Diseño en Grid: Campos de nueva contraseña y confirmación alineados en 2 columnas (desktop).
+    -   Botón Unificado: Estilo `bg-primary` con sombra, idéntico al de perfil para consistencia visual.
     -   Uso de `p-password` con feedback de fortaleza nativo en español.
-    -   Validación cruzada personalizada (`passwordMatchValidator`) para asegurar coincidencia.
 -   **Verificación de Identidad**: MODAL previo para acciones sensibles (como cambiar email).
 
 ### 2.2 AddressBuilderComponent (Shared)
 Componente reutilizable (`shared/components/address-builder`) diseñado para solucionar el problema de direcciones no estandarizadas en Colombia/Latam.
 
--   **Entradas (`@Input`)**:
-    -   `visible`: Controla la visibilidad del modal.
--   **Salidas (`@Output`)**:
-    -   `visibleChange`: Two-way binding.
-    -   `onConfirm`: Emite el string de la dirección construida.
+-   **Responsividad**: Grid adaptativo (1 col en móvil, 2 en tablet, 4 en desktop).
+-   **UX Móvil**: Botones apilados y padding ajustado para pantallas táctiles.
 -   **Lógica**:
     -   Permite seleccionar Vía Principal, Números, Letras, Bis, Cuadrantes y Complementos.
     -   Genera una vista previa en tiempo real.
@@ -60,16 +58,12 @@ Componente reutilizable (`shared/components/address-builder`) diseñado para sol
 | POST | `/api/profile/verify-password` | Verifica identidad | `PasswordDto` |
 | POST | `/api/profile/change-email` | Inicia cambio email | `EmailDto` |
 
-### 3.2 Seguridad XSRF
-Para proteger las mutaciones de datos (POST), el sistema implementa protección CSRF estricta:
-1.  **Backend**: `CookieCsrfTokenRepository` con `HttpOnly=false` (para que JS pueda leerlo).
-2.  **Frontend**: Interceptor automático configurado en `app.config.ts`:
-    ```typescript
-    withXsrfConfiguration({
-        cookieName: 'XSRF-TOKEN',
-        headerName: 'X-XSRF-TOKEN',
-    })
-    ```
+### 3.2 Seguridad y Resiliencia
+1.  **Protección XSRF**: Configuración en `app.config.ts` para sincronizar `XSRF-TOKEN`.
+2.  **AuthInterceptor (Silent Refresh)**:
+    -   Detecta tokens expirados y renovados automáticamente.
+    -   **Loop Protection**: Header `X-Interceptor-Retry` para evitar recursión infinita.
+    -   Mantiene la integridad de los datos en formularios largos durante el refresco.
 
 ---
 

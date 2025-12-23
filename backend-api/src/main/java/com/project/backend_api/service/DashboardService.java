@@ -31,34 +31,52 @@ public class DashboardService {
         // 2. Get user role and permissions for this company
         Set<String> userPermissions = new HashSet<>();
         boolean isSuperAdmin = user.getIsSuperAdmin();
+        boolean isCompanyAdmin = false;
 
         if (!isSuperAdmin) {
-            userCompanyRoleRepository.findByUserIdAndCompanyIdAndIsActiveTrue(user.getId(), companyId)
-                    .ifPresent(ucr -> {
-                        if (ucr.getRole() != null) {
-                            ucr.getRole().getPermissions().forEach(p -> userPermissions.add(p.getName()));
-                        }
-                    });
+            Optional<UserCompanyRole> roleOpt = userCompanyRoleRepository
+                    .findByUserIdAndCompanyIdAndIsActiveTrue(user.getId(), companyId);
+            if (roleOpt.isPresent()) {
+                UserCompanyRole ucr = roleOpt.get();
+                // Use the explicit boolean flag from the Role entity
+                if (ucr.getRole() != null && Boolean.TRUE.equals(ucr.getRole().getIsAdminRole())) {
+                    isCompanyAdmin = true;
+                }
+
+                if (ucr.getRole() != null) {
+                    ucr.getRole().getPermissions().forEach(p -> userPermissions.add(p.getName()));
+                }
+            }
         }
+
+        final boolean finalIsCompanyAdmin = isCompanyAdmin;
 
         // 3. Get all root menus and filter
         List<SidebarMenu> rootMenus = sidebarMenuRepository.findRootActive();
 
         return rootMenus.stream()
-                .filter(m -> canAccess(m, subscribedModuleIds, userPermissions, isSuperAdmin))
-                .map(m -> mapToDto(m, subscribedModuleIds, userPermissions, isSuperAdmin))
+                .filter(m -> canAccess(m, subscribedModuleIds, userPermissions, isSuperAdmin, finalIsCompanyAdmin))
+                .map(m -> mapToDto(m, subscribedModuleIds, userPermissions, isSuperAdmin, finalIsCompanyAdmin))
                 .collect(Collectors.toList());
     }
 
     private boolean canAccess(SidebarMenu menu, Set<UUID> subscribedModuleIds, Set<String> userPermissions,
-            boolean isSuperAdmin) {
-        // Super admins see everything active
-        if (isSuperAdmin)
+            boolean isSuperAdmin, boolean isCompanyAdmin) {
+        // 1. ABSOLUTE PRIORITY: Super admins see everything active
+        if (isSuperAdmin) {
             return true;
+        }
 
-        // If it requires a module, check subscription
+        // 2. MODULE SUBSCRIPTION: Both Company Admins and Users are limited by what the
+        // company has paid for
         if (menu.getModule() != null && !subscribedModuleIds.contains(menu.getModule().getId())) {
             return false;
+        }
+
+        // 3. COMPANY ADMIN PRIORITY: Sees all active menus if they belong to a
+        // subscribed module
+        if (isCompanyAdmin) {
+            return true;
         }
 
         // If it requires a permission, check it
@@ -73,10 +91,10 @@ public class DashboardService {
     }
 
     private ModuleDto mapToDto(SidebarMenu menu, Set<UUID> subscribedModuleIds, Set<String> userPermissions,
-            boolean isSuperAdmin) {
+            boolean isSuperAdmin, boolean isCompanyAdmin) {
         List<ModuleDto> children = menu.getChildren().stream()
-                .filter(child -> canAccess(child, subscribedModuleIds, userPermissions, isSuperAdmin))
-                .map(child -> mapToDto(child, subscribedModuleIds, userPermissions, isSuperAdmin))
+                .filter(child -> canAccess(child, subscribedModuleIds, userPermissions, isSuperAdmin, isCompanyAdmin))
+                .map(child -> mapToDto(child, subscribedModuleIds, userPermissions, isSuperAdmin, isCompanyAdmin))
                 .collect(Collectors.toList());
 
         return new ModuleDto(

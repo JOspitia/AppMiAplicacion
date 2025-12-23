@@ -45,7 +45,7 @@ export class AuthService {
     }
 
     refreshToken(): Observable<any> {
-        return this.http.post(`${this.apiUrl}/refreshtoken`, {});
+        return this.http.post(`${this.apiUrl}/refreshtoken`, {}, { withCredentials: true });
     }
 
     selectCompany(companyId: string): Observable<any> {

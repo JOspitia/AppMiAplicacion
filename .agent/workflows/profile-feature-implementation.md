@@ -56,6 +56,26 @@ provideHttpClient(
 ```
 
 Esto asegura que Angular extraiga automáticamente el token de la cookie y lo envíe en el header `X-XSRF-TOKEN`, alineándose con la configuración del backend Spring Security.
+    
+### 4.3 Manejo de Sesión y Errores (AuthInterceptor)
+Se implementó un mecanismo robusto de **Silent Refresh** que:
+- Detecta tokens expirados (401) y fallos de CSRF iniciales (403).
+- Pausa las peticiones salientes (Mutex Pattern).
+- Refresca el token transparentemente.
+- Reintenta las peticiones originales asegurando que el usuario nunca pierda su trabajo (ej: llenando un formulario largo).
+
+### 4.4 UX: Carga de Datos Geográficos
+Se solucionó el problema de carga de selectores dependientes (País > Departamento > Ciudad) implementando una estrategia de **Carga Secuencial** en la inicialización del componente, asegurando que los datos pre-existentes del usuario se visualicen correctamente sin intervención manual.
+
+### 4.5 UX: Responsividad Móvil (Fix)
+Se aplicaron correcciones críticas para dispositivos móviles:
+- **Pestañas Adaptativas**: Los botones de navegación se apilan verticalmente en móviles con etiquetas simplificadas.
+- **Grids Fluidos**: Los formularios (especialmente el Address Builder) usan grids de 1 columna en móvil y hasta 4 en desktop.
+- **Acciones Táctiles**: Botones de acción apilados verticalmente en móviles para facilitar el clic.
+
+### 4.6 Consistencia Visual (Unified Styling)
+- **Botones de Envío**: Todos los formularios de perfil (Personal y Seguridad) usan ahora el mismo botón `bg-primary` con sombra indigo, alineados a la derecha para consistencia.
+- **Layout de Seguridad**: Se corrigió el orden de los campos de contraseña en un grid de 2 columnas para maximizar el espacio en pantallas grandes.
 
 
 ## 7. Próximos Pasos (Pendientes)

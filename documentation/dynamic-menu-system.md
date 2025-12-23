@@ -25,13 +25,17 @@ Cuando el frontend solicita los módulos, el servidor ejecuta una lógica de "Tr
 ### Paso A: Identificación del Contexto
 Se obtiene el `userId` del token JWT y el `companyId` de la cookie `companyContext`.
 
-### Paso B: Reglas de Visibilidad
-1.  **Super Administradores:**
-    *   Tienen un interruptor maestro (`is_super_admin = true`).
-    *   **Lógica:** Saltan las validaciones de permisos y suscripciones. Ven todos los menús marcados como `active = true` en la base de datos.
-2.  **Usuarios de Empresa (Regulares):**
-    *   **Validación 1 (Suscripción):** Se verifica en `company_subscriptions` que la empresa actual tenga contratado el módulo asociado al ítem del menú.
-    *   **Validación 2 (Permisos de Rol):** Se busca el rol del usuario en esa empresa. El ítem del menú tiene un campo `permission_required`. Si el usuario no tiene ese permiso exacto en su rol, el ítem se oculta.
+### Paso B: Reglas de Visibilidad (Jerarquía de Acceso)
+1.  **Super Administradores (SaaS Owners):**
+    *   **Identificación:** `is_super_admin = true` en el perfil del usuario.
+    *   **Lógica:** Saltan todas las validaciones. Ven el 100% de los menús activos del sistema independientemente de suscripciones o permisos.
+2.  **Administradores de Empresa (Tenant Admins):**
+    *   **Identificación:** Usuario con un rol asignado que tiene el flag `is_admin_role = true`.
+    *   **Validación 1 (Suscripción):** Solo ven módulos a los que su empresa está suscrita actualmente.
+    *   **Validación 2 (Excepción de Permiso):** Si el módulo está suscrito, se les otorga acceso total al menú del módulo, ignorando los permisos granulares (`permission_required`).
+3.  **Usuarios de Empresa (Regulares):**
+    *   **Validación 1 (Suscripción):** Se verifica que la empresa tenga contratado el módulo.
+    *   **Validación 2 (Permisos Específicos):** Deben tener el permiso exacto definido en `permission_required` dentro de su rol asignado.
 
 ### Paso C: Construcción Jerárquica
 El servicio procesa los menús de forma recursiva:

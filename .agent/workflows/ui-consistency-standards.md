@@ -178,6 +178,15 @@ Implementar una capa global de CSS en `src/styles.css` usando `@layer components
 | **DashboardComponent** | ⏳ Pendiente | - | Heredará estilos globales automáticamente |
 | **RegisterComponent** | ⏳ Pendiente | - | Heredará estilos globales automáticamente |
 
+## 7. Responsividad Móvil (Mobile-First)
+
+Se han estandarizado patrones de responsividad para asegurar que la experiencia sea superior en dispositivos móviles:
+- **Grids Fluidos**: Uso de `grid-cols-1` por defecto en móviles.
+- **Pestañas Responsivas**: Los menús horizontales se apilan verticalmente en móviles.
+- **Acciones Alineadas**: Botones de acción escalables y apilables con prioridad visual.
+
+---
+
 ### Métricas de Impacto
 - **Código CSS Global**: +95 líneas (inversión única)
 - **Código CSS Local Eliminado**: -24 líneas (solo en ProfileComponent)

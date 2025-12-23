@@ -30,3 +30,8 @@ Este workflow define los estándares para mantener una base de datos robusta y u
 - **DTOs**: Utilizar Records o Clases de transferencia de datos para todas las entradas y salidas de la API.
 - **Validación**: Aplicar `@Valid` y anotaciones de Jakarta Validation para prevenir datos corruptos.
 - **Manejo de Errores**: Retornar códigos HTTP precisos (401 para no autenticado, 403 para prohibido, 429 para rate limit).
+
+## 6. Sincronización Entidad-DB y Seguridad de Roles
+- **Mapeo de Auditoría**: Las columnas de auditoría en la BD (`assigned_at` o `created_at`) deben coincidir exactamente con las anotaciones `@CreationTimestamp` de las entidades JPA para evitar errores de consulta SQL.
+- **Flags Administrativos**: No confiar en strings como "ADMIN" para otorgar privilegios totales. Utilizar siempre flags booleanos explícitos (como `is_admin_role` en la tabla de roles) para habilitar bypass de permisos por suscripción.
+- **Autoridades Dinámicas**: El `UserDetailsService` debe cargar tanto roles como permisos específicos para asegurar que la autorización granular funcione en toda la sesión, incluyendo el refresco de tokens.

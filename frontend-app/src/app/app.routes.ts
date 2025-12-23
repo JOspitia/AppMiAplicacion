@@ -10,23 +10,15 @@ import { SelectCompanyComponent } from './auth/select-company/select-company.com
 import { MainLayoutComponent } from './core/layout/main-layout.component';
 import { DashboardComponent } from './core/dashboard/dashboard.component';
 import { HomeComponent } from './core/home/home.component';
-import { superAdminGuard, authGuard } from './core/guards/auth.guard';
+import { superAdminGuard, authGuard, guestGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-    // Auth Routes (No Layout)
-    {
-        path: 'login',
-        component: LoginComponent
-    },
-    {
-        path: 'register',
-        component: RegisterComponent
-    },
-    {
-        path: 'select-company',
-        component: SelectCompanyComponent
-    },
-    // Internal App Routes (With MainLayout)
+    // 1. Auth Routes (No Layout)
+    { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+    { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
+    { path: 'select-company', component: SelectCompanyComponent },
+
+    // 2. Internal Application (MainLayout + Auth Guard)
     {
         path: '',
         component: MainLayoutComponent,
@@ -34,21 +26,23 @@ export const routes: Routes = [
         children: [
             { path: 'home', component: HomeComponent },
             { path: 'core/management/users/profile', loadComponent: () => import('./core/management/users/profile/profile').then(m => m.ProfileComponent) },
-            { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] },
-            { path: '', redirectTo: 'home', pathMatch: 'full' }
+            { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] }
         ]
     },
-    // Public Routes (With PublicLayout)
+
+    // 3. Public Website (PublicLayout)
     {
-        path: 'landing',
+        path: '',
         component: PublicLayoutComponent,
         children: [
-            { path: '', component: LandingComponent },
+            { path: '', component: LandingComponent, pathMatch: 'full', canActivate: [guestGuard] },
             { path: 'terms', component: TermsComponent },
             { path: 'privacy', component: PrivacyComponent },
             { path: 'cookies', component: CookiesComponent }
         ]
     },
-    { path: '**', redirectTo: '/landing' }
+
+    // 4. Fallback
+    { path: '**', redirectTo: '' }
 ];
 

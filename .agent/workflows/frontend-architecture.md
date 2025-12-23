@@ -22,7 +22,8 @@ Este workflow define los pilares de la interfaz de usuario moderna y la navegaci
 - **DashboardComponent**: Vista administrativa rica en datos exclusiva para roles de gestión (Super Admin).
 
 ## 4. Protección y Seguridad (Guards)
-- **authGuard**: Verifica que el usuario tenga un token válido y una empresa seleccionada.
+- **Estrategia de Rutas**: La Landing Page debe ser la ruta raíz (`/`). Las rutas de la aplicación operativa (`/home`, etc.) deben estar protegidas y declaradas antes en el router para prioridad de coincidencia específica.
+- **authGuard**: Verifica que el usuario tenga un token válido consultando `/api/auth/me`. Si el usuario no está autenticado, redirige al `/login`.
 - **superAdminGuard**: Restringe el acceso a rutas administrativas críticas basándose en el campo `isSuperAdmin` del perfil.
 
 ## 5. Gestión de Estado y Datos

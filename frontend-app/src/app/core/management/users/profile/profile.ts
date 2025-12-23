@@ -72,18 +72,20 @@ import { ProfileService, UserProfile } from '../../../services/profile.service';
             <div class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[3.5rem] border border-white/20 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-500">
                 
                 <!-- Premium Navigation Tabs -->
-                <div class="flex p-2 bg-slate-950/5 dark:bg-white/5 rounded-[2.5rem] m-8 mb-4 gap-2 border border-black/5 dark:border-white/5">
+                <div class="flex flex-col sm:flex-row p-2 bg-slate-950/5 dark:bg-white/5 rounded-[2.5rem] m-4 sm:m-8 mb-4 gap-2 border border-black/5 dark:border-white/5">
                     <button (click)="activeTab.set('info')" 
                         [class]="activeTab() === 'info' ? activeTabClass : inactiveTabClass"
                         class="flex items-center justify-center gap-2">
                         <app-icon icon="user" class="w-4 h-4"></app-icon>
-                        Información Personal
+                        <span class="hidden sm:inline">Información Personal</span>
+                        <span class="sm:hidden">Información</span>
                     </button>
                     <button (click)="activeTab.set('security')" 
                         [class]="activeTab() === 'security' ? activeTabClass : inactiveTabClass"
                         class="flex items-center justify-center gap-2">
                         <app-icon icon="shield" class="w-4 h-4"></app-icon>
-                        Seguridad y Acceso
+                        <span class="hidden sm:inline">Seguridad y Acceso</span>
+                        <span class="sm:hidden">Seguridad</span>
                     </button>
                 </div>
 
@@ -193,7 +195,7 @@ import { ProfileService, UserProfile } from '../../../services/profile.service';
                             </div>
 
                             <!-- Botón de acción (Full Width) -->
-                            <div class="col-span-1 md:col-span-2 flex justify-end pt-8">
+                            <div class="col-span-1 md:col-span-2 flex flex-col justify-center pt-8">
                                 <button pButton pRipple type="submit" label="Actualizar Perfil" icon="pi pi-check-circle" class="p-button-lg bg-primary text-white shadow-2xl shadow-primary/30 rounded-[2rem] px-12 py-6 transition-transform hover:scale-105" [loading]="loading()"></button>
                             </div>
                         </form>
@@ -234,13 +236,13 @@ import { ProfileService, UserProfile } from '../../../services/profile.service';
                             <p class="text-sm text-slate-500 dark:text-slate-400">Te recomendamos actualizar tu contraseña cada 90 días para mayor seguridad.</p>
                         </div>
 
-                        <form [formGroup]="passwordForm" (ngSubmit)="onUpdatePassword()" class="grid grid-cols-1 gap-8">
+                        <form [formGroup]="passwordForm" (ngSubmit)="onUpdatePassword()" class="space-y-8">
                             <div class="flex flex-col gap-2">
                                 <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Contraseña Actual</label>
                                 <p-password formControlName="oldPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full"></p-password>
                             </div>
 
-                            <div class="flex flex-col gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="flex flex-col gap-2">
                                     <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nueva Contraseña</label>
                                     <p-password formControlName="newPassword" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full"
@@ -249,19 +251,20 @@ import { ProfileService, UserProfile } from '../../../services/profile.service';
                                         mediumLabel="Media"
                                         strongLabel="Fuerte"></p-password>
                                 </div>
-                            </div>
 
-                            <div class="flex flex-col gap-2">
-                                <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Confirmar Nueva Contraseña</label>
-                                <p-password formControlName="confirmPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full"></p-password>
-                                <div *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched" class="mt-2 p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-2xl flex items-center justify-center gap-2 text-rose-500 animate-bounce">
-                                    <app-icon icon="shield" class="w-4 h-4"></app-icon>
-                                    <span class="text-xs font-bold">Las contraseñas no coinciden.</span>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Confirmar Nueva Contraseña</label>
+                                    <p-password formControlName="confirmPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full"></p-password>
                                 </div>
                             </div>
 
-                            <div class="flex justify-center pt-6">
-                                <button pButton pRipple type="submit" label="Fortalecer Seguridad" icon="pi pi-shield" class="p-button-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-2xl shadow-slate-900/20 rounded-[2rem] px-16 py-6 transition-transform hover:scale-105" [loading]="loading()"></button>
+                            <div *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched" class="p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-2xl flex items-center justify-center gap-2 text-rose-500 animate-bounce">
+                                <app-icon icon="shield" class="w-4 h-4"></app-icon>
+                                <span class="text-xs font-bold">Las contraseñas no coinciden.</span>
+                            </div>
+
+                            <div class="flex justify-end pt-6">
+                                <button pButton pRipple type="submit" label="Actualizar Contraseña" icon="pi pi-check-circle" class="p-button-lg bg-primary text-white shadow-2xl shadow-primary/30 rounded-[2rem] px-12 py-6 transition-transform hover:scale-105" [loading]="loading()"></button>
                             </div>
                         </form>
                     </div>
@@ -349,7 +352,6 @@ export class ProfileComponent implements OnInit {
 
     ngOnInit() {
         this.initForms();
-        this.loadProfile();
         this.loadInitialData();
         this.setupLocationWatchers();
     }
@@ -361,29 +363,32 @@ export class ProfileComponent implements OnInit {
                 ...c,
                 label: `${c.phoneCode} - ${c.name}`
             }));
+            // Iniciamos la carga del perfil una vez tenemos los países
+            this.loadProfile();
         });
     }
 
     private setupLocationWatchers() {
         // Watch country change to load states
         this.infoForm.get('country')?.valueChanges.subscribe(countryName => {
+            if (!countryName) return;
             const country = this.countries.find(c => c.name === countryName);
-            if (country) {
+            if (country && country.id) {
                 this.profileService.getStates(country.id).subscribe(data => {
                     this.states = data;
-                    this.infoForm.get('department')?.setValue(null);
-                    this.infoForm.get('city')?.setValue(null);
+                    // Solo reseteamos si hay un cambio real disparado por el usuario
+                    // (patchValue no suele disparar esto si es la carga inicial)
                 });
             }
         });
 
         // Watch state change to load cities
         this.infoForm.get('department')?.valueChanges.subscribe(stateName => {
+            if (!stateName) return;
             const state = this.states.find(s => s.name === stateName);
-            if (state) {
+            if (state && state.id) {
                 this.profileService.getCities(state.id).subscribe(data => {
                     this.cities = data;
-                    this.infoForm.get('city')?.setValue(null);
                 });
             }
         });
@@ -396,6 +401,32 @@ export class ProfileComponent implements OnInit {
                 if (data.dateOfBirth) {
                     data.dateOfBirth = new Date(data.dateOfBirth) as any;
                 }
+
+                // --- CARGA SECUENCIAL INICIAL DE GEOGRAFÍA ---
+                if (data.country) {
+                    const country = this.countries.find(c => c.name === data.country);
+                    if (country) {
+                        this.profileService.getStates(country.id).subscribe(states => {
+                            this.states = states;
+                            if (data.department) {
+                                const state = this.states.find(s => s.name === data.department);
+                                if (state) {
+                                    this.profileService.getCities(state.id).subscribe(cities => {
+                                        this.cities = cities;
+                                        this.infoForm.patchValue(data);
+                                        this.calculateAge();
+                                    });
+                                } else {
+                                    this.infoForm.patchValue(data);
+                                }
+                            } else {
+                                this.infoForm.patchValue(data);
+                            }
+                        });
+                        return; // Evitamos el patchValue de abajo si entramos en la cascada
+                    }
+                }
+
                 this.infoForm.patchValue(data);
                 this.calculateAge();
             }
@@ -445,13 +476,17 @@ export class ProfileComponent implements OnInit {
     onUpdateInfo() {
         if (this.infoForm.invalid) return;
         this.loading.set(true);
-        const rawValues = this.infoForm.getRawValue();
-        this.profileService.updateProfile(rawValues).subscribe({
-            next: () => {
+        this.profileService.updateProfile(this.infoForm.getRawValue()).subscribe({
+            next: (res) => {
+                console.log('[Profile] Success:', res);
                 this.loading.set(false);
-                this.showSuccess('Perfil actualizado exitosamente');
+                this.showSuccess('¡Excelente! Tu perfil ha sido actualizado correctamente.');
+                this.loadProfile();
             },
-            error: () => this.loading.set(false)
+            error: (err) => {
+                console.error('[Profile] Error:', err);
+                this.loading.set(false);
+            }
         });
     }
 

@@ -49,6 +49,7 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
     *   Registra el evento en la tabla `security.login_logs`.
 *   **`/refreshtoken`**:
     *   Valida la existencia y expiración del Refresh Token.
+    *   **Recarga de Contexto**: Consulta nuevamente los roles del usuario en la base de datos para asegurar que los permisos (ROLE_ADMIN, autoridades) se mantengan vigentes en el nuevo Access Token.
     *   Genera un nuevo Access Token sin requerir credenciales del usuario.
     *   Mantiene la continuidad de la sesión (Rotación de Sesión).
 *   **`/register`**:
@@ -57,7 +58,7 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
     *   Encripta la contraseña usando BCrypt antes de persistir.
     *   Asocia los metadatos de auditoría inicial.
 *   **`/logout`**:
-    *   Invalida la sesión sobrescribiendo la cookie con `Max-Age=0`.
+    *   Invalida la sesión sobrescribiendo las cookies `accessToken`, `refreshToken` y `companyContext` con `Max-Age=0`.
 *   **`/me`**:
     *   Retorna la "fuente de la verdad" del usuario autenticado.
     *   Incluye: ID, username, email, nombre completo y el flag `isSuperAdmin`.
@@ -120,13 +121,17 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
     *   Guarda registro en `login_logs`.
     *   Responde con Header: `Set-Cookie: accessToken=...; HttpOnly; SameSite=Strict; Path=/`.
 4.  **Navegador**: Recibe la respuesta y almacena la cookie de forma segura.
-5.  **Carga de Perfil**: El frontend llama a `/api/auth/me` para obtener el contexto del usuario y configurar el layout.
-6.  **Flujo Multi-Tenant (Auto-Skip)**:
+5.  **Carga de Perfil**: El frontend llama a `/api/auth/me` para obtener el contexto del usuario y configurar el layout. Este endpoint es también la base del `authGuard` para proteger rutas internas.
+6.  **Estrategia de Rutas**:
+    *   **Públicas con Redirección Inversa (`/`, `/login`)**: Utilizan un `guestGuard` que detecta si ya hay una sesión. En caso afirmativo, redirige a `/home` para mejorar la UX. Solo si no hay sesión permite ver estas páginas.
+    *   **Públicas Absolutas (`/terms`, `/privacy`)**: Accesibles siempre, con o sin sesión.
+    *   **Protegidas (`/home`, etc.)**: Están envueltas en un `authGuard` que requiere validación positiva del servidor antes de renderizar el layout principal.
+7.  **Flujo Multi-Tenant (Auto-Skip)**:
     *   **0 empresas**: Muestra error de acceso.
-    *   **1 empresa**: El frontend llama automáticamente a `/api/companies/select` y redirige al Dashboard.
+    *   **1 empresa**: El frontend llama automáticamente a `/api/companies/select` y redirige al Dashboard (Home).
     *   **2+ empresas**: Redirige al `SelectCompanyComponent` para que el usuario elija.
-6.  **Contexto de Empresa**: Al seleccionar una empresa, se crea la cookie `companyContext` (HttpOnly) que el backend usa para filtrar datos en peticiones subsecuentes.
-7.  **Peticiones Subsecuentes**:
+8.  **Contexto de Empresa**: Al seleccionar una empresa, se crea la cookie `companyContext` (HttpOnly) que el backend usa para filtrar datos en peticiones subsecuentes.
+9.  **Peticiones Subsecuentes**:
     *   El usuario navega o realiza acciones.
     *   **Interceptor** asegura el envío de credenciales (`withCredentials`).
     *   **Navegador** adjunta las cookies (`accessToken` y `companyContext`) automáticamente.
@@ -206,13 +211,22 @@ El `LoginComponent` captura el error 429 y:
 | `token` | VARCHAR | Token aleatorio único |
 | `expiry_date` | TIMESTAMP | Fecha de expiración (7 días) |
 
+### `security.roles`
+| Columna | Tipo | Descripción |
+| :--- | :--- | :--- |
+| `id` | UUID | PK |
+| `company_id` | UUID | FK -> Companies |
+| `name` | VARCHAR | Nombre del rol |
+| `is_admin_role` | BOOLEAN | **Flag Maestro para acceso total a la empresa** |
+
 ### `security.user_company_roles`
 | Columna | Tipo | Descripción |
 | :--- | :--- | :--- |
 | `id` | UUID | PK |
 | `user_id` | UUID | FK -> Users |
 | `company_id` | UUID | FK -> Companies |
-| `role_name` | VARCHAR | ADMIN, EMPLOYEE, etc. |
+| `role_id` | UUID | FK -> Roles |
+| `created_at` | TIMESTAMP | Fecha asignación |
 | `is_active` | BOOLEAN | Estado de la relación |
 
 ### `security.login_logs`

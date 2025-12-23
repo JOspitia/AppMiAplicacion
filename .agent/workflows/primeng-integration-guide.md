@@ -152,7 +152,23 @@ El **ProfileComponent** (`frontend-app/src/app/core/management/users/profile/pro
 ✅ **Variantes locales mínimas**: Solo `.premium-input-locked` para campos readonly  
 ✅ **Dropdown personalizado**: Template con `ng-template` para formato `+57 - Colombia`  
 ✅ **Integración completa**: InputText, Select, DatePicker, Password, Dialog  
-✅ **Responsive**: Grid adaptativo con `md:grid-cols-2`
+✅ **Responsive**: Grid adaptativo con `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`  
+
+### 5.1 Patrones Responsivos
+Para componentes que ocupan mucho espacio como `p-select` o `p-datepicker`, se debe usar siempre el sistema de rejilla de Tailwind:
+
+```html
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="flex flex-col gap-2">
+    <label>Campo 1</label>
+    <p-select ...></p-select>
+  </div>
+  <div class="flex flex-col gap-2">
+    <label>Campo 2</label>
+    <p-datepicker ...></p-datepicker>
+  </div>
+</div>
+```
 
 **Extracción de código recomendada**:
 ```typescript

@@ -32,6 +32,10 @@ public class Role {
     @Builder.Default
     private Boolean isSystemRole = false;
 
+    @Column(name = "is_admin_role")
+    @Builder.Default
+    private Boolean isAdminRole = false;
+
     @Builder.Default
     private Boolean active = true;
 

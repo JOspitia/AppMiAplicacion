@@ -7,22 +7,22 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MessageModule } from 'primeng/message';
-import { AuthService, User } from './auth.service';
+import { AuthService, User } from '../core/services/auth.service';
 
 @Component({
-    selector: 'app-register',
-    standalone: true,
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        RouterModule,
-        ButtonModule,
-        InputTextModule,
-        PasswordModule,
-        CheckboxModule,
-        MessageModule
-    ],
-    template: `
+  selector: 'app-register',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    ButtonModule,
+    InputTextModule,
+    PasswordModule,
+    CheckboxModule,
+    MessageModule
+  ],
+  template: `
     <div class="min-h-screen bg-slate-50 dark:bg-[#0B1120] flex items-center justify-center p-6 lg:p-12 relative overflow-hidden transition-colors duration-300">
       <!-- Background Ornaments -->
       <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/10 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2 opacity-50"></div>
@@ -169,75 +169,75 @@ import { AuthService, User } from './auth.service';
   `
 })
 export class RegisterComponent implements OnInit {
-    registerForm: FormGroup;
-    loading = false;
-    error = '';
-    success = '';
-    isDarkMode = signal(false);
+  registerForm: FormGroup;
+  loading = false;
+  error = '';
+  success = '';
+  isDarkMode = signal(false);
 
-    constructor(
-        private fb: FormBuilder,
-        private authService: AuthService,
-        private router: Router
-    ) {
-        this.registerForm = this.fb.group({
-            username: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
-            email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
-            firstName: ['', [Validators.required, Validators.maxLength(50)]],
-            firstSurname: ['', [Validators.required, Validators.maxLength(50)]],
-            password: ['', [Validators.required, Validators.minLength(8)]],
-            confirmPassword: ['', [Validators.required]]
-        }, { validators: this.passwordMatchValidator });
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.registerForm = this.fb.group({
+      username: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
+      firstName: ['', [Validators.required, Validators.maxLength(50)]],
+      firstSurname: ['', [Validators.required, Validators.maxLength(50)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  ngOnInit() {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      this.isDarkMode.set(savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches));
+      this.applyTheme();
     }
+  }
 
-    ngOnInit() {
-        if (typeof window !== 'undefined') {
-            const savedTheme = localStorage.getItem('theme');
-            this.isDarkMode.set(savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches));
-            this.applyTheme();
+  passwordMatchValidator(g: FormGroup) {
+    return g.get('password')?.value === g.get('confirmPassword')?.value
+      ? null : { mismatch: true };
+  }
+
+  toggleTheme() {
+    this.isDarkMode.update(v => !v);
+    this.applyTheme();
+    localStorage.setItem('theme', this.isDarkMode() ? 'dark' : 'light');
+  }
+
+  private applyTheme() {
+    if (typeof document !== 'undefined') {
+      if (this.isDarkMode()) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }
+
+  onSubmit() {
+    if (this.registerForm.valid) {
+      this.loading = true;
+      this.error = '';
+      this.success = '';
+
+      const { confirmPassword, ...registerData } = this.registerForm.value;
+
+      this.authService.register(registerData).subscribe({
+        next: (res: User) => {
+          this.loading = false;
+          this.success = res.message;
+          setTimeout(() => this.router.navigate(['/login']), 2000);
+        },
+        error: (err: any) => {
+          this.loading = false;
+          this.error = err.error || 'Ocurrió un error al registrar el usuario.';
         }
+      });
     }
-
-    passwordMatchValidator(g: FormGroup) {
-        return g.get('password')?.value === g.get('confirmPassword')?.value
-            ? null : { mismatch: true };
-    }
-
-    toggleTheme() {
-        this.isDarkMode.update(v => !v);
-        this.applyTheme();
-        localStorage.setItem('theme', this.isDarkMode() ? 'dark' : 'light');
-    }
-
-    private applyTheme() {
-        if (typeof document !== 'undefined') {
-            if (this.isDarkMode()) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-    }
-
-    onSubmit() {
-        if (this.registerForm.valid) {
-            this.loading = true;
-            this.error = '';
-            this.success = '';
-
-            const { confirmPassword, ...registerData } = this.registerForm.value;
-
-            this.authService.register(registerData).subscribe({
-                next: (res: User) => {
-                    this.loading = false;
-                    this.success = res.message;
-                    setTimeout(() => this.router.navigate(['/login']), 2000);
-                },
-                error: (err: any) => {
-                    this.loading = false;
-                    this.error = err.error || 'Ocurrió un error al registrar el usuario.';
-                }
-            });
-        }
-    }
+  }
 }

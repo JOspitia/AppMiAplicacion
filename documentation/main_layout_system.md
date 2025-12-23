@@ -31,20 +31,34 @@ Panel especializado para administradores con métricas clave.
 ## 2. Flujo de Navegación y Acceso
 
 ### Seguridad con Guards
-Se implementó un sistema de protección de rutas basado en roles:
+Se implementó un sistema de protección de rutas basado en roles y sesión:
 
-1.  **`authGuard`**: Asegura que el usuario tenga una empresa seleccionada y sesión activa antes de entrar al layout.
-2.  **`superAdminGuard`**: Filtra el acceso al `/dashboard`. Si un usuario normal intenta entrar, es redirigido automáticamente a `/home`.
+1.  **`authGuard`**: Verifica la autenticidad de la sesión consultando `/api/auth/me`. Si el usuario no está autenticado, redirige al `/login`.
+2.  **`guestGuard`**: Protege la Landing y el Login. Si el usuario ya tiene una sesión activa, lo redirige automáticamente al Panel de Control (`/home`) para evitar que tenga que volver a loguearse.
+3.  **`superAdminGuard`**: Filtra el acceso al `/dashboard`. Si un usuario normal intenta entrar, es redirigido automáticamente a `/home`.
 
 ### Configuración de Rutas (`app.routes.ts`)
+La jerarquía de rutas separa el sitio público de la aplicación interna:
+
 ```typescript
+// 1. Aplicación Interna (Protegida)
 {
     path: '',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
         { path: 'home', component: HomeComponent },
-        { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] },
-        { path: '', redirectTo: 'home', pathMatch: 'full' }
+        { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] }
+    ]
+}
+
+// 2. Sitio Público
+{
+    path: '',
+    component: PublicLayoutComponent,
+    children: [
+        { path: '', component: LandingComponent, pathMatch: 'full' },
+        { path: 'terms', ... }
     ]
 }
 ```
