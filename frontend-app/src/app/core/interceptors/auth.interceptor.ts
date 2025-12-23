@@ -2,7 +2,7 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { BehaviorSubject, throwError, filter, take, switchMap, catchError, finalize } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { ProfileService } from '../services/profile.service'; // used to prefetch profile for CSRF
+import { HttpClient } from '@angular/common/http'; // use HttpClient directly to avoid circular DI
 import { Router } from '@angular/router';
 
 // --- ESTADO GLOBAL DEL INTERCEPTOR (MUTEX) ---
@@ -12,7 +12,7 @@ const refreshTokenSubject = new BehaviorSubject<any>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
-    const profileService = inject(ProfileService);
+    const http = inject(HttpClient); // direct HTTP client to avoid circular DI with ProfileService
     const router = inject(Router);
 
     // 1. Asegurar que siempre enviamos credenciales (Cookies)
@@ -30,8 +30,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                         return throwError(() => error);
                     }
 
-                    console.log('🔄 [AuthInterceptor] Detectado 403. Intentando recuperar cookie CSRF...');
-                    return profileService.getProfile().pipe(
+                    console.log('[AuthInterceptor] Detectado 403. Intentando recuperar cookie CSRF (GET /api/profile/me)...');
+                    return http.get('/api/profile/me', { withCredentials: true }).pipe(
                         switchMap(() => {
                             // Reintentamos la petición original marcándola para no volver a entrar aquí
                             const retryReq = authReq.clone({
