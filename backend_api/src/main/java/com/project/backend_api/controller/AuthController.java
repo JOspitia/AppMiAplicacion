@@ -169,7 +169,7 @@ public class AuthController {
                                         .httpOnly(true)
                                         .secure(cookieSecure) // DEBE ser true en producción con SameSite=None
                                         .path("/") // Path raíz para evitar colisiones
-                                        .maxAge(15 * 60) // 15 mins
+                                        .maxAge(jwtUtils.getJwtExpirationMs() / 1000) // Usar configuración (1h)
                                         .sameSite(cookieSecure ? "None" : "Lax") // None en prod, Lax en dev
                                         .build();
 
@@ -178,7 +178,7 @@ public class AuthController {
                                         .httpOnly(true)
                                         .secure(cookieSecure)
                                         .path("/api/auth/refreshtoken") // Solo se envía a este endpoint
-                                        .maxAge(7 * 24 * 60 * 60) // 7 days
+                                        .maxAge(jwtUtils.getJwtRefreshExpirationMs() / 1000) // Usar configuración (24h)
                                         .sameSite(cookieSecure ? "None" : "Lax")
                                         .build();
 
@@ -232,7 +232,9 @@ public class AuthController {
                                                                 .httpOnly(true)
                                                                 .secure(cookieSecure)
                                                                 .path("/")
-                                                                .maxAge(15 * 60) // 15 mins
+                                                                .maxAge(jwtUtils.getJwtExpirationMs() / 1000) // Usar
+                                                                                                              // configuración
+                                                                                                              // (1h)
                                                                 .sameSite(cookieSecure ? "None" : "Lax")
                                                                 .build();
 

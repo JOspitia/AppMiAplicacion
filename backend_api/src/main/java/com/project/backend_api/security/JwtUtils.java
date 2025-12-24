@@ -55,13 +55,13 @@ public class JwtUtils {
     // Generate JWT cookie for CustomUserDetails
     public ResponseCookie generateJwtCookie(CustomUserDetails userPrincipal) {
         String jwt = generateTokenFromUsername(userPrincipal.getUsername());
-        return generateCookie(jwtCookie, jwt, 24 * 60 * 60);
+        return generateCookie(jwtCookie, jwt, jwtExpirationMs / 1000);
     }
 
     // Generate JWT cookie for User
     public ResponseCookie generateJwtCookie(User user) {
         String jwt = generateTokenFromUsername(user.getUsername());
-        return generateCookie(jwtCookie, jwt, 24 * 60 * 60);
+        return generateCookie(jwtCookie, jwt, jwtExpirationMs / 1000); // Usar configuración, no hardcodeado
     }
 
     // Generate Refresh JWT cookie
@@ -77,6 +77,15 @@ public class JwtUtils {
     // Clean Refresh JWT cookie
     public ResponseCookie getCleanRefreshJwtCookie() {
         return generateCookie(jwtRefreshCookie, "", 0);
+    }
+
+    // Getters for expiration times (used by AuthController)
+    public int getJwtExpirationMs() {
+        return jwtExpirationMs;
+    }
+
+    public int getJwtRefreshExpirationMs() {
+        return jwtRefreshExpirationMs;
     }
 
     // -------------------------------------------------------------------
@@ -120,17 +129,8 @@ public class JwtUtils {
                 .compact();
     }
 
-    // Generate JWT cookie for UserDetails
-    public ResponseCookie generateJwtCookie(UserDetails userPrincipal) {
-        String jwt = generateTokenFromUsername(userPrincipal.getUsername());
-        return ResponseCookie.from(jwtCookie, jwt)
-                .path("/")
-                .maxAge(24 * 60 * 60)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .build();
-    }
+    // [REMOVED] generateJwtCookie(UserDetails) overload - redundant and hardcoded
+    // secure=true
 
     /**
      * Compute the expiration Date that will be used for a newly generated token.

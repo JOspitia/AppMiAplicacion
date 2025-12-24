@@ -26,9 +26,12 @@ services:
     ports:
       - "8081:8080" # Mapeo opcional para acceso directo al API (desde Postman etc)
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/myapplication_test
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      # Database
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+      # JPA/Flyway
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
       - SPRING_FLYWAY_ENABLED=true
       - SPRING_FLYWAY_BASELINE_ON_MIGRATE=true
@@ -36,12 +39,38 @@ services:
       - SPRING_FLYWAY_OUT_OF_ORDER=true
       - SPRING_FLYWAY_IGNORE_MIGRATION_PATTERNS=*:missing
       - SPRING_FLYWAY_SCHEMAS=configuration,security,business,public_access
-      - STORAGE_S3_ENDPOINT=http://minio:9000
-      - STORAGE_S3_ACCESS_KEY=minioadmin
-      - STORAGE_S3_SECRET_KEY=minioadmin
-      - STORAGE_S3_BUCKET_NAME=public-assets
-      - STORAGE_S3_PUBLIC_BUCKET=public-assets
-      - STORAGE_S3_PRIVATE_BUCKET=private-assets
+
+      # MinIO Storage
+      - STORAGE_ENDPOINT=${STORAGE_ENDPOINT}
+      - STORAGE_ACCESS_KEY=${STORAGE_ACCESS_KEY}
+      - STORAGE_SECRET_KEY=${STORAGE_SECRET_KEY}
+      - STORAGE_BUCKET_NAME=${STORAGE_BUCKET_NAME}
+      - STORAGE_PUBLIC_BUCKET=${STORAGE_PUBLIC_BUCKET}
+      - STORAGE_PRIVATE_BUCKET=${STORAGE_PRIVATE_BUCKET}
+
+      # JWT
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
+      - JWT_REFRESH_EXPIRATION_MS=${JWT_REFRESH_EXPIRATION_MS}
+
+      # App Config
+      - APP_SECURITY_COOKIE_SECURE=${APP_SECURITY_COOKIE_SECURE}
+      - APP_BASE_URL=${APP_BASE_URL}
+
+      # Email
+      - SPRING_MAIL_ENABLED=${SPRING_MAIL_ENABLED}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}
+
+      # Chatbot
+      - CHATBOT_INTERNAL_API_KEY=${CHATBOT_INTERNAL_API_KEY}
+      - CHATBOT_N8N_WEBHOOK_URL=${CHATBOT_N8N_WEBHOOK_URL}
+      - CHATBOT_N8N_API_KEY=${CHATBOT_N8N_API_KEY}
+
+      # MercadoPago
+      - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN}
+      - MERCADOPAGO_PUBLIC_KEY=${MERCADOPAGO_PUBLIC_KEY}
+
     depends_on:
       - postgres
       - minio
@@ -62,9 +91,9 @@ services:
     image: postgres:15-alpine
     container_name: postgres_db
     environment:
-      POSTGRES_DB: myapplication_test
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -81,8 +110,8 @@ services:
     container_name: minio_storage
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -115,11 +144,11 @@ services:
     image: n8nio/n8n:latest
     container_name: n8n_app
     ports:
-      - "5678:5678"
+      - "${N8N_PORT:-5678}:5678"
     environment:
       - N8N_HOST=n8n_app
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
+      - N8N_PORT=${N8N_PORT:-5678}
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
       - WEBHOOK_URL=http://n8n_app:5678/
       - GENERIC_TIMEZONE=America/Bogota
       - TZ=America/Bogota
