@@ -23,10 +23,10 @@ Para evitar que la experiencia del usuario se interrumpa al expirar el Access To
 -   **Protección contra Bucles**: Implementa un header personalizado `X-Interceptor-Retry` para identificar peticiones ya reintentadas. Si una petición reintentada falla de nuevo, se cancela el flujo para evitar bucles infinitos.
 -   **Reintento Transparente**: Una vez renovado el token, el interceptor clona la petición original añadiendo el header de marca y la reenvía sin que el usuario note el fallo inicial.
 
--   **Unificación CSRF + Refresh**: Se implementó un **interceptor unificado** (frontend) que maneja ambos casos:
-    - En caso de **403 Forbidden** (p. ej. CSRF desincronizado) hace una llamada ligera a `/api/profile/me` para forzar la creación de la cookie `XSRF-TOKEN` y reintenta la petición original.
-    - En caso de **401 Unauthorized** ejecuta la rutina de refresh-token y reintenta la petición original. Esto evita que se intenten refrescar tokens cuando el problema real es CSRF.
-    - Para evitar bucles, el interceptor marca reintentos con cabeceras (`X-Interceptor-Retry`, `X-CSRF-Retry`) y evita reentradas sobre la propia llamada de prefeteo.
+    -   **Unificación CSRF + Refresh**: Se implementó un **interceptor unificado** (frontend) que maneja ambos casos:
+    - En caso de **403 Forbidden** (p. ej. CSRF desincronizado) ejecuta la **Estrategia Nuclear**: llama a `/api/auth/me` y lee el nuevo token CSRF directamente del cuerpo **JSON** de la respuesta, ignorando la cookie para evitar condiciones de carrera. Luego reintenta la petición original con el header `X-XSRF-TOKEN` actualizado.
+    - En caso de **401 Unauthorized** ejecuta la rutina de refresh-token y reintenta la petición original.
+    - Para evitar bucles, el interceptor marca reintentos con cabeceras (`X-Interceptor-Retry`, `X-CSRF-Retry`).
 
 > **Nota de Desarrollo**: Para pruebas, el token JWT se ha configurado con una expiración corta (30s) para validar visualmente el flujo de refresco. En producción, esto debe ajustarse a 15 min (JWT) y 7 días (Refresh Token).
 
@@ -34,20 +34,15 @@ Para evitar que la experiencia del usuario se interrumpa al expirar el Access To
 
 ## 2. Protección CSRF / XSRF (Cross-Site Request Forgery)
 
-Se implementó el patrón de **Doble Envío de Cookie** recomendado para SPAs modernas (Angular + Spring Security 6).
+Se implementó una estrategia híbrida robusta basada en el patrón de **Doble Envío de Cookie** pero reforzada con **Entrega Explícita por JSON (Solución Nuclear)** para recuperaciones.
 
 ### 2.1 Configuración del Backend
--   **Repositorio**: Se utiliza `CookieCsrfTokenRepository.withHttpOnlyFalse()`, permitiendo que Angular lea el valor del token.
--   **Filtro Despertador (`CsrfCookieFilter`)**: Un filtro personalizado que fuerza la generación del token en cada respuesta (solucionando el problema del *Lazy Loading* de Spring Security 6). Sin este filtro, la primera petición mutable suele fallar.
+-   **Repositorio**: Se utiliza `CookieCsrfTokenRepository.withHttpOnlyFalse()`.
+-   **Entrega JSON**: El endpoint `/api/auth/me` ha sido modificado para incluir explícitamente el `csrfToken` en su respuesta JSON. Esto permite al frontend obtener un token válido garantizado sin depender de la legibilidad o sincronización de las cookies en el navegador.
 
 ### 2.2 Configuración del Frontend
-En `app.config.ts`, el `HttpClient` está configurado para sincronizar automáticamente:
-```typescript
-withXsrfConfiguration({
-    cookieName: 'XSRF-TOKEN',
-    headerName: 'X-XSRF-TOKEN',
-})
-```
+-   **Funcionamiento Normal**: Angular lee automáticamente la cookie `XSRF-TOKEN` y la adjunta al header `X-XSRF-TOKEN`.
+-   **Recuperación de Fallos (Interceptor)**: Si una petición falla con `403`, el interceptor solicita `/api/auth/me`, extrae el token del JSON y reintenta la petición fallida manualmente. Esta redundancia elimina los errores por "race conditions" en la actualización de cookies.
 
 ---
 
@@ -242,7 +237,7 @@ powershell -ExecutionPolicy Bypass -File .\audit\injection_test.ps1
 |---|---|
 | Autenticación | JWT + Cookies HttpOnly |
 | Refresco de Sesión | RxJS (Interceptor + Mutex) |
-| Protección CSRF | Cookie-Header Pattern |
+| Protección CSRF | Double Submit + JSON Delivery |
 | Almacenamiento | MinIO (Object Storage) |
 | Seguridad Backend | Spring Security 6.x |
 | Control de Tráfico | RateLimitFilter (Custom Java) |

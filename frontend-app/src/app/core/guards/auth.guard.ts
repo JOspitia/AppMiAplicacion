@@ -7,6 +7,9 @@ interface UserInfo {
     isSuperAdmin: boolean;
 }
 
+/**
+ * Guard para rutas exclusivas de SuperAdmin
+ */
 export const superAdminGuard: CanActivateFn = (route, state) => {
     const http = inject(HttpClient);
     const router = inject(Router);
@@ -16,7 +19,7 @@ export const superAdminGuard: CanActivateFn = (route, state) => {
             if (user.isSuperAdmin) {
                 return true;
             }
-            // Redirect regular users to home
+            // Redirigir usuarios regulares a home
             router.navigate(['/home']);
             return false;
         }),
@@ -27,6 +30,9 @@ export const superAdminGuard: CanActivateFn = (route, state) => {
     );
 };
 
+/**
+ * Guard para rutas que requieren autenticación
+ */
 export const authGuard: CanActivateFn = (route, state) => {
     const http = inject(HttpClient);
     const router = inject(Router);
@@ -40,18 +46,24 @@ export const authGuard: CanActivateFn = (route, state) => {
     );
 };
 
+/**
+ * Guard para rutas públicas (Landing, Login, Register)
+ * Redirige a /home si el usuario YA está autenticado.
+ * IMPORTANTE: Captura silenciosamente el 401 sin disparar el interceptor.
+ */
 export const guestGuard: CanActivateFn = (route, state) => {
     const http = inject(HttpClient);
     const router = inject(Router);
 
     return http.get('/api/auth/me').pipe(
         map(() => {
-            // If authenticated, go to home instead of public page
+            // Si está autenticado, redirigir a home
             router.navigate(['/home']);
             return false;
         }),
-        catchError(() => {
-            // Not authenticated: allow seeing landing/login
+        catchError((error) => {
+            // Si recibe 401 (no autenticado), permitir acceso a la ruta pública
+            // NO propagar el error para evitar que el interceptor intente refresh
             return of(true);
         })
     );

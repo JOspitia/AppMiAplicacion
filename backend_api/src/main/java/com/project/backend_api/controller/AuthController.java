@@ -102,8 +102,8 @@ public class AuthController {
                                 if (clientHash != null && !clientHash.isBlank()) {
                                         try {
                                                 // Load user and update password to bcrypt(clientHash)
-                                                java.util.Optional<com.project.backend_api.model.User> optUser =
-                                                                userRepository.findByUsernameOrEmail(
+                                                java.util.Optional<com.project.backend_api.model.User> optUser = userRepository
+                                                                .findByUsernameOrEmail(
                                                                                 loginRequest.usernameOrEmail(),
                                                                                 loginRequest.usernameOrEmail());
                                                 if (optUser.isPresent()) {
@@ -150,7 +150,8 @@ public class AuthController {
                                         .user(user)
                                         .token(jwt.substring(0, Math.min(jwt.length(), 20)) + "...")
                                         .loginTime(LocalDateTime.now())
-                                        .expirationTime(LocalDateTime.ofInstant(expDate.toInstant(), java.time.ZoneId.systemDefault()))
+                                        .expirationTime(LocalDateTime.ofInstant(expDate.toInstant(),
+                                                        java.time.ZoneId.systemDefault()))
                                         .ipAddress(getClientIp(request))
                                         .userAgent(request.getHeader("User-Agent"))
                                         .status("SUCCESS")
@@ -162,24 +163,23 @@ public class AuthController {
                         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
                         // 6. Create HttpOnly Cookies
-                        // Access Token Cookie
+                        // Access Token Cookie - SameSite=None para compatibilidad con Cloudflare y
+                        // Path=/ para SPA
                         ResponseCookie jwtCookie = ResponseCookie.from("accessToken", jwt)
                                         .httpOnly(true)
-                                        .secure(cookieSecure) // Configurable: true in Prod
-                                        .path("/")
+                                        .secure(cookieSecure) // DEBE ser true en producción con SameSite=None
+                                        .path("/") // Path raíz para evitar colisiones
                                         .maxAge(15 * 60) // 15 mins
-                                        // .maxAge(30) // 30 seconds
-                                        .sameSite("Strict")
+                                        .sameSite(cookieSecure ? "None" : "Lax") // None en prod, Lax en dev
                                         .build();
 
-                        // Refresh Token Cookie
+                        // Refresh Token Cookie - mantener path específico
                         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
                                         .httpOnly(true)
-                                        .secure(cookieSecure) // Configurable: true in Prod
-                                        .path("/api/auth/refreshtoken") // Security hardening: only sent to refresh
-                                                                        // endpoint
+                                        .secure(cookieSecure)
+                                        .path("/api/auth/refreshtoken") // Solo se envía a este endpoint
                                         .maxAge(7 * 24 * 60 * 60) // 7 days
-                                        .sameSite("Strict")
+                                        .sameSite(cookieSecure ? "None" : "Lax")
                                         .build();
 
                         org.springframework.http.HttpHeaders respHeaders = new org.springframework.http.HttpHeaders();
@@ -203,7 +203,8 @@ public class AuthController {
         public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
                 String csrfHeader = request.getHeader("X-XSRF-TOKEN");
                 String cookieHeader = request.getHeader("Cookie");
-                logger.info("Refresh token request to {}. X-XSRF-TOKEN='{}'. CookieHeader='{}'", request.getRequestURI(), csrfHeader, cookieHeader);
+                logger.info("Refresh token request to {}. X-XSRF-TOKEN='{}'. CookieHeader='{}'",
+                                request.getRequestURI(), csrfHeader, cookieHeader);
 
                 String refreshToken = jwtUtils.parseJwtFromCookie(request, "refreshToken"); // We need a method in
                                                                                             // JwtUtils or just get
@@ -232,20 +233,21 @@ public class AuthController {
                                                                 .secure(cookieSecure)
                                                                 .path("/")
                                                                 .maxAge(15 * 60) // 15 mins
-                                                                .sameSite("Strict")
+                                                                .sameSite(cookieSecure ? "None" : "Lax")
                                                                 .build();
 
                                                 org.springframework.http.HttpHeaders respHeaders = new org.springframework.http.HttpHeaders();
                                                 respHeaders.add(HttpHeaders.SET_COOKIE, jwtCookie.toString());
-                                                logger.info("Refresh successful for user {} (issued new access cookie)", user.getUsername());
+                                                logger.info("Refresh successful for user {} (issued new access cookie)",
+                                                                user.getUsername());
                                                 return ResponseEntity.ok()
                                                                 .headers(respHeaders)
                                                                 .body(java.util.Map.of("message",
                                                                                 "Token refreshed successfully"));
                                         })
                                         .orElseThrow(() -> {
-                                            logger.warn("Refresh token '{}' not found in database", refreshToken);
-                                            return new RuntimeException("Refresh token is not in database!");
+                                                logger.warn("Refresh token '{}' not found in database", refreshToken);
+                                                return new RuntimeException("Refresh token is not in database!");
                                         });
                 }
 
@@ -254,25 +256,29 @@ public class AuthController {
         }
 
         @PostMapping("/logout")
-        public ResponseEntity<?> logout(HttpServletRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        public ResponseEntity<?> logout(HttpServletRequest request,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
                 // Optional: Get user from request context to delete precise token
                 // For audit purposes, log logout event BEFORE clearing cookies
                 try {
                         com.project.backend_api.model.User logUser = null;
                         if (userDetails != null && userDetails.getUser() != null) {
-                                java.util.Optional<com.project.backend_api.model.User> optUser = userRepository.findById(userDetails.getUser().getId());
+                                java.util.Optional<com.project.backend_api.model.User> optUser = userRepository
+                                                .findById(userDetails.getUser().getId());
                                 if (optUser.isPresent()) {
                                         logUser = optUser.get();
                                 }
                         }
 
-                        // If we still don't have the user (e.g., SecurityContext cleared), try parsing the access token
+                        // If we still don't have the user (e.g., SecurityContext cleared), try parsing
+                        // the access token
                         if (logUser == null) {
                                 try {
                                         String token = jwtUtils.parseJwtFromCookie(request, "accessToken");
                                         if (token != null && jwtUtils.validateJwtToken(token)) {
                                                 String username = jwtUtils.getUserNameFromJwtToken(token);
-                                                java.util.Optional<com.project.backend_api.model.User> optUser2 = userRepository.findByUsernameOrEmail(username, username);
+                                                java.util.Optional<com.project.backend_api.model.User> optUser2 = userRepository
+                                                                .findByUsernameOrEmail(username, username);
                                                 if (optUser2.isPresent()) {
                                                         logUser = optUser2.get();
                                                 }
@@ -300,15 +306,17 @@ public class AuthController {
                                         .warn("No se pudo persistir el log de logout: {}", e.getMessage());
                 }
 
-                // Delete cookies
+                // Delete cookies - IMPORTANTE: usar mismo path y sameSite que al crearlas
                 ResponseCookie jwtCookie = ResponseCookie.from("accessToken", "")
-                                .httpOnly(true).secure(cookieSecure).path("/").maxAge(0).sameSite("Strict").build();
+                                .httpOnly(true).secure(cookieSecure).path("/").maxAge(0)
+                                .sameSite(cookieSecure ? "None" : "Lax").build();
                 ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
                                 .httpOnly(true).secure(cookieSecure).path("/api/auth/refreshtoken").maxAge(0)
-                                .sameSite("Strict").build();
+                                .sameSite(cookieSecure ? "None" : "Lax").build();
 
                 ResponseCookie companyCookie = ResponseCookie.from("companyContext", "")
-                                .httpOnly(true).secure(cookieSecure).path("/api").maxAge(0).sameSite("Strict").build();
+                                .httpOnly(true).secure(cookieSecure).path("/").maxAge(0)
+                                .sameSite(cookieSecure ? "None" : "Lax").build();
 
                 org.springframework.http.HttpHeaders respHeaders = new org.springframework.http.HttpHeaders();
                 respHeaders.add(HttpHeaders.SET_COOKIE, jwtCookie.toString());
@@ -321,7 +329,9 @@ public class AuthController {
         }
 
         @GetMapping("/me")
-        public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        public ResponseEntity<?> getCurrentUser(
+                        @AuthenticationPrincipal CustomUserDetails userDetails,
+                        HttpServletRequest request) { // Inyectar request para obtener CSRF
                 if (userDetails == null) {
                         return ResponseEntity.status(401).body("No autenticado");
                 }
@@ -334,6 +344,14 @@ public class AuthController {
                 response.put("firstName", user.getFirstName());
                 response.put("firstSurname", user.getFirstSurname());
                 response.put("isSuperAdmin", user.getIsSuperAdmin());
+
+                // SOLUCIÓN: Enviar CSRF token explícitamente en JSON
+                org.springframework.security.web.csrf.CsrfToken csrfToken = (org.springframework.security.web.csrf.CsrfToken) request
+                                .getAttribute(org.springframework.security.web.csrf.CsrfToken.class.getName());
+                if (csrfToken != null) {
+                        response.put("csrfToken", csrfToken.getToken());
+                        logger.debug("CSRF token incluido en /me response: {}", csrfToken.getToken());
+                }
 
                 return ResponseEntity.ok(response);
         }

@@ -53,7 +53,7 @@ public class CompanyController {
             // Create company context cookie
             ResponseCookie companyCookie = ResponseCookie.from("companyContext", companyId.toString())
                     .httpOnly(true)
-                    .secure(false) // Set to true in production
+                    .secure(true)
                     .path("/api")
                     .maxAge(24 * 60 * 60) // 1 day
                     .sameSite("Strict")

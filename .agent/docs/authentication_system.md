@@ -11,7 +11,7 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
 ### Características Clave
 *   **JWT en HttpOnly Cookies**: El token JWT no se almacena en `localStorage` ni `sessionStorage`. Se inyecta como una cookie `HttpOnly`, lo que impide que cualquier script de JavaScript (propio o malicioso) acceda a él.
 *   **Protección XSS**: Al no ser accesible via JS, el token es inmune a robos por Cross-Site Scripting.
-*   **Protección CSRF**: Se configura SameSite=Strict en la cookie y se valida el origen mediante CORS estricto.
+*   **Protección CSRF**: Uso de tokens XSRF sincronizados y Cookies con `SameSite` condicional (None en Producción/HTTPS, Lax en Desarrollo) para soportar Cloudflare y proxies seguros.
 *   **Hash de Contraseñas**: Se utiliza **BCrypt** con fuerza 10 para el hash de contraseñas.
 *   **Rate Limiting**: Implementación de **Bucket4j** para prevenir ataques de fuerza bruta (Anti-Brute Force).
 *   **Refresh Tokens**: Sistema de doble token (Access + Refresh) para balances de seguridad y usabilidad.
@@ -62,6 +62,7 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
 *   **`/me`**:
     *   Retorna la "fuente de la verdad" del usuario autenticado.
     *   Incluye: ID, username, email, nombre completo y el flag `isSuperAdmin`.
+    *   **CSRF Token**: Entrega explícitamente el token XSRF en el cuerpo JSON (`csrfToken`). Esto permite al frontend obtener un token fresco y válido sin depender de la lectura de cookies, eliminando problemas de sincronización (Solución Nuclear).
     *   Esencial para que el frontend (Guards y Layout) tome decisiones de UI en tiempo real.
 
 ### E. Modelo de Datos y Persistencia
@@ -118,8 +119,10 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
 3.  **Spring Boot**:
     *   `AuthenticationManager` valida credenciales contra PostgreSQL hash.
     *   Si es válido, genera JWT.
+    *   Si es válido, genera JWT.
     *   Guarda registro en `login_logs`.
-    *   Responde con Header: `Set-Cookie: accessToken=...; HttpOnly; SameSite=Strict; Path=/`.
+    *   Responde con Header: `Set-Cookie: accessToken=...; HttpOnly; SameSite=None; Secure; Path=/api` (Configuración Producción/Cloudflare).
+    *   En desarrollo local se ajusta a `SameSite=Lax`.
 4.  **Navegador**: Recibe la respuesta y almacena la cookie de forma segura.
 5.  **Carga de Perfil**: El frontend llama a `/api/auth/me` para obtener el contexto del usuario y configurar el layout. Este endpoint es también la base del `authGuard` para proteger rutas internas.
 6.  **Estrategia de Rutas**:

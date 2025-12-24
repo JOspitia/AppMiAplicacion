@@ -4,23 +4,32 @@ This document explains the unified Auth Interceptor we implemented to handle bot
 
 ## Goals
 - Handle `401 Unauthorized` by performing a refresh token request and retrying the original request.
-- Handle `403 Forbidden` (most commonly caused by missing/expired CSRF cookie) by performing a lightweight `GET /api/profile/me` (prefetch) to force server to set `XSRF-TOKEN` cookie, then retry original request.
+- Handle `403 Forbidden` (most commonly caused by missing/expired CSRF cookie) by performing a request to `/api/auth/me`.
+  - **Strategy**: "Nuclear Solution" (Explicit JSON Delivery).
+  - The interceptor requests `/api/auth/me` and reads the fresh `csrfToken` directly from the JSON response body.
+  - It does NOT rely on `document.cookie` or Angular's `tokenExtractor`, eliminating timing issues and browser synchronization delays.
 - Avoid circular dependency between the interceptor and services that use `HttpClient`.
 - Avoid request retry loops using custom headers.
 
 ## Key Implementation Points
 - Interceptor is implemented as a functional `HttpInterceptorFn` (`auth.interceptor.ts`) at the application level.
 - Uses a global mutex (`BehaviorSubject`) to ensure only a single refresh is active at a time.
+- **Public Endpoint Protection**: Maintains a list of public endpoints (e.g., `/api/auth/login`, `/api/auth/me`) where `401 Unauthorized` errors effectively mean "not logged in" and should **NOT** trigger a refresh token attempt, preventing redirect loops.
 - Uses two retry guards:
   - `X-Interceptor-Retry` for requests reattempted after a refresh.
-  - `X-CSRF-Retry` for requests reattempted after CSRF prefetch.
+  - `X-CSRF-Retry` for requests reattempted after CSRF token renewal.
 
 ## Circular DI mitigation
-- Do not inject `ProfileService` directly in the interceptor: `ProfileService` itself uses `HttpClient` which relies on the interceptor. To avoid a circular dependency we use `HttpClient` directly for the CSRF prefetch request:
+- Do not inject `ProfileService` directly in the interceptor: `ProfileService` itself uses `HttpClient` which relies on the interceptor. To avoid a circular dependency we use `HttpClient` directly for the CSRF renewal request:
 
 ```ts
 const http = inject(HttpClient);
-return http.get('/api/profile/me', { withCredentials: true }).pipe(...)
+return http.get<any>('/api/auth/me', { withCredentials: true }).pipe(
+    switchMap(response => {
+        const token = response.csrfToken; // Read from JSON
+        // ... retry logic
+    })
+)
 ```
 
 This prevents Angular DI cycles and keeps the interceptor self-contained.
