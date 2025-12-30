@@ -72,7 +72,7 @@ public class SecurityConfig {
                                                         .reportOnly());
 
                                         /* Additional hardening headers */
-                                        headers.contentTypeOptions(); // X-Content-Type-Options: nosniff
+                                        // X-Content-Type-Options: nosniff and X-XSS-Protection removed (deprecated in Spring Security 6.1)
                                         headers.frameOptions(frame -> frame.deny()); // X-Frame-Options: DENY
 
                                         headers.permissionsPolicyHeader(permissions -> permissions

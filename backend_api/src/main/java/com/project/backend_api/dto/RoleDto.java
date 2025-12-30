@@ -1,19 +1,22 @@
-package com.project.project.dto.core;
+package com.project.backend_api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CountryDto {
+public class RoleDto {
     private UUID id;
     private String name;
-    private String code;
-    private String phoneCode;
+    private String description;
+    private Boolean isSystemRole;
+    private Boolean active;
+    private LocalDateTime createdAt;
 }

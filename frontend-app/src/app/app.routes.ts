@@ -12,6 +12,9 @@ import { MainLayoutComponent } from './core/layout/main-layout.component';
 import { DashboardComponent } from './core/dashboard/dashboard.component';
 import { HomeComponent } from './core/home/home.component';
 import { superAdminGuard, authGuard, guestGuard } from './core/guards/auth.guard';
+import { CompanyListComponent } from './core/companies/company-list.component';
+import { CompanyFormComponent } from './core/companies/company-form.component';
+
 
 export const routes: Routes = [
     // 1. Auth Routes (No Layout)
@@ -41,6 +44,9 @@ export const routes: Routes = [
             { path: 'home', component: HomeComponent },
             { path: 'core/management/users/profile', loadComponent: () => import('./core/management/users/profile/profile').then(m => m.ProfileComponent) },
             { path: 'core/management/users/profile/change-password', loadComponent: () => import('./core/management/users/profile/change-password.component').then(m => m.ChangePasswordComponent) },
+            { path: 'core/companies', component: CompanyListComponent },
+            { path: 'core/companies/create', component: CompanyFormComponent },
+            { path: 'core/companies/edit/:id', component: CompanyFormComponent },
             { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] }
         ]
     },

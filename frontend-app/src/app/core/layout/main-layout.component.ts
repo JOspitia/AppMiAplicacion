@@ -9,39 +9,42 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml, Title, Meta } from '@angular/platform-browser';
 import { DashboardService, ModuleDto } from '../services/dashboard.service';
 import { IconComponent } from '../../shared/components/icon.component';
+import { ToastComponent } from '../../shared/components/toast/toast.component';
 
 
 interface MenuItem extends ModuleDto {
-    isOpen?: boolean;
-    children: MenuItem[];
+  isOpen?: boolean;
+  children: MenuItem[];
 }
 
 interface Company {
-    id: string;
-    name: string;
-    nit: string;
+  id: string;
+  name: string;
+  nit: string;
 }
 
 interface UserInfo {
-    username: string;
-    role: string;
+  username: string;
+  role: string;
 }
 
 @Component({
-    selector: 'app-main-layout',
-    standalone: true,
-    imports: [
-        CommonModule,
-        RouterModule,
-        RouterOutlet,
-        ButtonModule,
-        TooltipModule,
-        SelectModule,
-        FormsModule,
-        IconComponent
-    ],
+  selector: 'app-main-layout',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    RouterOutlet,
+    ButtonModule,
+    TooltipModule,
+    SelectModule,
+    FormsModule,
+    FormsModule,
+    IconComponent,
+    ToastComponent
+  ],
 
-    template: `
+  template: `
     <!-- Topbar Decor -->
     <div class="fixed top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent z-[1001]"></div>
 
@@ -232,8 +235,10 @@ interface UserInfo {
     <!-- Global Decoration -->
     <div class="fixed top-0 right-0 w-[800px] h-[800px] bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none z-0"></div>
     <div class="fixed bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none z-0"></div>
+
+    <app-toast></app-toast>
     `,
-    styles: [`
+  styles: [`
         :host ::ng-deep {
             .header-company-select {
                 .p-select {
@@ -287,162 +292,162 @@ interface UserInfo {
     `]
 })
 export class MainLayoutComponent implements OnInit {
-    private http = inject(HttpClient);
-    private router = inject(Router);
-    private dashboardService = inject(DashboardService);
-    private sanitizer = inject(DomSanitizer);
-    private titleService = inject(Title);
-    private metaService = inject(Meta);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private dashboardService = inject(DashboardService);
+  private sanitizer = inject(DomSanitizer);
+  private titleService = inject(Title);
+  private metaService = inject(Meta);
 
-    // State
-    isSidebarCollapsed = signal(false);
-    isMobileMenuOpen = signal(false);
-    isDarkMode = signal(false);
+  // State
+  isSidebarCollapsed = signal(false);
+  isMobileMenuOpen = signal(false);
+  isDarkMode = signal(false);
 
-    // Dynamic Menu Items
-    menuItems = signal<MenuItem[]>([]);
+  // Dynamic Menu Items
+  menuItems = signal<MenuItem[]>([]);
 
-    companies = signal<Company[]>([]);
-    selectedCompany = signal<Company | null>(null);
-    selectedCompanyId: string = '';
-    userInfo = signal<UserInfo | null>(null);
+  companies = signal<Company[]>([]);
+  selectedCompany = signal<Company | null>(null);
+  selectedCompanyId: string = '';
+  userInfo = signal<UserInfo | null>(null);
 
-    // Logo Handling
-    logoCandidates = [
-        '/api/public/assets/images/logo.png',
-        '/api/assets/logos/logo.webp'
-    ];
-    private currentLogoIndex = 0;
-    logoUrl = signal(this.logoCandidates[this.currentLogoIndex]);
+  // Logo Handling
+  logoCandidates = [
+    '/api/public/assets/images/logo.png',
+    '/api/assets/logos/logo.webp'
+  ];
+  private currentLogoIndex = 0;
+  logoUrl = signal(this.logoCandidates[this.currentLogoIndex]);
 
-    onLogoError(event: Event) {
-        this.currentLogoIndex++;
-        if (this.currentLogoIndex < this.logoCandidates.length) {
-            this.logoUrl.set(this.logoCandidates[this.currentLogoIndex]);
+  onLogoError(event: Event) {
+    this.currentLogoIndex++;
+    if (this.currentLogoIndex < this.logoCandidates.length) {
+      this.logoUrl.set(this.logoCandidates[this.currentLogoIndex]);
+    }
+  }
+
+  ngOnInit() {
+    // SEO / Metadata
+    try {
+      this.titleService.setTitle('MiAplicación | Automatiza tu Gestión Empresarial y Automatización SaaS');
+      this.metaService.updateTag({ name: 'description', content: 'Plataforma SaaS para centralizar la gestión de tu equipo. Automatiza flujos de trabajo, gestiona tu bolsa de empleo y protege tus datos con seguridad de grado bancario.' });
+      this.metaService.updateTag({ property: 'og:title', content: 'MiAplicación: Gestión de RRHH Inteligente' });
+      this.metaService.updateTag({ property: 'og:description', content: 'Centraliza tu equipo y automatiza procesos con total seguridad.' });
+      this.metaService.updateTag({ property: 'og:type', content: 'website' });
+      this.metaService.updateTag({ property: 'og:url', content: 'https://www.appmiaplicacion.com' });
+    } catch (e) {
+      // Best-effort: don't break the UI if platform-browser is unavailable in some environments
+      const errMsg = (e as any)?.message ?? String(e);
+      console.warn('Could not set meta tags:', errMsg);
+    }
+
+    // Ensure the default logo is the public asset (overrides candidate order)
+    this.logoUrl.set('/api/public/assets/images/logo.png');
+
+    this.loadTheme();
+    this.loadCurrentCompany();
+    this.loadUserInfo();
+    this.dashboardService.loadUserModules().subscribe(modules => {
+      this.menuItems.set(this.mapModules(modules));
+    });
+  }
+
+  private mapModules(modules: ModuleDto[]): MenuItem[] {
+    return modules.map(m => ({
+      ...m,
+      isOpen: false,
+      children: m.children ? this.mapModules(m.children) : []
+    }));
+  }
+
+
+
+  private loadTheme() {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      this.isDarkMode.set(
+        savedTheme === 'dark' ||
+        (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      );
+      this.applyTheme();
+    }
+  }
+
+  private loadCurrentCompany() {
+    this.http.get<Company>('/api/companies/current').subscribe({
+      next: (company) => {
+        if (company && company.id) {
+          this.selectedCompany.set(company);
+          this.selectedCompanyId = company.id;
         }
-    }
+      }
+    });
 
-    ngOnInit() {
-        // SEO / Metadata
-        try {
-            this.titleService.setTitle('MiAplicación | Automatiza tu Gestión Empresarial y Automatización SaaS');
-            this.metaService.updateTag({ name: 'description', content: 'Plataforma SaaS para centralizar la gestión de tu equipo. Automatiza flujos de trabajo, gestiona tu bolsa de empleo y protege tus datos con seguridad de grado bancario.' });
-            this.metaService.updateTag({ property: 'og:title', content: 'MiAplicación: Gestión de RRHH Inteligente' });
-            this.metaService.updateTag({ property: 'og:description', content: 'Centraliza tu equipo y automatiza procesos con total seguridad.' });
-            this.metaService.updateTag({ property: 'og:type', content: 'website' });
-            this.metaService.updateTag({ property: 'og:url', content: 'https://www.appmiaplicacion.com' });
-        } catch (e) {
-            // Best-effort: don't break the UI if platform-browser is unavailable in some environments
-            const errMsg = (e as any)?.message ?? String(e);
-            console.warn('Could not set meta tags:', errMsg);
+    this.http.get<Company[]>('/api/companies/available').subscribe({
+      next: (companies) => this.companies.set(companies)
+    });
+  }
+
+  private loadUserInfo() {
+    this.http.get<any>('/api/auth/me').subscribe({
+      next: (user) => {
+        if (user) {
+          this.userInfo.set({
+            username: user.firstName || user.username,
+            role: user.isSuperAdmin ? 'Super Admin' : 'Administrador'
+          });
         }
+      }
+    });
+  }
 
-        // Ensure the default logo is the public asset (overrides candidate order)
-        this.logoUrl.set('/api/public/assets/images/logo.png');
+  toggleSidebar() {
+    this.isSidebarCollapsed.update(v => !v);
+  }
 
-        this.loadTheme();
-        this.loadCurrentCompany();
-        this.loadUserInfo();
-        this.dashboardService.loadUserModules().subscribe(modules => {
-            this.menuItems.set(this.mapModules(modules));
-        });
+  toggleMobileMenu() {
+    this.isMobileMenuOpen.update(v => !v);
+  }
+
+  toggleSubmenu(item: MenuItem) {
+    item.isOpen = !item.isOpen;
+    this.menuItems.set([...this.menuItems()]);
+  }
+
+  toggleTheme() {
+    this.isDarkMode.update(v => !v);
+    this.applyTheme();
+    localStorage.setItem('theme', this.isDarkMode() ? 'dark' : 'light');
+  }
+
+  private applyTheme() {
+    if (typeof document !== 'undefined') {
+      if (this.isDarkMode()) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }
+  }
 
-    private mapModules(modules: ModuleDto[]): MenuItem[] {
-        return modules.map(m => ({
-            ...m,
-            isOpen: false,
-            children: m.children ? this.mapModules(m.children) : []
-        }));
-    }
-
-
-
-    private loadTheme() {
-        if (typeof window !== 'undefined') {
-            const savedTheme = localStorage.getItem('theme');
-            this.isDarkMode.set(
-                savedTheme === 'dark' ||
-                (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-            );
-            this.applyTheme();
+  onCompanyChange(event: any) {
+    const companyId = event.value;
+    this.http.post('/api/companies/select', { companyId }).subscribe({
+      next: () => {
+        const company = this.companies().find(c => c.id === companyId);
+        if (company) {
+          this.selectedCompany.set(company);
         }
-    }
+        window.location.reload();
+      }
+    });
+  }
 
-    private loadCurrentCompany() {
-        this.http.get<Company>('/api/companies/current').subscribe({
-            next: (company) => {
-                if (company && company.id) {
-                    this.selectedCompany.set(company);
-                    this.selectedCompanyId = company.id;
-                }
-            }
-        });
-
-        this.http.get<Company[]>('/api/companies/available').subscribe({
-            next: (companies) => this.companies.set(companies)
-        });
-    }
-
-    private loadUserInfo() {
-        this.http.get<any>('/api/auth/me').subscribe({
-            next: (user) => {
-                if (user) {
-                    this.userInfo.set({
-                        username: user.firstName || user.username,
-                        role: user.isSuperAdmin ? 'Super Admin' : 'Administrador'
-                    });
-                }
-            }
-        });
-    }
-
-    toggleSidebar() {
-        this.isSidebarCollapsed.update(v => !v);
-    }
-
-    toggleMobileMenu() {
-        this.isMobileMenuOpen.update(v => !v);
-    }
-
-    toggleSubmenu(item: MenuItem) {
-        item.isOpen = !item.isOpen;
-        this.menuItems.set([...this.menuItems()]);
-    }
-
-    toggleTheme() {
-        this.isDarkMode.update(v => !v);
-        this.applyTheme();
-        localStorage.setItem('theme', this.isDarkMode() ? 'dark' : 'light');
-    }
-
-    private applyTheme() {
-        if (typeof document !== 'undefined') {
-            if (this.isDarkMode()) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-    }
-
-    onCompanyChange(event: any) {
-        const companyId = event.value;
-        this.http.post('/api/companies/select', { companyId }).subscribe({
-            next: () => {
-                const company = this.companies().find(c => c.id === companyId);
-                if (company) {
-                    this.selectedCompany.set(company);
-                }
-                window.location.reload();
-            }
-        });
-    }
-
-    logout() {
-        this.http.post('/api/auth/logout', {}).subscribe({
-            next: () => this.router.navigate(['/login']),
-            error: () => this.router.navigate(['/login'])
-        });
-    }
+  logout() {
+    this.http.post('/api/auth/logout', {}).subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login'])
+    });
+  }
 }

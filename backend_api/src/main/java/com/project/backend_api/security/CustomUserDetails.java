@@ -6,6 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -13,15 +14,18 @@ public class CustomUserDetails implements UserDetails {
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
     private final User user; // Keep reference if needed
+    private final UUID companyId; // The company currently active for this session
 
     public CustomUserDetails(User user) {
-        this(user, java.util.Collections.emptyList());
+        this(user, java.util.Collections.emptyList(), null);
     }
 
-    public CustomUserDetails(User user, java.util.List<com.project.backend_api.model.UserCompanyRole> userRoles) {
+    public CustomUserDetails(User user, java.util.List<com.project.backend_api.model.UserCompanyRole> userRoles,
+            UUID companyId) {
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.user = user;
+        this.companyId = companyId;
 
         java.util.Set<SimpleGrantedAuthority> auths = new java.util.HashSet<>();
 
@@ -58,6 +62,10 @@ public class CustomUserDetails implements UserDetails {
         return user;
     }
 
+    public UUID getCompanyId() {
+        return companyId;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
@@ -92,4 +100,5 @@ public class CustomUserDetails implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

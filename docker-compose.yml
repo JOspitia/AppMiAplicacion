@@ -71,11 +71,17 @@ services:
       - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN}
       - MERCADOPAGO_PUBLIC_KEY=${MERCADOPAGO_PUBLIC_KEY}
 
+      # Anti-Malware
+      - CLAMAV_HOST=${CLAMAV_HOST:-clamav}
+      - CLAMAV_PORT=${CLAMAV_PORT:-3310}
+
     depends_on:
       - postgres
       - minio
+      - clamav
     networks:
       - app-network
+
     stdin_open: true
     tty: true
     restart: on-failure
@@ -158,7 +164,27 @@ services:
       - app-network
     restart: always
 
+  # ---------------------------------------------------------------------
+  # 7. ANTI-MALWARE (CLAMAV)
+  # ---------------------------------------------------------------------
+  clamav:
+    image: clamav/clamav:latest
+    container_name: clamav_scanner
+    restart: always
+    networks:
+      - app-network
+    ports:
+      - "3310:3310"
+    mem_limit: 2g
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+        reservations:
+          memory: 1g
+
 networks:
+
   app-network:
     driver: bridge
 

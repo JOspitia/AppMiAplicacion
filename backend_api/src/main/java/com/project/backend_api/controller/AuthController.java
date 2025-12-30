@@ -220,7 +220,7 @@ public class AuthController {
                                                 // permissions
                                                 java.util.List<com.project.backend_api.model.UserCompanyRole> roles = userCompanyRoleRepository
                                                                 .findByUserIdAndIsActiveTrue(user.getId());
-                                                CustomUserDetails userDetails = new CustomUserDetails(user, roles);
+                                                CustomUserDetails userDetails = new CustomUserDetails(user, roles, null);
 
                                                 // Manually create authentication token (we trust the refresh token)
                                                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

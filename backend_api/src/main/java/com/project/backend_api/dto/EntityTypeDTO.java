@@ -1,4 +1,4 @@
-package com.project.project.dto.core;
+package com.project.backend_api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StateDto {
+public class EntityTypeDTO {
     private UUID id;
     private String name;
-    private String code;
-    private UUID countryId;
+    private String description;
+    private Boolean active;
 }

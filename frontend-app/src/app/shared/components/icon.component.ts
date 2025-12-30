@@ -41,10 +41,47 @@ export class IconComponent {
         }
     }
 
+    // Icon name mapping: Feather/Lucide -> PrimeIcons
+    private iconMap: Record<string, string> = {
+        'mail': 'envelope',
+        'map-pin': 'map-marker',
+        'phone': 'phone',
+        'globe': 'globe',
+        'building': 'building',
+        'user': 'user',
+        'users': 'users',
+        'check': 'check',
+        'x': 'times',
+        'plus': 'plus',
+        'edit': 'pencil',
+        'trash': 'trash',
+        'info': 'info-circle',
+        'alert-triangle': 'exclamation-triangle',
+        'hash': 'hashtag',
+        'home': 'home',
+        'briefcase': 'briefcase',
+        'calendar': 'calendar',
+        'clock': 'clock',
+        'save': 'save',
+        'upload': 'upload',
+        'download': 'download',
+        'search': 'search',
+        'filter': 'filter',
+        'arrow-left': 'arrow-left',
+        'arrow-right': 'arrow-right',
+        'chevron-down': 'chevron-down',
+        'chevron-up': 'chevron-up',
+        'eye': 'eye',
+        'eye-off': 'eye-slash',
+        'lock': 'lock',
+        'unlock': 'unlock',
+        'settings': 'cog',
+        'log-out': 'sign-out'
+    };
+
     isSvg(): boolean {
         return !!(this.icon && this.icon.trim().startsWith('<svg'));
     }
-
 
     getSafeSvg(): SafeHtml {
         return this.sanitizer.bypassSecurityTrustHtml(this.icon);
@@ -52,6 +89,14 @@ export class IconComponent {
 
     getIconClass(): string {
         if (!this.icon) return '';
-        return 'pi ' + (this.icon.startsWith('pi-') ? this.icon : 'pi-' + this.icon);
+
+        // If already starts with pi-, use as-is
+        if (this.icon.startsWith('pi-')) {
+            return 'pi ' + this.icon;
+        }
+
+        // Map common icon names to PrimeIcons
+        const mappedName = this.iconMap[this.icon] || this.icon;
+        return 'pi pi-' + mappedName;
     }
 }

@@ -193,8 +193,27 @@ Se han estandarizado patrones de responsividad para asegurar que la experiencia 
 - **ROI Estimado**: Positivo después de 4 componentes refactorizados
 - **Consistencia Visual**: 100% en componentes estandarizados
 
+## 8. Sistema de Feedback y Alertas (UX)
+
+Para garantizar una comunicación clara del estado del sistema al usuario, se definen tres niveles de feedback:
+
+### 8.1 Toast Notifications (Flotantes)
+- **Uso**: Notificaciones transitorias que no requieren acción del usuario. (Ej. "Guardado automático").
+- **Componente**: `ToastComponent`.
+- **Comportamiento**: Flotante y autodesvanecible.
+
+### 8.2 Banners de Alerta (En Línea)
+- **Uso**: Feedback directo tras una acción (Ej. "Éxito al guardar").
+- **Componente**: `AlertComponent`.
+- **Ubicación**: Zona superior del contenido principal.
+
+### 8.3 Modales de Confirmación (Críticos)
+- **Uso**: Acciones destructivas o cambios de estado (Toggle Status).
+- **Componente**: `ConfirmDialogComponent`.
+- **Regla**: Prohibido usar `window.alert()`.
+
 ---
 
-**Última Actualización**: 2025-12-23  
-**Responsable**: Equipo de Frontend  
+**Última Actualización**: 2025-12-25
+**Responsable**: Equipo de Frontend
 **Estado**: ✅ Implementado y en Producción

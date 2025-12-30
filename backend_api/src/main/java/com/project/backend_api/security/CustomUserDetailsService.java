@@ -26,6 +26,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         java.util.List<com.project.backend_api.model.UserCompanyRole> roles = userCompanyRoleRepository
                 .findByUserIdAndIsActiveTrue(user.getId());
 
-        return new CustomUserDetails(user, roles);
+        return new CustomUserDetails(user, roles, null);
     }
 }

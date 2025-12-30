@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::#main-content-area})}">
+
+<head>
+    <title>Roles y Perfiles</title>
+</head>
+
+<body>
+    <div id="main-content-area" class="px-6 py-8 w-full min-h-screen font-sans bg-slate-50/50 dark:bg-transparent">
+        <!-- Header Section -->
+        <div
+            th:replace="~{fragments/list :: pageHeader('Módulo de Seguridad', 'Roles y', 'Perfiles', 'Gestión de permisos y jerarquías de seguridad a nivel global.', '/core/management/roles/create', 'Nuevo Rol')}">
+        </div>
+
+        <div th:insert="~{fragments/alerts :: globalAlerts}"></div>
+
+        <!-- Main Listing -->
+        <div th:replace="~{fragments/list :: tableContainer(~{::#roles-table-structure})}">
+            <div id="roles-table-structure" th:fragment="roles-table-structure">
+                <!-- Barra de Búsqueda -->
+                <div
+                    th:replace="~{fragments/list :: searchBar('Directorio de Roles', 'Buscar por nombre o descripción de rol...')}">
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/50 dark:bg-slate-950/20">
+                                <th
+                                    class="px-8 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-[0.2em] text-left uppercase">
+                                    Identificación del Rol</th>
+                                <th
+                                    class="px-8 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-[0.2em] text-center uppercase">
+                                    Estado</th>
+                                <th
+                                    class="px-8 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-[0.2em] text-right uppercase">
+                                    Gestión</th>
+                            </tr>
+                        </thead>
+                        <tbody id="main-table-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <tr th:each="role : ${roles}" th:id="'role-row-' + ${role.id}"
+                                class="item-row hover:bg-slate-50/80 dark:hover:bg-indigo-500/5 transition-all duration-300 group">
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform"
+                                            th:text="${#strings.substring(role.name,0, (role.name.length() > 2 ? 2 : role.name.length())).toUpperCase()}">
+                                            RO
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span
+                                                class="text-sm font-bold text-slate-800 dark:text-slate-200 searchable"
+                                                th:text="${role.name}">Nombre</span>
+                                            <span
+                                                class="text-[11px] font-medium text-slate-500 dark:text-slate-400 searchable"
+                                                th:text="${role.description}">Descripción</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6 text-center">
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border transition-colors"
+                                        th:classappend="${role.active == true ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20'}">
+                                        <div class="w-1 h-1 rounded-full"
+                                            th:classappend="${role.active == true ? 'bg-emerald-500' : 'bg-rose-500'}">
+                                        </div>
+                                        <span th:text="${role.active == true ? 'Activo' : 'Inactivo'}"></span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6 text-right">
+                                    <div class="flex items-center justify-end gap-3">
+                                        <a th:href="@{/core/management/roles/edit/{id}(id=${role.id})}"
+                                            class="px-4 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all active:scale-95">Editar</a>
+                                        <form th:action="@{/core/management/roles/{id}/toggle-active(id=${role.id})}"
+                                            method="post" class="inline-block spa-form">
+                                            <button type="submit"
+                                                class="px-4 py-2 text-xs font-bold rounded-xl border transition-all active:scale-95 disabled:opacity-50"
+                                                th:classappend="${role.active == true ? 'text-rose-600 border-rose-100 bg-rose-50 hover:bg-rose-100 dark:text-rose-400 dark:border-rose-500/20 dark:bg-rose-500/5' : 'text-emerald-600 border-emerald-100 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/5'}"
+                                                th:text="${role.active == true} ? 'Desactivar' : 'Activar'">Toggle</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(roles)}" class="py-20 text-center">
+                    <div
+                        class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-800 text-slate-400 mb-4 border border-slate-100 dark:border-slate-700">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Sin roles definidos</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto mt-2">No se han configurado
+                        perfiles de seguridad en el ecosistema.</p>
+                </div>
+
+                <!-- Footer Summary -->
+                <div th:replace="~{fragments/list :: tableFooter('Total Roles Configurables', ${#lists.size(roles)})}">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
