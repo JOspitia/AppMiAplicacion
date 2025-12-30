@@ -40,7 +40,8 @@ public class SecurityConfig {
         @Autowired
         private CsrfCookieFilter csrfCookieFilter;
 
-        // CSP used for Report-Only responses (start strict but allow style inline temporarily)
+        // CSP used for Report-Only responses (start strict but allow style inline
+        // temporarily)
         public static final String CSP_REPORT_ONLY = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; upgrade-insecure-requests;";
 
         @Bean
@@ -50,8 +51,9 @@ public class SecurityConfig {
                                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                                                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                                                 .ignoringRequestMatchers("/api/auth/**", "/api/public/**",
-                                                                "/api/assets/**",
+                                                                "/api/assets/**", "/api/management/**",
                                                                 "/api/companies/**", "/error"))
+
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -72,7 +74,8 @@ public class SecurityConfig {
                                                         .reportOnly());
 
                                         /* Additional hardening headers */
-                                        // X-Content-Type-Options: nosniff and X-XSS-Protection removed (deprecated in Spring Security 6.1)
+                                        // X-Content-Type-Options: nosniff and X-XSS-Protection removed (deprecated in
+                                        // Spring Security 6.1)
                                         headers.frameOptions(frame -> frame.deny()); // X-Frame-Options: DENY
 
                                         headers.permissionsPolicyHeader(permissions -> permissions
