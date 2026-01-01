@@ -31,7 +31,18 @@ Se desarrolló un componente standalone con diseño "Premium" (Glassmorphism + T
 (Sin cambios mayores) Se mantiene la carga lazy del componente.
 
 ## 2. Backend: Spring Boot API
-(Se mantienen los endpoints descritos anteriormente)
+ 
+### 2.1 Controlador y Mapeos
+- **Controlador**: `com.project.backend_api.controller.core.management.ProfileController`
+- **Mapeo Base**: `/api/core/management/users/profile`
+ 
+### 2.2 Endpoints Clave
+- `GET /me`: Obtiene el perfil actual.
+- `PUT /update`: Actualiza datos personales.
+- `POST /verify-password`: Verifica la contraseña actual antes de cambios sensibles.
+- `POST /change-email`: Solicita cambio de correo.
+- `POST /change-password`: Cambia la contraseña actual.
+- **Geografía**: Mapeado en `/api/core/administration/geo`.
 
 ## 3. Arquitectura de UI "Human-Centric"
 (Se mantiene la estandarización global descrita)

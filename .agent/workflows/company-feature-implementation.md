@@ -17,9 +17,10 @@ Servicio centralizado que orquesta la comunicación con el backend:
 ### 1.2 `CompanyListComponent` (`frontend-app/src/app/core/companies/company-list.component.ts`)
 Pantalla principal de directorio empresarial con diseño Premium.
 - **Tabla Inteligente (PrimeNG)**:
-    - Filtrado global reactivo por Múltiples campos (`name`, `nit`, `emailExtension`).
-    - Paginación integrada.
-    - Manejo de estados vacíos (empty message) estilizado.
+    - **Identidad Premium**: Uso de cuadros de iniciales con gradiente dinámico (`bg-gradient-to-br from-primary to-primary-dark`) o logotipos corporativos si están disponibles, escalables al pasar el ratón (`group-hover:scale-110`).
+    - **Filtrado global reactivo**: Búsqueda por múltiples campos (`name`, `nit`, `emailExtension`).
+    - **[NUEVO] Filtro de Estado**: Switch de alternancia (`p-toggleSwitch`) para conmutar entre empresas "Activas" e "Inactivas" instantáneamente.
+    - **Paginación integrada** y manejo de estados vacíos estilizado.
 - **Sistema de Acciones "Safe"**:
     - **Toggle Status**: Implementación de un flujo seguro para activar/desactivar empresas.
         - **Paso 1: Confirmación Modal**: Uso de `ConfirmDialogComponent` para validar la intención del usuario.
@@ -59,26 +60,42 @@ Sistema global de notificaciones tipo "Toast".
 ## 3. Routing y Navegación
 
 Se ajustaron las rutas para mantener la consistencia jerárquica bajo `/core`:
-
-- **Lista**: `/core/companies`
-- **Crear**: `/core/companies/create`
-- **Editar**: `/core/companies/edit/:id`
-
+ 
+- **Lista**: `/core/management/companies`
+- **Crear**: `/core/management/companies/create`
+- **Editar**: `/core/management/companies/edit/:id`
+ 
 Esto asegura que el `authGuard` y el `MainLayout` protejan y envuelvan correctamente estas vistas.
 
 ## 4. Backend Integration
 
-### 4.1 Endpoints (`CompanyManagementController`)
-- `GET /api/management/companies`: Listado completo.
-- `PUT /api/management/companies/{id}/status`: Endpoint específico para cambio de estado seguro.
+### 4.1 Endpoints (`com.project.backend_api.controller.core.management.CompanyManagementController`)
+- `GET /api/core/management/companies`: Listado completo.
+- `PATCH /api/core/management/companies/{id}/toggle`: Endpoint específico para cambio de estado seguro.
+- `POST /api/core/management/companies`: Creación de empresa.
+- `PUT /api/core/management/companies/{id}`: Actualización de empresa.
+- `POST /api/core/management/companies/{id}/logo`: Carga de logotipo.
 
-## 5. Diseño Visual (Design System Adaptations)
-
-- **Dark Mode First**: Todos los componentes (tablas, modales, formularios) fueron diseñados y probados extensivamente en modo oscuro (`slate-900` + `slate-800`), utilizando bordes translúcidos y sombras suaves.
 - **Tabla "Clean"**: Se eliminaron bordes de celdas verticales, usando solo separadores horizontales sutiles y mucho espaciado (padding) para mejorar la legibilidad.
 - **Botones de Estado**: Uso de "badges" interactivos (cápsulas redondeadas) que sirven tanto de indicador visual como de botón de acción.
 
-## 6. Próximos Pasos
+## 6. Branding & Identidad Visual por Empresa
 
-- Implementar la carga de Logos para empresas (integración con MinIO pendiente en formulario).
+El sistema implementa una mecánica de **Marca Blanca Dinámica** que personaliza la interfaz según la empresa seleccionada:
+
+### 6.1 `BrandingService` (Maza)
+- **Persistencia de Marca**: Al seleccionar una empresa, el servicio captura su `logoUrl` y `primaryColor`.
+- **Inyección de CSS Tokens**: El servicio inyecta dinámicamente variables en `:root`:
+    - `--primary`: Color base en Hex.
+    - `--primary-rgb`: Componentes R, G, B para permitir opacidad en tiempo de ejecución.
+    - `--primary-ring`: Sombra suave calculada para estados de foco.
+- **Reset Automático**: Al salir de la sesión o volver a áreas públicas, el branding vuelve a los valores por defecto (Indigo).
+
+### 6.2 Aplicación en UI
+- **Glows Suaves**: Se evita la saturación usando opacidades ultra-bajas (`5-10%`) sobre el color primario dinámico en componentes como el Login y el Selector de Empresas.
+- **Sincronización de Componentes**: Todos los componentes estandarizados (inputs, botones, tablas) heredan automáticamente estos tokens para asegurar que la "app" se sienta como propiedad de la empresa seleccionada.
+
+## 7. Próximos Pasos
+
 - Agregar validación de unicidad de NIT en tiempo real.
+- Extender el branding dinámico a componentes complejos como gráficos y dashboards.

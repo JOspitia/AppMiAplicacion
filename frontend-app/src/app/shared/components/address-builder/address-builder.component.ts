@@ -31,7 +31,9 @@ import { IconComponent } from '../icon.component';
             
             <div class="p-4 sm:p-6 space-y-6 sm:space-y-8">
                 <!-- Live Preview -->
-                <div class="relative p-6 sm:p-8 bg-gradient-to-br from-primary to-indigo-600 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-indigo-500/20 overflow-hidden">
+                <div class="relative p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl overflow-hidden"
+                     [style.background]="'linear-gradient(135deg, var(--primary), var(--primary-stop))'"
+                     [style.boxShadow]="'0 20px 25px -5px var(--primary-light)'">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
                     <span class="text-[9px] font-black text-white/60 uppercase tracking-widest block mb-4">Vista Previa Real</span>
                     <p class="text-xl sm:text-2xl font-black text-white leading-tight min-h-[3rem]">
@@ -104,7 +106,9 @@ import { IconComponent } from '../icon.component';
 
                 <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
                     <button pButton label="Limpiar" (click)="clearAddressBuilder()" class="p-button-text p-button-secondary font-bold order-2 sm:order-1"></button>
-                    <button pButton label="Confirmar Dirección" (click)="confirm()" class="flex-1 bg-primary text-white rounded-2xl py-4 font-black shadow-xl shadow-indigo-500/20 order-1 sm:order-2"></button>
+                    <button pButton label="Confirmar Dirección" (click)="confirm()" 
+                        class="flex-1 bg-primary text-white rounded-2xl py-4 font-black shadow-xl order-1 sm:order-2"
+                        [style.boxShadow]="'0 20px 25px -5px var(--primary-light)'"></button>
                 </div>
             </div>
         </p-dialog>

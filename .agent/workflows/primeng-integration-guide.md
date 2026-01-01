@@ -6,7 +6,10 @@ description: Guía de integración y personalización de PrimeNG para el sistema
 
 Este documento describe cómo se integra, configura y personaliza PrimeNG en el proyecto Angular para cumplir con los estándares de diseño "Premium/Human-Centric".
 
-> **Nota**: Para detalles sobre la estandarización global de inputs y consistencia visual, consulta `/ui-consistency-standards`.
+> **Nota**: Para detalles sobre la estandarización global de inputs, branding dinámico por empresa y consistencia visual en tablas, consulta `/ui-consistency-standards`.
+
+## 0. Branding Dinámico (Maza)
+El sistema utiliza variables CSS dinámicas (`--primary`, `--primary-rgb`) inyectadas via `BrandingService`. Para asegurar que PrimeNG respete estos colores, se deben usar los tokens de color nativos de PrimeNG apuntando a nuestras variables CSS.
 
 
 ## 1. Configuración Global (`app.config.ts`)

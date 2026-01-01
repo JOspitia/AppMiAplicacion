@@ -10,6 +10,8 @@ import { DomSanitizer, SafeHtml, Title, Meta } from '@angular/platform-browser';
 import { DashboardService, ModuleDto } from '../services/dashboard.service';
 import { IconComponent } from '../../shared/components/icon.component';
 import { ToastComponent } from '../../shared/components/toast/toast.component';
+import { BrandingService } from '../services/branding.service';
+import { AuthService } from '../services/auth.service';
 
 
 interface MenuItem extends ModuleDto {
@@ -21,6 +23,8 @@ interface Company {
   id: string;
   name: string;
   nit: string;
+  logoUrl?: string;
+  primaryColor?: string;
 }
 
 interface UserInfo {
@@ -38,7 +42,6 @@ interface UserInfo {
     ButtonModule,
     TooltipModule,
     SelectModule,
-    FormsModule,
     FormsModule,
     IconComponent,
     ToastComponent
@@ -58,7 +61,7 @@ interface UserInfo {
     <!-- Sidebar Navigation -->
     <aside 
       class="fixed left-0 top-0 h-full z-[999] transition-all duration-300 ease-in-out flex flex-col
-             bg-white dark:bg-[#0F172A] border-r border-slate-200 dark:border-slate-800/60
+             bg-white dark:bg-[var(--bg-sidebar)] border-r border-slate-200 dark:border-slate-800/60
              shadow-xl shadow-slate-900/5 dark:shadow-black/20"
 
       [ngClass]="{
@@ -71,8 +74,10 @@ interface UserInfo {
       <!-- Sidebar Header / Logo Section -->
       <div class="h-[4.5rem] px-5 flex items-center border-b border-slate-100 dark:border-slate-800/60">
         <div class="flex items-center gap-3 overflow-hidden">
-          <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary to-indigo-600 rounded-2xl grid place-items-center shadow-lg shadow-primary/20 border border-white/10 group-hover:scale-105 transition-transform">
-            <img [src]="logoUrl()" (error)="onLogoError($event)" alt="Logo" class="w-6 h-6 object-contain brightness-0 invert">
+          <div class="flex-shrink-0 w-11 h-11 rounded-2xl grid place-items-center transition-all border shadow-sm"
+               [style.backgroundColor]="'var(--bg-card)'"
+               [style.borderColor]="'var(--primary-light)'">
+            <img [src]="logoUrl()" (error)="onLogoError($event)" alt="Logo" class="w-8 h-8 object-contain">
           </div>
           
           <div *ngIf="!isSidebarCollapsed()" class="flex flex-col transition-all duration-300 animate-in fade-in slide-in-from-left-2">
@@ -156,7 +161,7 @@ interface UserInfo {
 
     <!-- Main Content Area -->
     <main 
-      class="min-h-screen transition-all duration-300 ease-in-out bg-slate-50/50 dark:bg-[#0B1120]"
+      class="min-h-screen transition-all duration-300 ease-in-out bg-slate-50/50 dark:bg-[var(--bg-light)]"
       [ngClass]="{
         'md:ml-[280px]': !isSidebarCollapsed(),
         'md:ml-[80px]': isSidebarCollapsed()
@@ -165,7 +170,7 @@ interface UserInfo {
       <!-- Navbar (Topbar) -->
       <header 
         class="sticky top-0 z-[997] h-[4.5rem] px-4 md:px-8 flex items-center justify-between
-               bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60">
+               bg-white/80 dark:bg-[#0f172a]/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60">
         
         <div class="flex items-center gap-4">
           <button (click)="toggleSidebar()" class="hidden md:flex w-10 h-10 items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-primary hover:border-primary/30 transition-all shadow-sm">
@@ -188,7 +193,7 @@ interface UserInfo {
             <i [class]="isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"></i>
           </button>
 
-          <div class="hidden lg:block w-[220px]">
+          <div *ngIf="companies().length > 1" class="hidden lg:block w-[220px]">
             <p-select [options]="companies()" [(ngModel)]="selectedCompanyId" optionLabel="name" optionValue="id" placeholder="Seleccionar Empresa" (onChange)="onCompanyChange($event)" class="header-company-select"></p-select>
           </div>
 
@@ -199,7 +204,8 @@ interface UserInfo {
                 <span class="text-sm font-bold text-slate-900 dark:text-white">{{ userInfo()?.username || 'Usuario' }}</span>
                 <span class="text-[10px] font-medium text-slate-500 uppercase tracking-tighter">{{ userInfo()?.role || 'Admin' }}</span>
             </div>
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-primary/20 border border-white/20">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black border border-white/10 shadow-sm"
+                 [style.background]="'linear-gradient(135deg, var(--primary), var(--primary-dark))'">
                 {{ userInfo()?.username?.substring(0, 1) || 'U' }}
             </div>
             <button (click)="logout()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm" pTooltip="Cerrar Sesión" tooltipPosition="left">
@@ -218,7 +224,7 @@ interface UserInfo {
       <footer class="py-8 px-8 md:px-12 border-t border-slate-200/60 dark:border-slate-800/60">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
           <div class="flex items-center gap-3">
-             <img [src]="logoUrl()" alt="Logo" class="w-5 h-5 opacity-40 grayscale group-hover:grayscale-0 transition-all">
+             <img [src]="logoUrl()" alt="Logo" class="w-5 h-5 opacity-50 grayscale transition-all">
              <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
                 © 2025 MiAplicación. Todos los derechos reservados.
              </p>
@@ -234,7 +240,7 @@ interface UserInfo {
 
     <!-- Global Decoration -->
     <div class="fixed top-0 right-0 w-[800px] h-[800px] bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none z-0"></div>
-    <div class="fixed bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none z-0"></div>
+    <div class="fixed bottom-0 left-0 w-[500px] h-[500px] bg-primary/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none z-0"></div>
 
     <app-toast></app-toast>
     `,
@@ -298,6 +304,7 @@ export class MainLayoutComponent implements OnInit {
   private sanitizer = inject(DomSanitizer);
   private titleService = inject(Title);
   private metaService = inject(Meta);
+  private authService = inject(AuthService);
 
   // State
   isSidebarCollapsed = signal(false);
@@ -312,19 +319,13 @@ export class MainLayoutComponent implements OnInit {
   selectedCompanyId: string = '';
   userInfo = signal<UserInfo | null>(null);
 
-  // Logo Handling
-  logoCandidates = [
-    '/api/public/assets/images/logo.png',
-    '/api/assets/logos/logo.webp'
-  ];
-  private currentLogoIndex = 0;
-  logoUrl = signal(this.logoCandidates[this.currentLogoIndex]);
+  // Branding
+  brandingService = inject(BrandingService);
+  logoUrl = this.brandingService.currentLogo;
 
   onLogoError(event: Event) {
-    this.currentLogoIndex++;
-    if (this.currentLogoIndex < this.logoCandidates.length) {
-      this.logoUrl.set(this.logoCandidates[this.currentLogoIndex]);
-    }
+    // If branding logo fails, we could fallback here if needed
+    console.warn('Logo failed to load:', (event.target as HTMLImageElement).src);
   }
 
   ngOnInit() {
@@ -337,13 +338,9 @@ export class MainLayoutComponent implements OnInit {
       this.metaService.updateTag({ property: 'og:type', content: 'website' });
       this.metaService.updateTag({ property: 'og:url', content: 'https://www.appmiaplicacion.com' });
     } catch (e) {
-      // Best-effort: don't break the UI if platform-browser is unavailable in some environments
       const errMsg = (e as any)?.message ?? String(e);
       console.warn('Could not set meta tags:', errMsg);
     }
-
-    // Ensure the default logo is the public asset (overrides candidate order)
-    this.logoUrl.set('/api/public/assets/images/logo.png');
 
     this.loadTheme();
     this.loadCurrentCompany();
@@ -380,6 +377,12 @@ export class MainLayoutComponent implements OnInit {
         if (company && company.id) {
           this.selectedCompany.set(company);
           this.selectedCompanyId = company.id;
+
+          // Apply branding
+          this.brandingService.setBranding({
+            logoUrl: company.logoUrl,
+            primaryColor: company.primaryColor
+          });
         }
       }
     });
@@ -438,16 +441,32 @@ export class MainLayoutComponent implements OnInit {
         const company = this.companies().find(c => c.id === companyId);
         if (company) {
           this.selectedCompany.set(company);
+          // Apply branding immediately
+          this.brandingService.setBranding({
+            logoUrl: company.logoUrl,
+            primaryColor: company.primaryColor
+          });
+
+          // Full reload to ensure all states (permissions, data, services) are synchronized with the new company
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
         }
-        window.location.reload();
       }
     });
   }
 
   logout() {
-    this.http.post('/api/auth/logout', {}).subscribe({
-      next: () => this.router.navigate(['/login']),
-      error: () => this.router.navigate(['/login'])
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: () => {
+        // Even if backend fails, clean up frontend state
+        localStorage.removeItem('auth_token');
+        this.authService.currentUser.set(null);
+        this.router.navigate(['/login']);
+      }
     });
   }
 }

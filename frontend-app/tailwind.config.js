@@ -11,8 +11,12 @@ module.exports = {
             },
             colors: {
                 primary: {
-                    DEFAULT: 'var(--primary-color)',
+                    DEFAULT: 'rgb(var(--primary-rgb))',
                     hover: 'var(--primary-hover)',
+                    dark: 'var(--primary-dark)',
+                    light: 'var(--primary-light)',
+                    vibrant: 'var(--primary-vibrant)',
+                    stop: 'var(--primary-stop)',
                 },
                 success: 'var(--success-color)',
                 warning: 'var(--warning-color)',

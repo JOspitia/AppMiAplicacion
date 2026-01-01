@@ -7,18 +7,18 @@ import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 
 @Component({
-    selector: 'app-contact-form',
-    standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        InputTextModule,
-        TextareaModule,
-        ButtonModule,
-        RippleModule
-    ],
-    template: `
+  selector: 'app-contact-form',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    InputTextModule,
+    TextareaModule,
+    ButtonModule,
+    RippleModule
+  ],
+  template: `
     <section id="contact" class="py-24 bg-slate-50 dark:bg-slate-950/50">
       <div class="max-w-7xl mx-auto px-6">
         <div class="grid lg:grid-cols-2 gap-16 items-center">
@@ -37,19 +37,19 @@ import { RippleModule } from 'primeng/ripple';
 
             <ul class="space-y-6">
                <li class="flex items-center gap-4 group">
-                  <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
                     <i class="pi pi-check-circle"></i>
                   </div>
                   <span class="text-slate-700 dark:text-slate-300 font-medium">Consultoría personalizada de 30 minutos</span>
                </li>
                <li class="flex items-center gap-4 group">
-                  <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
                     <i class="pi pi-check-circle"></i>
                   </div>
                   <span class="text-slate-700 dark:text-slate-300 font-medium">Sin compromiso ni tarjeta de crédito</span>
                </li>
                <li class="flex items-center gap-4 group">
-                  <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
                     <i class="pi pi-check-circle"></i>
                   </div>
                   <span class="text-slate-700 dark:text-slate-300 font-medium">Respuesta en menos de 24 horas</span>
@@ -58,9 +58,9 @@ import { RippleModule } from 'primeng/ripple';
           </div>
 
           <!-- Form Card -->
-          <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 lg:p-12 shadow-2xl shadow-primary/5 border border-slate-100 dark:border-white/5 relative overflow-hidden">
+          <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 lg:p-12 shadow-2xl shadow-indigo-500/5 border border-slate-100 dark:border-white/5 relative overflow-hidden">
             <!-- Decorative gradient -->
-            <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[80px] rounded-full"></div>
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/10 blur-[80px] rounded-full"></div>
             
             <form class="space-y-6 relative z-10">
               <div class="space-y-2">
@@ -69,7 +69,7 @@ import { RippleModule } from 'primeng/ripple';
                   type="text" 
                   pInputText 
                   placeholder="Tu nombre" 
-                  class="w-full !bg-slate-50 dark:!bg-slate-800/50 !border-slate-100 dark:!border-white/5 !rounded-2xl !p-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  class="w-full !bg-slate-50 dark:!bg-slate-800/50 !border-slate-100 dark:!border-white/5 !rounded-2xl !p-4 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
                 />
               </div>
 
@@ -79,7 +79,7 @@ import { RippleModule } from 'primeng/ripple';
                   type="email" 
                   pInputText 
                   placeholder="tu@empresa.com" 
-                  class="w-full !bg-slate-50 dark:!bg-slate-800/50 !border-slate-100 dark:!border-white/5 !rounded-2xl !p-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  class="w-full !bg-slate-50 dark:!bg-slate-800/50 !border-slate-100 dark:!border-white/5 !rounded-2xl !p-4 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
                 />
               </div>
 
@@ -89,7 +89,7 @@ import { RippleModule } from 'primeng/ripple';
                   type="text" 
                   pInputText 
                   placeholder="Nombre de tu empresa" 
-                  class="w-full !bg-slate-50 dark:!bg-slate-800/50 !border-slate-100 dark:!border-white/5 !rounded-2xl !p-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  class="w-full !bg-slate-50 dark:!bg-slate-800/50 !border-slate-100 dark:!border-white/5 !rounded-2xl !p-4 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
                 />
               </div>
 
@@ -100,18 +100,18 @@ import { RippleModule } from 'primeng/ripple';
                   [autoResize]="true" 
                   placeholder="¿En qué podemos ayudarte?" 
                   rows="4"
-                  class="w-full !bg-slate-50 dark:!bg-slate-800/50 !border-slate-100 dark:!border-white/5 !rounded-2xl !p-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  class="w-full !bg-slate-50 dark:!bg-slate-800/50 !border-slate-100 dark:!border-white/5 !rounded-2xl !p-4 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
                 ></textarea>
               </div>
 
               <button 
                 pButton pRipple 
                 label="ENVIAR MENSAJE" 
-                class="w-full !bg-primary !border-primary font-black tracking-widest py-5 rounded-2xl shadow-xl shadow-primary/25 hover:scale-[1.02] active:scale-95 transition-all text-white"
+                class="w-full !bg-indigo-600 !border-indigo-600 font-black tracking-widest py-5 rounded-2xl shadow-xl shadow-indigo-500/25 hover:scale-[1.02] active:scale-95 transition-all text-white"
               ></button>
 
               <p class="text-center text-[10px] text-slate-400">
-                Al enviar, aceptas nuestra <a routerLink="/privacy" class="text-primary hover:underline cursor-pointer">Política de Privacidad</a>.
+                Al enviar, aceptas nuestra <a routerLink="/privacy" class="text-indigo-600 hover:underline cursor-pointer">Política de Privacidad</a>.
               </p>
             </form>
           </div>
@@ -120,7 +120,7 @@ import { RippleModule } from 'primeng/ripple';
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     :host ::ng-deep {
       .p-inputtext:focus {
         border-color: var(--primary-color) !important;

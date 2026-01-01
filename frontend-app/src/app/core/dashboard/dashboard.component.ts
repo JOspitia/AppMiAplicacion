@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-dashboard',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="space-y-8">
       <!-- Page Header -->
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -41,12 +41,12 @@ import { CommonModule } from '@angular/common';
         </div>
 
         <!-- Stat Card 2 -->
-        <div class="group relative bg-white dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/50 hover:border-indigo-500/30 transition-all overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="group relative bg-white dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/50 hover:border-primary/30 transition-all overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div class="relative">
             <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-                <i class="pi pi-building text-xl text-indigo-500"></i>
+              <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <i class="pi pi-building text-xl text-primary"></i>
               </div>
               <span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold">+3</span>
             </div>

@@ -1,20 +1,23 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ButtonModule } from 'primeng/button';
+import { BrandingService } from '../../core/services/branding.service';
 
 interface Company {
-    id: string;
-    name: string;
-    nit: string;
+  id: string;
+  name: string;
+  nit: string;
+  logoUrl?: string;
+  primaryColor?: string;
 }
 
 @Component({
-    selector: 'app-select-company',
-    standalone: true,
-    imports: [CommonModule, ButtonModule],
-    template: `
+  selector: 'app-select-company',
+  standalone: true,
+  imports: [CommonModule, ButtonModule],
+  template: `
     <!-- Ambient Glow Background -->
     <div class="ambient-glow"></div>
 
@@ -62,7 +65,7 @@ interface Company {
             <div class="item-glow -top-10 -left-10"></div>
 
             <div class="text-left relative z-10">
-              <span class="block font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors text-lg">
+              <span class="block font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors text-lg">
                 {{ company.name }}
               </span>
               <span class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
@@ -70,7 +73,7 @@ interface Company {
               </span>
             </div>
 
-            <div class="relative z-10 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <div class="relative z-10 text-slate-400 group-hover:text-primary transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
@@ -84,7 +87,7 @@ interface Company {
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .ambient-glow {
       position: fixed;
       top: 10%;
@@ -92,7 +95,7 @@ interface Company {
       transform: translateX(-50%);
       width: 600px;
       height: 600px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
       filter: blur(60px);
       pointer-events: none;
       z-index: 0;
@@ -103,7 +106,7 @@ interface Company {
       border: 1px solid rgba(226, 232, 240, 0.8);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
@@ -115,15 +118,15 @@ interface Company {
     }
 
     .company-card-premium:hover {
-      border-color: rgb(99, 102, 241);
-      box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.3), 0 10px 10px -5px rgba(99, 102, 241, 0.2);
+      border-color: var(--primary);
+      box-shadow: 0 20px 25px -5px rgba(var(--primary-rgb), 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
 
     .item-glow {
       position: absolute;
       width: 100px;
       height: 100px;
-      background: rgb(99, 102, 241);
+      background: var(--primary);
       filter: blur(60px);
       opacity: 0;
       transition: opacity 0.3s ease;
@@ -131,7 +134,7 @@ interface Company {
     }
 
     .company-card-premium:hover .item-glow {
-      opacity: 0.1;
+      opacity: 0.05;
     }
 
     @keyframes fade-in {
@@ -152,64 +155,81 @@ interface Company {
   `]
 })
 export class SelectCompanyComponent implements OnInit {
-    private http = inject(HttpClient);
-    private router = inject(Router);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private brandingService = inject(BrandingService);
 
-    companies = signal<Company[]>([]);
-    loading = signal(true);
-    error = signal<string | null>(null);
-    selecting = signal(false);
+  companies = signal<Company[]>([]);
+  loading = signal(true);
+  error = signal<string | null>(null);
+  selecting = signal(false);
 
-    ngOnInit() {
-        this.loadCompanies();
-    }
+  ngOnInit() {
+    this.loadCompanies();
+  }
 
-    loadCompanies() {
-        this.http.get<Company[]>('/api/companies/available').subscribe({
-            next: (data) => {
-                if (data.length === 0) {
-                    this.error.set('No tienes acceso a ninguna empresa');
-                } else if (data.length === 1) {
-                    // Auto-select if only one company
-                    this.selectCompany(data[0].id);
-                } else {
-                    this.companies.set(data);
-                }
-                this.loading.set(false);
-            },
-            error: (err) => {
-                this.error.set('Error al cargar las empresas. Intenta nuevamente.');
-                this.loading.set(false);
-                console.error('Error loading companies:', err);
-            }
-        });
-    }
-
-    selectCompany(companyId: string) {
-        this.selecting.set(true);
-        this.http.post('/api/companies/select', { companyId }).subscribe({
-            next: () => {
-                // Navigate to dashboard after successful selection
-                this.router.navigate(['/dashboard']);
-            },
-            error: (err) => {
-                this.error.set('Error al seleccionar la empresa');
-                this.selecting.set(false);
-                console.error('Error selecting company:', err);
-            }
-        });
-    }
-
-    toggleTheme() {
-        const html = document.documentElement;
-        const isDark = html.classList.contains('dark');
-
-        if (isDark) {
-            html.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
+  loadCompanies() {
+    this.http.get<Company[]>('/api/companies/available').subscribe({
+      next: (data) => {
+        if (data.length === 0) {
+          this.error.set('No tienes acceso a ninguna empresa');
+        } else if (data.length === 1) {
+          // Auto-select if only one company
+          this.selectCompany(data[0].id, data[0]);
         } else {
-            html.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
+          this.companies.set(data);
         }
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set('Error al cargar las empresas. Intenta nuevamente.');
+        this.loading.set(false);
+        console.error('Error loading companies:', err);
+      }
+    });
+  }
+
+  selectCompany(companyId: string, companyData?: Company) {
+    this.selecting.set(true);
+    this.http.post<any>('/api/companies/select', { companyId }).subscribe({
+      next: (response) => {
+        // response.company should now contain the full branding info
+        const targetCompany = response.company || companyData;
+
+        if (targetCompany) {
+          this.brandingService.setBranding({
+            logoUrl: targetCompany.logoUrl,
+            primaryColor: targetCompany.primaryColor
+          });
+        }
+
+        // Navigate to dashboard or home after successful selection
+        const forceChange = this.route.snapshot.queryParams['forceChange'] === 'true';
+        if (forceChange) {
+          this.router.navigate(['/core/management/users/profile/change-password']);
+        } else {
+          this.router.navigate(['/home']);
+        }
+      },
+      error: (err) => {
+        this.error.set('Error al seleccionar la empresa');
+        this.selecting.set(false);
+        console.error('Error selecting company:', err);
+      }
+    });
+  }
+
+  toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.classList.contains('dark');
+
+    if (isDark) {
+      html.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    } else {
+      html.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     }
+  }
 }

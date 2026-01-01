@@ -38,7 +38,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
         <div class="p-8 text-center">
             
             <!-- Icon -->
-            <div class="w-16 h-16 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-6 transform transition-transform hover:scale-110 duration-300 ring-8 ring-indigo-50/50 dark:ring-indigo-900/10">
+            <div class="w-16 h-16 rounded-full bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center mx-auto mb-6 transform transition-transform hover:scale-110 duration-300 ring-8 ring-primary/5">
                 <i class="pi pi-question text-3xl"></i>
             </div>
 
@@ -53,7 +53,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
                     Cancelar
                 </button>
                 <button (click)="onConfirm()" 
-                        class="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary to-indigo-600 text-white font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 transform hover:-translate-y-0.5 transition-all">
+                        class="px-8 py-2.5 rounded-xl bg-brand-gradient text-white font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 transform hover:-translate-y-0.5 transition-all">
                     Confirmar
                 </button>
             </div>

@@ -1,0 +1,120 @@
+package com.project.backend_api.controller.core.administration;
+
+import com.project.backend_api.dto.core.administration.LoginRequest;
+import com.project.backend_api.dto.core.administration.LoginResponse;
+import com.project.backend_api.security.JwtUtils;
+import com.project.backend_api.security.RefreshTokenService;
+import com.project.backend_api.security.CustomUserDetails;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+        private final AuthenticationManager authenticationManager;
+        private final JwtUtils jwtUtils;
+        private final RefreshTokenService refreshTokenService;
+        private final com.project.backend_api.repository.core.management.UserCompanyRoleRepository userCompanyRoleRepository;
+
+        @PostMapping("/login")
+        public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request,
+                        HttpServletResponse response) {
+
+                Authentication authentication = authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(loginRequest.username(),
+                                                loginRequest.password()));
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+                // Hybrid Strategy: Cookie + Header/Body
+                ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+
+                String jwt = jwtUtils.generateToken(authentication);
+                String refreshToken = refreshTokenService.createRefreshToken(userDetails.getUser().getId()).getToken();
+                ResponseCookie refreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken);
+
+                // Fetch User Companies
+                List<com.project.backend_api.dto.core.management.CompanySummaryDto> companies = userCompanyRoleRepository
+                                .findByUserIdAndIsActiveTrue(userDetails.getUser().getId())
+                                .stream()
+                                .map(ucr -> ucr.getCompany())
+                                .distinct()
+                                .map(c -> com.project.backend_api.dto.core.management.CompanySummaryDto.builder()
+                                                .id(c.getId())
+                                                .name(c.getName())
+                                                .nit(c.getNit())
+                                                .logoUrl(c.getLogoUrl())
+                                                .primaryColor(c.getPrimaryColor())
+                                                .build())
+                                .collect(Collectors.toList());
+
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .body(LoginResponse.builder()
+                                                .token(jwt)
+                                                .refreshToken(refreshToken)
+                                                .username(userDetails.getUsername())
+                                                .firstName(userDetails.getUser().getFirstName())
+                                                .role(userDetails.getAuthorities().stream().findFirst()
+                                                                .map(a -> a.getAuthority()).orElse("ROLE_USER"))
+                                                .permissions(userDetails.getAuthorities().stream()
+                                                                .map(a -> a.getAuthority())
+                                                                .collect(Collectors.toList()))
+                                                .companies(companies)
+                                                .requirePasswordChange(userDetails.getUser().getRequirePasswordChange())
+                                                .isSuperAdmin(userDetails.getUser().getIsSuperAdmin())
+                                                .build());
+        }
+
+        @GetMapping("/me")
+        public ResponseEntity<?> getCurrentUser(Authentication authentication, HttpServletRequest request) {
+                if (authentication == null)
+                        return ResponseEntity.status(401).build();
+
+                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+                // Generate a fresh token for the frontend (Hybrid Strategy support)
+                String freshToken = jwtUtils.generateToken(authentication);
+
+                // Return safe DTO with token
+                return ResponseEntity.ok(LoginResponse.builder()
+                                .token(freshToken)
+                                .username(userDetails.getUsername())
+                                .firstName(userDetails.getUser().getFirstName())
+                                .role(userDetails.getAuthorities().stream().findFirst()
+                                                .map(a -> a.getAuthority()).orElse("ROLE_USER"))
+                                .permissions(userDetails.getAuthorities().stream()
+                                                .map(a -> a.getAuthority())
+                                                .collect(Collectors.toList()))
+                                .isSuperAdmin(userDetails.getUser().getIsSuperAdmin())
+                                .build());
+        }
+
+        @PostMapping("/logout")
+        public ResponseEntity<?> logout(HttpServletResponse response) {
+                ResponseCookie cleanJwtCookie = jwtUtils.getCleanJwtCookie();
+                ResponseCookie cleanRefreshCookie = jwtUtils.getCleanRefreshJwtCookie();
+
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, cleanJwtCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
+                                .build();
+        }
+}

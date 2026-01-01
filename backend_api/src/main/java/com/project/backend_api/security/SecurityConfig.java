@@ -17,6 +17,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -50,9 +51,15 @@ public class SecurityConfig {
                                 .csrf(csrf -> csrf
                                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                                                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                                                .ignoringRequestMatchers("/api/auth/**", "/api/public/**",
-                                                                "/api/assets/**", "/api/management/**",
-                                                                "/api/companies/**", "/error"))
+                                                .ignoringRequestMatchers(
+                                                                new AntPathRequestMatcher("/api/auth/**"),
+                                                                new AntPathRequestMatcher("/api/public/**"),
+                                                                new AntPathRequestMatcher("/api/assets/**"),
+                                                                new AntPathRequestMatcher("/api/management/**"),
+                                                                new AntPathRequestMatcher("/api/core/**"),
+                                                                new AntPathRequestMatcher("/api/rrhh/**"),
+                                                                new AntPathRequestMatcher("/api/companies/**"),
+                                                                new AntPathRequestMatcher("/error")))
 
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .sessionManagement(session -> session
@@ -63,6 +70,9 @@ public class SecurityConfig {
                                                                 "/api/companies/current", "/error")
                                                 .permitAll()
                                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                                .requestMatchers(org.springframework.http.HttpMethod.GET,
+                                                                "/api/private/assets/*/images/**")
+                                                .permitAll()
                                                 .anyRequest().authenticated())
                                 .headers(headers -> {
                                         headers.referrerPolicy(referrer -> referrer
@@ -116,7 +126,7 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.setAllowedOrigins(List.of("https://appmiaplicacion.com", "http://localhost:4200"));
-                configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+                configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
                 configuration.setAllowCredentials(true);
                 configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

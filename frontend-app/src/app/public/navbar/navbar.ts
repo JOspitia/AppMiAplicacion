@@ -21,11 +21,11 @@ import { RippleModule } from 'primeng/ripple';
         <!-- Logo -->
         <div class="flex items-center gap-3 flex-shrink-0">
           <a routerLink="/" class="flex items-center gap-3 group">
-            <div class="relative w-10 h-10 bg-primary rounded-2xl grid place-items-center shadow-lg shadow-primary/20 transition-transform group-hover:scale-110 overflow-hidden border border-white/10">
+            <div class="relative w-10 h-10 bg-indigo-600 rounded-2xl grid place-items-center shadow-lg shadow-indigo-500/20 transition-transform group-hover:scale-110 overflow-hidden border border-white/10">
               <img [src]="logoUrl" (error)="onLogoError($event)" alt="Logo" class="w-7 h-7 object-contain brightness-0 invert" />
             </div>
             <span class="text-xl font-black tracking-tighter text-slate-900 dark:text-white hidden sm:block">
-              <span class="text-primary">Mi</span>Aplicación
+              <span class="text-indigo-600">Mi</span>Aplicación
             </span>
           </a>
         </div>
@@ -33,10 +33,10 @@ import { RippleModule } from 'primeng/ripple';
         <!-- Desktop Menu -->
         <div class="hidden md:flex items-center justify-center flex-1">
           <nav class="flex items-center gap-8">
-            <a href="/#features" class="text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">Caracteristicas</a>
-            <a href="/#platform" class="text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">Plataforma</a>
-            <a routerLink="/pricing" class="text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">Precios</a>
-            <a href="/#contact" class="text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">Contacto</a>
+            <a href="/#features" class="text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors">Caracteristicas</a>
+            <a href="/#platform" class="text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors">Plataforma</a>
+            <a routerLink="/pricing" class="text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors">Precios</a>
+            <a href="/#contact" class="text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors">Contacto</a>
           </nav>
         </div>
 
@@ -55,14 +55,14 @@ import { RippleModule } from 'primeng/ripple';
             <button 
               pButton pRipple 
               label="ATENCIÓN PERSONALIZADA" 
-              class="p-button-sm font-black uppercase tracking-widest bg-primary text-white rounded-2xl shadow-lg shadow-primary/25 px-7 py-3"
+              class="p-button-sm font-black uppercase tracking-widest bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-500/25 px-7 py-3"
             ></button>
           </div>
 
           <!-- Mobile Toggle -->
           <button 
             (click)="mobileMenuOpen.set(true)"
-            class="md:hidden p-2 text-slate-500 hover:text-primary transition-colors"
+            class="md:hidden p-2 text-slate-500 hover:text-indigo-600 transition-colors"
           >
             <i class="pi pi-bars text-2xl"></i>
           </button>
@@ -76,7 +76,7 @@ import { RippleModule } from 'primeng/ripple';
       class="fixed inset-0 z-[100] bg-white dark:bg-slate-900 p-6 flex flex-col gap-8 transition-all animate-fadein"
     >
       <div class="flex justify-between items-center border-b border-slate-100 dark:border-white/5 pb-6">
-        <span class="text-2xl font-black text-primary">Menú</span>
+        <span class="text-2xl font-black text-indigo-600">Menú</span>
         <button (click)="mobileMenuOpen.set(false)" class="p-2 text-slate-500">
           <i class="pi pi-times text-2xl"></i>
         </button>
@@ -89,7 +89,7 @@ import { RippleModule } from 'primeng/ripple';
         <button 
            pButton pRipple 
            label="ATENCIÓN PERSONALIZADA" 
-           class="w-full py-5 text-center text-xl font-black bg-primary text-white rounded-2xl"
+           class="w-full py-5 text-center text-xl font-black bg-indigo-600 text-white rounded-2xl"
         ></button>
 
         <!-- Mobile legal links -->

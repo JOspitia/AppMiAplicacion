@@ -9,6 +9,8 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { MessageModule } from 'primeng/message';
 import { AuthService } from '../../core/services/auth.service';
 
+import { BrandingService } from '../../core/services/branding.service';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -22,11 +24,12 @@ import { AuthService } from '../../core/services/auth.service';
     CheckboxModule,
     MessageModule
   ],
+  providers: [FormBuilder],
   template: `
     <div class="min-h-screen bg-slate-50 dark:bg-[#0B1120] flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300">
       <!-- Background Ornaments -->
-      <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/10 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2 opacity-50"></div>
-      <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none translate-y-1/2 -translate-x-1/2 opacity-30"></div>
+      <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2 opacity-30"></div>
+      <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none translate-y-1/2 -translate-x-1/2 opacity-20"></div>
 
       <!-- Top Left: Back Button -->
       <a 
@@ -47,13 +50,14 @@ import { AuthService } from '../../core/services/auth.service';
       </button>
 
       <!-- Login Card -->
-      <div class="w-full max-w-[440px] bg-white dark:bg-[#1E293B] rounded-[2rem] shadow-2xl shadow-indigo-500/10 p-8 sm:p-12 border border-slate-100 dark:border-white/5 relative z-10 mx-auto animate-fadeinup">
+      <div class="w-full max-w-[440px] bg-white dark:bg-[#1E293B] rounded-[2rem] shadow-2xl p-8 sm:p-12 border border-slate-100 dark:border-white/5 relative z-10 mx-auto animate-fadeinup"
+           [style.boxShadow]="'0 25px 50px -12px rgba(var(--primary-rgb), 0.25)'">
         
         <!-- Header -->
         <div class="text-center mb-10">
           <div class="w-16 h-16 mx-auto mb-6 text-primary flex items-center justify-center relative">
              <i class="pi pi-user text-4xl dark:text-indigo-400"></i>
-             <div class="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+             <div class="absolute inset-0 bg-primary/10 blur-xl rounded-full"></div>
           </div>
           <h1 class="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">Bienvenido</h1>
           <p class="text-slate-500 dark:text-slate-400 font-medium">Ingresa a tu cuenta corporativa</p>
@@ -112,14 +116,32 @@ import { AuthService } from '../../core/services/auth.service';
                 [loading]="loading" 
                 label="INGRESAR" 
                 [disabled]="loginForm.invalid" 
-                styleClass="w-full !rounded-xl !py-4 !bg-primary hover:!bg-indigo-500 !border-0 !font-black !tracking-widest !uppercase !text-white !text-sm shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all">
+                styleClass="w-full !rounded-xl !py-4 !bg-primary hover:!bg-primary-dark !border-0 !font-black !tracking-widest !uppercase !text-white !text-sm shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all">
             </p-button>
           </div>
 
           <!-- Error Message -->
-          <div *ngIf="error" class="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm font-bold flex items-start gap-3 animate-fadein">
-            <i class="pi pi-exclamation-circle text-lg mt-0.5"></i>
-            <span class="leading-tight">{{ error }}</span>
+          <div *ngIf="error" class="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm font-bold flex flex-col gap-2 animate-fadein">
+            <div class="flex items-start gap-3">
+              <i class="pi pi-exclamation-circle text-lg mt-0.5"></i>
+              <span class="leading-tight">{{ error }}</span>
+            </div>
+            
+            <!-- Resend Link -->
+            <button 
+              *ngIf="unverifiedEmail()"
+              type="button"
+              (click)="onResend()"
+              [disabled]="resending()"
+              class="text-primary hover:text-primary-dark text-left ml-8 underline decoration-primary/30 underline-offset-4 transition-all disabled:opacity-50">
+              {{ resending() ? 'Reenviando...' : 'Reenviar enlace de verificación' }}
+            </button>
+          </div>
+
+          <!-- Resend Success -->
+          <div *ngIf="resendSuccess()" class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 p-4 rounded-xl text-sm font-bold flex items-center gap-3 animate-fadein">
+            <i class="pi pi-check-circle text-lg"></i>
+            <span>{{ resendSuccess() }}</span>
           </div>
 
         </form>
@@ -128,7 +150,7 @@ import { AuthService } from '../../core/services/auth.service';
         <div class="mt-12 text-center space-y-4">
           <p class="text-sm text-slate-500 dark:text-slate-400">
             ¿No tienes cuenta? 
-            <a routerLink="/register" class="font-bold text-primary hover:text-indigo-400 transition-colors ml-1">Regístrate ahora</a>
+            <a routerLink="/register" class="font-bold text-primary hover:text-primary-dark transition-colors ml-1">Regístrate ahora</a>
           </p>
           <div class="h-px bg-slate-100 dark:bg-white/5 w-1/2 mx-auto"></div>
           <p class="text-xs text-slate-400">
@@ -146,9 +168,14 @@ export class LoginComponent implements OnInit {
   error = '';
   isDarkMode = signal(false);
 
+  unverifiedEmail = signal<string | null>(null);
+  resending = signal(false);
+  resendSuccess = signal('');
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private brandingService: BrandingService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -164,6 +191,24 @@ export class LoginComponent implements OnInit {
       this.isDarkMode.set(savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches));
       this.applyTheme();
     }
+  }
+
+  onResend() {
+    const email = this.unverifiedEmail();
+    if (!email) return;
+
+    this.resending.set(true);
+    this.authService.resendVerification(email).subscribe({
+      next: (resp) => {
+        this.resending.set(false);
+        this.resendSuccess.set(resp.message);
+        setTimeout(() => this.resendSuccess.set(''), 5000);
+      },
+      error: (err) => {
+        this.resending.set(false);
+        this.error = err.error?.message || 'Error al reenviar el correo.';
+      }
+    });
   }
 
   toggleTheme() {
@@ -189,6 +234,7 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.valid) {
       this.loading = true;
       this.error = '';
+      this.unverifiedEmail.set(null);
       this.loginForm.disable();
 
       const raw = this.loginForm.get('password')?.value || '';
@@ -196,47 +242,66 @@ export class LoginComponent implements OnInit {
       // Compute SHA-256 client hash and send both raw and clientHash for server-side migration
       this.sha256Hex(raw).then(clientHash => {
         const payload = {
-          usernameOrEmail: this.loginForm.get('usernameOrEmail')?.value,
+          username: this.loginForm.get('usernameOrEmail')?.value,
           password: raw,
           clientHash: clientHash
         };
 
         this.authService.login(payload).subscribe({
-        next: (response) => {
-          this.loading = false;
+          next: (response) => {
+            this.loading = false;
 
-          // Company selection logic
-          if (!response.companies || response.companies.length === 0) {
-            this.error = 'No tienes acceso a ninguna empresa. Contacta a soporte.';
+            // Company selection logic
+            if (!response.companies || response.companies.length === 0) {
+              this.error = 'No tienes acceso a ninguna empresa. Contacta a soporte.';
+              this.loginForm.enable();
+            } else if (response.companies.length === 1) {
+              // Auto-select single company
+              const company = response.companies[0];
+              this.brandingService.setBranding({
+                logoUrl: company.logoUrl,
+                primaryColor: company.primaryColor
+              });
+
+              this.authService.selectCompany(company.id).subscribe({
+                next: () => {
+                  if (response.requirePasswordChange) {
+                    this.router.navigate(['/core/management/users/profile/change-password']);
+                  } else {
+                    this.router.navigate(['/home']);
+                  }
+                },
+                error: () => {
+                  this.error = 'Error al seleccionar la empresa';
+                  this.loginForm.enable();
+                }
+              });
+            } else {
+              // Navigate to company selector
+              this.router.navigate(['/select-company'], {
+                queryParams: response.requirePasswordChange ? { forceChange: 'true' } : {}
+              });
+            }
+          },
+          error: (err) => {
+            this.loading = false;
             this.loginForm.enable();
-          } else if (response.companies.length === 1) {
-            // Auto-select single company
-            const companyId = response.companies[0].id;
-            this.authService.selectCompany(companyId).subscribe({
-              next: () => this.router.navigate(['/dashboard']),
-              error: () => {
-                this.error = 'Error al seleccionar la empresa';
-                this.loginForm.enable();
-              }
-            });
-          } else {
-            // Navigate to company selector
-            this.router.navigate(['/select-company']);
-          }
-        },
-        error: (err) => {
-          this.loading = false;
-          this.loginForm.enable();
 
-          if (err.status === 429) {
-            this.startCountdown(60);
-          } else if (err.status === 401) {
-            this.error = 'Credenciales incorrectas. Verifique su usuario y contraseña.';
-          } else {
-            this.error = 'Ocurrió un error inesperado. Intente nuevamente.';
-            console.error('Login error', err);
+            if (err.status === 429) {
+              this.startCountdown(60);
+            } else if (err.status === 403) {
+              // 403 en login suele ser Account Not Verified o Banned
+              this.error = err.error?.message || 'Su cuenta no ha sido verificada. Por favor revise su correo.';
+              if (err.error?.email) {
+                this.unverifiedEmail.set(err.error.email);
+              }
+            } else if (err.status === 401) {
+              this.error = 'Credenciales incorrectas. Verifique su usuario y contraseña.';
+            } else {
+              this.error = 'Ocurrió un error inesperado. Intente nuevamente.';
+              console.error('Login error', err);
+            }
           }
-        }
         });
       }).catch(err => {
         console.error('Hashing failed', err);

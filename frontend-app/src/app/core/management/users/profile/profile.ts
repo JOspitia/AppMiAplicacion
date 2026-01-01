@@ -50,7 +50,7 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                 <div>
                      <span class="text-primary font-bold tracking-widest text-[10px] uppercase block mb-1">Configuración</span>
                      <h1 class="text-4xl font-black text-slate-900 dark:text-white">
-                        Mi Perfil de <span class="bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent">Usuario</span>
+                        Mi Perfil de <span class="bg-clip-text text-transparent" [style.backgroundImage]="'linear-gradient(to right, var(--primary), var(--primary-stop))'">Usuario</span>
                      </h1>
                 </div>
                 <button [routerLink]="['/home']" class="p-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm">
@@ -68,7 +68,7 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
 
         <!-- Main Card Container -->
         <div class="max-w-4xl mx-auto">
-            <div class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[3.5rem] border border-white/20 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-500">
+            <div class="bg-white/80 dark:bg-[var(--bg-card)] backdrop-blur-3xl rounded-[3.5rem] border border-white/20 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-500">
                 
                 <!-- Premium Navigation Tabs -->
                 <div class="flex flex-col sm:flex-row p-2 bg-slate-950/5 dark:bg-white/5 rounded-[2.5rem] m-4 sm:m-8 mb-4 gap-2 border border-black/5 dark:border-white/5">
@@ -214,7 +214,7 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                                 </div>
                                 <div class="flex gap-4">
                                     <button *ngIf="!emailUnlocked()" (click)="showPasswordDialog = true" class="px-10 h-11 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/10">Desbloquear</button>
-                                    <button *ngIf="emailUnlocked()" (click)="onRequestEmailChange()" class="px-10 h-11 bg-primary text-white text-sm font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-indigo-500/20" [disabled]="!newEmail">Solicitar Cambio</button>
+                                    <button *ngIf="emailUnlocked()" (click)="onRequestEmailChange()" class="px-10 h-11 bg-primary text-white text-sm font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20" [disabled]="!newEmail">Solicitar Cambio</button>
                                 </div>
                             </div>
                             <p class="mt-6 text-[11px] font-bold text-slate-400 flex items-center gap-3 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
@@ -227,8 +227,8 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                     <!-- Tab: Security -->
                     <div *ngIf="activeTab() === 'security'" class="animate-fade-in max-w-2xl mx-auto space-y-12">
                         <div class="text-center">
-                            <div class="inline-flex items-center justify-center w-28 h-28 rounded-[3rem] bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 mb-8 border border-indigo-100 dark:border-indigo-500/20 shadow-inner relative group">
-                                <div class="absolute inset-0 bg-indigo-500/10 rounded-[3rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="inline-flex items-center justify-center w-28 h-28 rounded-[3rem] bg-primary/10 text-primary mb-8 border border-primary/20 shadow-inner relative group">
+                                <div class="absolute inset-0 bg-primary/20 rounded-[3rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 <app-icon icon="key" class="w-12 h-12 relative z-10"></app-icon>
                             </div>
                             <div class="flex items-center justify-center flex-col">
@@ -292,7 +292,7 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                     <p-password [(ngModel)]="verificationPassword" [feedback]="false" placeholder="Ingresa tu contraseña" styleClass="w-full" [toggleMask]="true" inputStyleClass="w-full text-center"></p-password>
                     
                     <div class="flex flex-col gap-3">
-                        <button pButton label="Verificar y Continuar" (click)="onVerifyPassword()" class="bg-primary text-white rounded-2xl py-5 font-black shadow-xl shadow-indigo-500/20 transition-transform active:scale-95" [loading]="loading()"></button>
+                        <button pButton label="Verificar y Continuar" (click)="onVerifyPassword()" class="bg-primary text-white rounded-2xl py-5 font-black shadow-xl shadow-primary/20 transition-transform active:scale-95" [loading]="loading()"></button>
                         <button (click)="showPasswordDialog = false" class="text-sm font-bold text-slate-400 hover:text-slate-900 dark:hover:text-white py-3 transition-colors">Cancelar operación</button>
                     </div>
                 </div>
@@ -348,7 +348,7 @@ export class ProfileComponent implements OnInit {
 
 
 
-    activeTabClass = "flex-1 py-5 px-6 rounded-[2rem] text-sm font-black transition-all duration-300 active:scale-95 bg-primary text-white shadow-xl shadow-indigo-500/20";
+    activeTabClass = "flex-1 py-5 px-6 rounded-[2rem] text-sm font-black transition-all duration-300 active:scale-95 bg-primary text-white shadow-xl";
     inactiveTabClass = "flex-1 py-5 px-6 rounded-[2rem] text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all duration-300";
 
 

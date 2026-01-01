@@ -37,7 +37,7 @@ Se creó una capa de estandarización en `src/styles.css` usando Tailwind CSS `@
     @apply h-11 text-sm rounded-2xl border-slate-200 dark:border-white/10 !important;
     @apply bg-white dark:bg-white/5 !important;
     @apply font-bold transition-all !important;
-    @apply focus:border-primary focus:ring-4 focus:ring-indigo-500/20 !important;
+    @apply focus:border-primary focus:ring-4 focus:ring-[var(--primary-ring)] !important;
   }
 
   /* Force Dropdowns to full width and standard height */
@@ -83,6 +83,26 @@ Se creó una capa de estandarización en `src/styles.css` usando Tailwind CSS `@
 ✅ **Textarea** (`p-inputtextarea`)  
 ✅ **Buttons** (`p-button`)  
 ✅ **Dialogs** (`p-dialog`)
+✅ **Tables/Paginators** (`p-datatable`, `p-paginator`)
+
+## 4. Estandarización de Tablas y Listados (Modo Oscuro)
+
+Para garantizar que los listados se integren con el tema "Midnight" sin bloques de color discordantes:
+
+- **Transparencia**: Las tablas (`p-datatable`) y paginadores (`p-paginator`) deben tener fondo transparente en modo oscuro para heredar el color de la tarjeta contenedora (`--bg-card`).
+- **Paginador Premium**:
+    - Botones redondeados (`rounded-xl`).
+    - Estado activo (`p-highlight`) usando `rgba(var(--primary-rgb), 0.1)` de fondo y texto con `--primary`.
+- **Encabezados**: Texto en `slate-500` (Light) o `slate-400` (Dark), en negrita y mayúsculas (`text-xs font-bold uppercase tracking-wider`).
+
+```css
+/* Ejemplo de override en styles.css */
+.dark .p-datatable {
+  --p-datatable-header-background: transparent;
+  --p-datatable-row-background: transparent;
+  --p-paginator-background: transparent;
+}
+```
 
 ## 🎯 Criterios de Aceptación Cumplidos
 
@@ -212,8 +232,51 @@ Para garantizar una comunicación clara del estado del sistema al usuario, se de
 - **Componente**: `ConfirmDialogComponent`.
 - **Regla**: Prohibido usar `window.alert()`.
 
+## 9. Avatares e Iniciales (Identidad Visual)
+
+Para garantizar una representación consistente de usuarios y empresas en listados:
+
+- **Estilo de Fondo**: Siempre usar un gradiente premium `bg-gradient-to-br from-primary to-primary-dark`.
+- **Dimensiones**:
+    - **Listados de Tabla**: `h-12 w-12` con `rounded-2xl` (16px).
+    - **Sidebar (Colapsado)**: `h-10 w-10` con `rounded-full`.
+    - **Navbar (Topbar)**: `h-10 w-10` con `rounded-xl`.
+- **Tipografía**: `font-bold` o `font-black`, color `text-white`.
+- **Interacción**: En tablas, usar `group-hover:scale-110 transition-transform` para dar sensación de profundidad.
+
+```html
+<!-- Estándar para Listados -->
+<div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+    Initials
+</div>
+```
+
+## 10. Filtros de Lista (Status Toggle Switch)
+
+Para mejorar la gestión de grandes volúmenes de datos y permitir la limpieza visual de las tablas, se ha estandarizado un patrón de filtrado por estado:
+
+### 10.1 Diseño del Toggle de Estado
+- **Componente**: `p-toggleSwitch` (PrimeNG v18+).
+- **Ubicación**: Cabecera de la tabla (`pTemplate="caption"`), alineado a la derecha de la barra de búsqueda.
+- **Micro-interacción**:
+    - **Labels**: Etiquetas de texto en negrita y mayúsculas (`text-[10px] font-bold uppercase tracking-wider`).
+    - **Color Dinámico**: La etiqueta seleccionada debe usar el color temático (Primario para Activos, Rojo/Rosa para Inactivos) mientras que la no seleccionada se atenúa (`text-slate-400`).
+    - **Backdrop**: El grupo de control debe estar contenido en una cápsula con fondo sutil (`bg-slate-50 dark:bg-slate-800/50`) y borde definido.
+
+### 10.2 Implementación Técnica (Signals)
+- Se utiliza una señal `showInactive` para controlar el estado del switch.
+- El filtrado se realiza mediante un `computed` de Angular en el frontend para una respuesta instantánea (Zero-Latency Filtering), evitando peticiones innecesarias al servidor si la data ya está en memoria.
+
+```typescript
+// Patrón de filtrado reactivo
+showInactive = signal<boolean>(false);
+filteredItems = computed(() => {
+    return this.items().filter(item => item.active === !this.showInactive());
+});
+```
+
 ---
 
-**Última Actualización**: 2025-12-25
-**Responsable**: Equipo de Frontend
-**Estado**: ✅ Implementado y en Producción
+**Última Actualización**: 2025-12-31
+**Responsable**: Equipo de Frontend (Antigravity AI)
+**Estado**: ✅ Implementado y Estandarizado

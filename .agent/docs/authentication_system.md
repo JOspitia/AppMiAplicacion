@@ -9,8 +9,9 @@ Este documento detalla la arquitectura, componentes y flujo de implementación d
 La autenticación es **Stateless** (sin estado en servidor), delegando la persistencia de la sesión al navegador mediante cookies seguras.
 
 ### Características Clave
-*   **JWT en HttpOnly Cookies**: El token JWT no se almacena en `localStorage` ni `sessionStorage`. Se inyecta como una cookie `HttpOnly`, lo que impide que cualquier script de JavaScript (propio o malicioso) acceda a él.
-*   **Protección XSS**: Al no ser accesible via JS, el token es inmune a robos por Cross-Site Scripting.
+*   **JWT en HttpOnly Cookies (Estrategia Primaria)**: El token JWT se inyecta preferentemente como cookie `HttpOnly` para máxima seguridad XSS.
+*   **Fallback a LocalStorage (Compatibilidad)**: Para entornos donde el navegador bloquea cookies de terceros/localhost, el token también se retorna en el JSON y se almacena en `localStorage` como respaldo.
+*   **Protección XSS**: Se prioriza el uso de Cookies. Si se usa el fallback, se asume un entorno controlado o de desarrollo.
 *   **Protección CSRF**: Uso de tokens XSRF sincronizados y Cookies con `SameSite` condicional (None en Producción/HTTPS, Lax en Desarrollo) para soportar Cloudflare y proxies seguros.
 *   **Hash de Contraseñas**: Se utiliza **BCrypt** con fuerza 10 para el hash de contraseñas.
 *   **Rate Limiting**: Implementación de **Bucket4j** para prevenir ataques de fuerza bruta (Anti-Brute Force).
@@ -33,23 +34,24 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
 *   Validación de firma y expiración.
 *   Extracción de claims (usuario, roles).
 
-### C. Filtro de Autenticación (`JwtTokenFilter.java`)
+### C. Filtro de Autenticación (`com.project.backend_api.auth.JwtTokenFilter.java`)
 *   Intercepta cada petición HTTP.
-*   Extrae el JWT específicamente de la cookie `accessToken`.
+*   **Estrategia Híbrida (Priorización)**:
+    1.  **Authorization Header**: Intenta leer el header `Authorization: Bearer ...`. Esta es la fuente más confiable para SPAs.
+    2.  **Cookie HttpOnly**: Si no hay header, intenta leer la cookie `auth_token` (fallback).
 *   Valida el token y, si es correcto, establece el contexto de seguridad (`SecurityContextHolder`) para la petición actual.
 
-### D. Controlador (`AuthController.java`)
+### D. Controlador (`com.project.backend_api.controller.core.administration.AuthController.java`)
 *   **`/login`**:
     *   Autentica credenciales (**Usuario o Correo** / Password).
-    *   Genera un **Access Token** de corta vida (15 minutos).
+    *   Genera un **Access Token** de corta vida (1 hora).
     *   Genera un **Refresh Token** persistente (7 días) almacenado en BD.
     *   **Multi-Tenancy**: Consulta las empresas disponibles para el usuario.
-    *   Inyecta ambos tokens en Cookies HttpOnly.
+    *   **Inyección Dual**: Inyecta el token en la cookie `auth_token` (HttpOnly) y lo retorna en el cuerpo JSON de la respuesta.
     *   Retorna `LoginResponse` con mensaje, rol y **lista de empresas** para activar la lógica de Auto-Skip en el frontend.
     *   Registra el evento en la tabla `security.login_logs`.
 *   **`/refreshtoken`**:
-    *   Valida la existencia y expiración del Refresh Token.
-    *   **Recarga de Contexto**: Consulta nuevamente los roles del usuario en la base de datos para asegurar que los permisos (ROLE_ADMIN, autoridades) se mantengan vigentes en el nuevo Access Token.
+    *   **Recarga de Contexto**: Consulta nuevamente los roles del usuario en la base de datos para asegurar que los permisos (ROLE_ADMIN, autoridades) se mantengan vigentes en el nuevo Access Token. Soporta la acumulación de permisos de múltiples roles asignados.
     *   Genera un nuevo Access Token sin requerir credenciales del usuario.
     *   Mantiene la continuidad de la sesión (Rotación de Sesión).
 *   **`/register`**:
@@ -89,7 +91,8 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
 
 ### B. Servicio (`auth.service.ts`)
 *   Maneja las llamadas a la API `/api/auth/login` y `/logout`.
-*   **Nota**: No gestiona el token manualmente (no hay `localStorage.setItem`), ya que todo es manejado por el navegador via cookies.
+*   Maneja las llamadas a la API `/api/auth/login` y `/logout`.
+*   **Gestión de Token Híbrida**: Al recibir la respuesta de login, guarda el `token` en `localStorage` como mecanismo de fallback si las cookies fallan. Elimina este token al hacer logout.
 
 ### C. Interfaz de Usuario (`LoginComponent`)
 *   **Identificación Flexible**: Soporte para "Usuario o Correo" en un único campo.
@@ -119,26 +122,16 @@ La autenticación es **Stateless** (sin estado en servidor), delegando la persis
 3.  **Spring Boot**:
     *   `AuthenticationManager` valida credenciales contra PostgreSQL hash.
     *   Si es válido, genera JWT.
-    *   Si es válido, genera JWT.
     *   Guarda registro en `login_logs`.
-    *   Responde con Header: `Set-Cookie: accessToken=...; HttpOnly; SameSite=None; Secure; Path=/api` (Configuración Producción/Cloudflare).
-    *   En desarrollo local se ajusta a `SameSite=Lax`.
-4.  **Navegador**: Recibe la respuesta y almacena la cookie de forma segura.
-5.  **Carga de Perfil**: El frontend llama a `/api/auth/me` para obtener el contexto del usuario y configurar el layout. Este endpoint es también la base del `authGuard` para proteger rutas internas.
-6.  **Estrategia de Rutas**:
-    *   **Públicas con Redirección Inversa (`/`, `/login`)**: Utilizan un `guestGuard` que detecta si ya hay una sesión. En caso afirmativo, redirige a `/home` para mejorar la UX. Solo si no hay sesión permite ver estas páginas.
-    *   **Públicas Absolutas (`/terms`, `/privacy`)**: Accesibles siempre, con o sin sesión.
-    *   **Protegidas (`/home`, etc.)**: Están envueltas en un `authGuard` que requiere validación positiva del servidor antes de renderizar el layout principal.
-7.  **Flujo Multi-Tenant (Auto-Skip)**:
-    *   **0 empresas**: Muestra error de acceso.
-    *   **1 empresa**: El frontend llama automáticamente a `/api/companies/select` y redirige al Dashboard (Home).
-    *   **2+ empresas**: Redirige al `SelectCompanyComponent` para que el usuario elija.
-8.  **Contexto de Empresa**: Al seleccionar una empresa, se crea la cookie `companyContext` (HttpOnly) que el backend usa para filtrar datos en peticiones subsecuentes.
-9.  **Peticiones Subsecuentes**:
-    *   El usuario navega o realiza acciones.
-    *   **Interceptor** asegura el envío de credenciales (`withCredentials`).
-    *   **Navegador** adjunta las cookies (`accessToken` y `companyContext`) automáticamente.
-    *   **JwtTokenFilter** en Backend lee la cookie y autoriza la petición.
+    *   Responde con Header: `Set-Cookie: auth_token=...; HttpOnly; SameSite=Lax; Path=/`
+    *   Retorna el token en el body de `LoginResponse`.
+4.  **Navegador/Frontend**: 
+    *   Recibe la cookie automáticamente.
+    *   Guarda el token del body en `localStorage.setItem('auth_token', ...)`.
+5.  **Carga de Perfil**: El frontend llama a `/api/auth/me` para obtener el contexto del usuario.
+6.  **Peticiones Subsecuentes**:
+    *   **Interceptor** extrae el token de `localStorage` y lo adjunta como `Authorization: Bearer ...`.
+    *   **JwtTokenFilter** en Backend lee el header (preferencia) o la cookie y autoriza.
 
 ---
 
@@ -231,6 +224,8 @@ El `LoginComponent` captura el error 429 y:
 | `role_id` | UUID | FK -> Roles |
 | `created_at` | TIMESTAMP | Fecha asignación |
 | `is_active` | BOOLEAN | Estado de la relación |
+
+**[UPDATE]**: La restricción de unicidad es ahora `(user_id, company_id, role_id)`, permitiendo múltiples registros por usuario/empresa.
 
 ### `security.login_logs`
 | Columna | Tipo | Descripción |

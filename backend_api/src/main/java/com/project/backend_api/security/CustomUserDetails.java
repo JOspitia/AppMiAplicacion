@@ -1,6 +1,7 @@
 package com.project.backend_api.security;
 
-import com.project.backend_api.model.User;
+import com.project.backend_api.model.core.management.User;
+import com.project.backend_api.model.core.management.UserCompanyRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +21,7 @@ public class CustomUserDetails implements UserDetails {
         this(user, java.util.Collections.emptyList(), null);
     }
 
-    public CustomUserDetails(User user, java.util.List<com.project.backend_api.model.UserCompanyRole> userRoles,
+    public CustomUserDetails(User user, java.util.List<UserCompanyRole> userRoles,
             UUID companyId) {
         this.username = user.getUsername();
         this.password = user.getPassword();
@@ -37,7 +38,12 @@ public class CustomUserDetails implements UserDetails {
 
         // 2. Map all company roles to Authorities
         if (userRoles != null) {
-            for (com.project.backend_api.model.UserCompanyRole ucr : userRoles) {
+            for (UserCompanyRole ucr : userRoles) {
+                // If the role is explicitly deactivated, skip it
+                if (ucr.getRole() != null && !Boolean.TRUE.equals(ucr.getRole().getActive())) {
+                    continue;
+                }
+
                 // Check the explicit boolean flag from the Role entity
                 if (ucr.getRole() != null && Boolean.TRUE.equals(ucr.getRole().getIsAdminRole())) {
                     auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));

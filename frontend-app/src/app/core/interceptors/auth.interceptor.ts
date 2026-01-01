@@ -30,8 +30,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const http = inject(HttpClient);
     const router = inject(Router);
 
-    // 1. Asegurar que siempre enviamos credenciales (Cookies)
-    const authReq = req.clone({ withCredentials: true });
+    // 1. Leer el token SIEMPRE antes de cada petición (garantiza frescura)
+    const token = localStorage.getItem('auth_token');
+
+    // 2. Clonar la petición con credenciales Y token si existe
+    let authReq = req.clone({
+        withCredentials: true,
+        setHeaders: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+
+    // Debug: Solo en desarrollo
+    if (!token && !isPublicEndpoint(req.url)) {
+        console.warn('[AuthInterceptor] No token found for protected endpoint:', req.url);
+    }
 
     return next(authReq).pipe(
         catchError((error) => {

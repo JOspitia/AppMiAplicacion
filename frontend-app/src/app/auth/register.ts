@@ -25,8 +25,8 @@ import { AuthService, User } from '../core/services/auth.service';
   template: `
     <div class="min-h-screen bg-slate-50 dark:bg-[#0B1120] flex items-center justify-center p-6 lg:p-12 relative overflow-hidden transition-colors duration-300">
       <!-- Background Ornaments -->
-      <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/10 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2 opacity-50"></div>
-      <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none translate-y-1/2 -translate-x-1/2 opacity-30"></div>
+      <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2 opacity-30"></div>
+      <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none translate-y-1/2 -translate-x-1/2 opacity-20"></div>
 
       <!-- Top Left: Back Button -->
       <a 
@@ -46,17 +46,18 @@ import { AuthService, User } from '../core/services/auth.service';
       </button>
 
       <!-- Register Card -->
-      <div class="w-full max-w-[640px] bg-white dark:bg-[#1E293B] rounded-[2.5rem] shadow-2xl shadow-indigo-500/10 p-8 lg:p-12 border border-slate-100 dark:border-white/5 relative z-10 mx-auto animate-fadeinup overflow-hidden">
+      <div class="w-full max-w-[640px] bg-white dark:bg-[#1E293B] rounded-[2.5rem] shadow-2xl p-8 lg:p-12 border border-slate-100 dark:border-white/5 relative z-10 mx-auto animate-fadeinup overflow-hidden"
+           [style.boxShadow]="'0 25px 50px -12px rgba(var(--primary-rgb), 0.25)'">
         
         <!-- Decoration Glows -->
-        <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 blur-[80px] rounded-full pointer-events-none"></div>
-        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/20 blur-[80px] rounded-full pointer-events-none"></div>
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[80px] rounded-full pointer-events-none opacity-40"></div>
+        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-primary/10 blur-[80px] rounded-full pointer-events-none opacity-40"></div>
 
         <!-- Header -->
         <div class="text-center mb-10 relative">
           <div class="w-16 h-16 mx-auto mb-6 text-primary flex items-center justify-center">
              <i class="pi pi-user-plus text-4xl dark:text-indigo-400"></i>
-             <div class="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+             <div class="absolute inset-0 bg-primary/10 blur-xl rounded-full"></div>
           </div>
           <h1 class="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">Crear Cuenta</h1>
           <p class="text-slate-500 dark:text-slate-400 font-medium">Únete a nuestra plataforma SaaS</p>
@@ -67,7 +68,7 @@ import { AuthService, User } from '../core/services/auth.service';
           <!-- Section 1: User Info -->
           <div class="space-y-6">
             <div class="flex items-center gap-3 mb-2">
-              <span class="flex items-center justify-center w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-500 text-[10px] font-black">1</span>
+              <span class="flex items-center justify-center w-6 h-6 rounded-lg bg-primary/10 text-primary text-[10px] font-black">1</span>
               <h2 class="text-sm font-black uppercase tracking-widest text-slate-400">Información Personal</h2>
             </div>
             
@@ -93,11 +94,17 @@ import { AuthService, User } from '../core/services/auth.service';
               <!-- Names -->
               <div class="space-y-2">
                 <label class="block text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Nombre</label>
-                <input pInputText formControlName="firstName" class="w-full !rounded-2xl !py-3.5 !px-5 !bg-slate-50 dark:!bg-[#0f172a] !border-slate-200 dark:!border-slate-700 text-slate-900 dark:text-slate-100 focus:!border-primary transition-all font-semibold" placeholder="Tu nombre" />
+                <input pInputText formControlName="firstName" class="w-full !rounded-2xl !py-3.5 !px-5 !bg-slate-50 dark:!bg-[#0f172a] !border-slate-200 dark:!border-slate-700 text-slate-900 dark:text-slate-100 focus:!border-primary transition-all font-semibold" placeholder="Juan" />
               </div>
               <div class="space-y-2">
-                <label class="block text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Apellido</label>
-                <input pInputText formControlName="firstSurname" class="w-full !rounded-2xl !py-3.5 !px-5 !bg-slate-50 dark:!bg-[#0f172a] !border-slate-200 dark:!border-slate-700 text-slate-900 dark:text-slate-100 focus:!border-primary transition-all font-semibold" placeholder="Tu apellido" />
+                <label class="block text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Primer Apellido</label>
+                <input pInputText formControlName="firstSurname" class="w-full !rounded-2xl !py-3.5 !px-5 !bg-slate-50 dark:!bg-[#0f172a] !border-slate-200 dark:!border-slate-700 text-slate-900 dark:text-slate-100 focus:!border-primary transition-all font-semibold" placeholder="Pérez" />
+              </div>
+
+              <!-- Extra fields from legacy -->
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Segundo Apellido</label>
+                <input pInputText formControlName="secondSurname" class="w-full !rounded-2xl !py-3.5 !px-5 !bg-slate-50 dark:!bg-[#0f172a] !border-slate-200 dark:!border-slate-700 text-slate-900 dark:text-slate-100 focus:!border-primary transition-all font-semibold" placeholder="Opcional" />
               </div>
             </div>
           </div>
@@ -105,7 +112,7 @@ import { AuthService, User } from '../core/services/auth.service';
           <!-- Section 2: Security -->
           <div class="space-y-6">
             <div class="flex items-center gap-3 mb-2">
-              <span class="flex items-center justify-center w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-500 text-[10px] font-black">2</span>
+              <span class="flex items-center justify-center w-6 h-6 rounded-lg bg-primary/10 text-primary text-[10px] font-black">2</span>
               <h2 class="text-sm font-black uppercase tracking-widest text-slate-400">Seguridad</h2>
             </div>
             
@@ -136,7 +143,7 @@ import { AuthService, User } from '../core/services/auth.service';
                 [loading]="loading" 
                 label="CREAR MI CUENTA" 
                 [disabled]="registerForm.invalid" 
-                styleClass="w-full !rounded-2xl !py-4 !bg-primary hover:!bg-indigo-500 !border-0 !font-black !tracking-widest !uppercase !text-white !text-sm shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all">
+                styleClass="w-full !rounded-2xl !py-4 !bg-primary hover:!bg-primary-dark !border-0 !font-black !tracking-widest !uppercase !text-white !text-sm shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all">
             </p-button>
             <p class="text-[10px] text-slate-400 text-center mt-6 leading-relaxed uppercase tracking-widest">
               Al registrarte, aceptas nuestros <a routerLink="/terms" class="hover:text-primary underline">Términos</a> y <a routerLink="/privacy" class="hover:text-primary underline">Privacidad</a>
@@ -150,9 +157,17 @@ import { AuthService, User } from '../core/services/auth.service';
           </div>
 
           <!-- Success Message -->
-          <div *ngIf="success" class="bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 p-4 rounded-xl text-sm font-bold flex items-start gap-3 animate-fadein">
-            <i class="pi pi-check-circle text-lg mt-0.5"></i>
-            <span class="leading-tight">{{ success }} Ingresa ahora.</span>
+          <div *ngIf="success" class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 p-8 rounded-[2rem] text-sm font-bold flex flex-col items-center gap-4 animate-fadein">
+            <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mb-2">
+              <i class="pi pi-envelope text-3xl"></i>
+            </div>
+            <span class="leading-tight text-center text-lg">¡Registro casi completo!</span>
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 text-center max-w-[280px]">
+              {{ success }}. Hemos enviado un enlace de verificación a tu correo para activar tu cuenta.
+            </p>
+            <div class="pt-4 w-full">
+               <p-button label="IR AL INICIO DE SESIÓN" routerLink="/login" styleClass="w-full !rounded-xl !py-3 !bg-emerald-600 !border-0 !text-[11px]"></p-button>
+            </div>
           </div>
 
         </form>
@@ -161,7 +176,7 @@ import { AuthService, User } from '../core/services/auth.service';
         <div class="mt-12 text-center pt-8 border-t border-slate-100 dark:border-white/5">
           <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">
             ¿Ya tienes cuenta? 
-            <a routerLink="/login" class="font-black text-primary hover:text-indigo-400 transition-colors ml-1">Inicia Sesión</a>
+            <a routerLink="/login" class="font-black text-primary hover:text-primary-dark transition-colors ml-1">Inicia Sesión</a>
           </p>
         </div>
       </div>
@@ -185,6 +200,7 @@ export class RegisterComponent implements OnInit {
       email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
       firstName: ['', [Validators.required, Validators.maxLength(50)]],
       firstSurname: ['', [Validators.required, Validators.maxLength(50)]],
+      secondSurname: ['', [Validators.maxLength(50)]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
@@ -231,7 +247,6 @@ export class RegisterComponent implements OnInit {
         next: (res: User) => {
           this.loading = false;
           this.success = res.message;
-          setTimeout(() => this.router.navigate(['/login']), 2000);
         },
         error: (err: any) => {
           this.loading = false;

@@ -2,13 +2,10 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { RippleModule } from 'primeng/ripple';
-import { TextareaModule } from 'primeng/textarea';
+import { InputText } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
+import { ToggleSwitch } from 'primeng/toggleswitch';
+import { Textarea } from 'primeng/textarea';
 import { IconComponent } from '../../shared/components/icon.component';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { AddressBuilderComponent } from '../../shared/components/address-builder/address-builder.component';
@@ -17,14 +14,15 @@ import { EconomicSectorService, EconomicSector } from '../services/economic-sect
 import { EntityTypeService, EntityType } from '../services/entity-type.service';
 
 import { ProfileService } from '../services/profile.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
     selector: 'app-company-form',
     standalone: true,
     imports: [
         CommonModule, ReactiveFormsModule, RouterModule,
-        ButtonModule, InputTextModule, SelectModule, ToggleSwitchModule,
-        FloatLabelModule, RippleModule, IconComponent, AlertComponent, AddressBuilderComponent, TextareaModule
+        InputText, Select, ToggleSwitch,
+        IconComponent, AlertComponent, AddressBuilderComponent, Textarea
     ],
     template: `
     <div class="px-6 py-8 w-full min-h-screen font-sans bg-slate-50/50 dark:bg-transparent animate-fade-in">
@@ -39,7 +37,7 @@ import { ProfileService } from '../services/profile.service';
                 <div>
                     <span class="text-primary font-bold tracking-widest text-[10px] uppercase block mb-1">Administración</span>
                     <h1 class="text-4xl font-black text-slate-900 dark:text-white">
-                        {{ isEditMode() ? 'Editar' : 'Nueva' }} <span class="bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent">Empresa</span>
+                        {{ isEditMode() ? 'Editar' : 'Nueva' }} <span class="bg-clip-text text-transparent" [style.backgroundImage]="'linear-gradient(to right, var(--primary), var(--primary-stop))'">Empresa</span>
                     </h1>
                 </div>
                 <button [routerLink]="['/core/companies']" class="p-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm">
@@ -61,7 +59,9 @@ import { ProfileService } from '../services/profile.service';
                         <!-- Background Track -->
                         <div class="absolute top-[34px] left-0 right-0 h-[2px] bg-slate-200 dark:bg-white/5 -z-0 mx-12 sm:mx-20">
                             <!-- Progress Line -->
-                            <div class="h-full bg-gradient-to-r from-primary via-indigo-400 to-indigo-500 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(79,70,229,0.5)]" 
+                            <div class="h-full transition-all duration-700 ease-out shadow-lg" 
+                                 [style.background]="'linear-gradient(to right, var(--primary), var(--primary-stop))'"
+                                 [style.boxShadow]="'0 0 15px var(--primary-light)'"
                                  [style.width]="(currentStep() / 3 * 100) + '%'"></div>
                         </div>
 
@@ -73,7 +73,7 @@ import { ProfileService } from '../services/profile.service';
                                      class="p-1.5 rounded-[1.25rem] transition-all duration-500 border border-slate-200 dark:border-white/5">
                                     
                                     <!-- Inner Container -->
-                                    <div [class]="currentStep() === i ? 'bg-primary text-white shadow-xl shadow-primary/30 scale-110' : (currentStep() > i ? 'bg-indigo-500/10 text-primary border border-primary/20' : 'bg-transparent text-slate-400 dark:text-slate-700 border border-slate-200 dark:border-white/10')"
+                                    <div [class]="currentStep() === i ? 'bg-primary text-white shadow-xl shadow-primary/30 scale-110' : (currentStep() > i ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-transparent text-slate-400 dark:text-slate-700 border border-slate-200 dark:border-white/10')"
                                          class="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-all duration-500">
                                         
                                         <app-icon *ngIf="currentStep() > i" icon="check" class="w-6 h-6 stroke-[3]"></app-icon>
@@ -301,7 +301,7 @@ import { ProfileService } from '../services/profile.service';
                                 </div>
 
                                 <!-- Estado Operativo -->
-                                <div class="mt-8 p-6 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
+                                <div *ngIf="isSuperAdminGlobal()" class="mt-8 p-6 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
                                     <div class="flex items-center justify-between">
                                         <div>
                                             <h3 class="font-black text-slate-800 dark:text-white text-sm mb-1">Estado Operativo</h3>
@@ -394,7 +394,9 @@ import { ProfileService } from '../services/profile.service';
                         </button>
 
                         <button *ngIf="currentStep() === 3" (click)="onSubmit()" [disabled]="loading()"
-                                class="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-primary to-indigo-600 text-white rounded-2xl hover:scale-105 active:scale-95 transition-all font-bold shadow-lg shadow-primary/30 ml-auto">
+                                class="flex items-center gap-2 px-8 py-3 text-white rounded-2xl hover:scale-105 active:scale-95 transition-all font-bold shadow-lg ml-auto"
+                                [style.background]="'linear-gradient(to right, var(--primary), var(--primary-dark))'"
+                                [style.boxShadow]="'0 10px 15px -3px var(--primary-light)'">
                             <app-icon *ngIf="!loading()" icon="check" class="w-4 h-4"></app-icon>
                             <span *ngIf="!loading()">{{ isEditMode() ? 'Actualizar Empresa' : 'Crear Empresa' }}</span>
                             <span *ngIf="loading()">Procesando...</span>
@@ -420,6 +422,11 @@ export class CompanyFormComponent implements OnInit {
     private entityTypeService = inject(EntityTypeService);
     private economicSectorService = inject(EconomicSectorService);
     private profileService = inject(ProfileService);
+    private authService = inject(AuthService);
+
+    isSuperAdminGlobal(): boolean {
+        return this.authService.currentUser()?.isSuperAdmin ?? false;
+    }
 
     currentStep = signal(0);
     isEditMode = signal(false);

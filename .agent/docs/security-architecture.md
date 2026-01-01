@@ -10,10 +10,11 @@ El sistema utiliza una arquitectura **Stateless** reforzada con **Cookies HttpOn
 
 ### 1.1 Flujo de Autenticación
 1.  **Login**: El usuario envía credenciales al endpoint `/api/auth/login`.
-2.  **Tokens**: El servidor responde con dos tokens:
-    -   **Access Token (JWT)**: Almacenado de forma segura (Cookie HttpOnly).
-    -   **Refresh Token**: Almacenado en la base de datos (`security.refresh_tokens`) y vinculado a una cookie de larga duración.
-3.  **Persistencia**: Todas las peticiones posteriores incluyen automáticamente las cookies gracias a la configuración `withCredentials: true`.
+2.  **Estrategia Híbrida**: El servidor responde con el token en dos vías:
+    -   **Cookie (HttpOnly)**: `auth_token` para seguridad automática del navegador.
+    -   **Body (JSON)**: `token` para almacenamiento en `localStorage` (fallback/SPA compatibility).
+3.  **Persistencia**: Angular guarda el token en `localStorage`. Todas las peticiones posteriores incluyen el header `Authorization: Bearer <token>` **Y** las cookies.
+4.  **Prioridad en Backend**: El `JwtTokenFilter` prioriza el header `Authorization` sobre la cookie para evitar problemas con bloqueos de cookies de terceros.
 
 ### 1.2 Sistema de Silent Refresh (Transmisión Automática)
 Para evitar que la experiencia del usuario se interrumpa al expirar el Access Token, se implementó un **HttpInterceptor** avanzado:
@@ -202,6 +203,9 @@ El sistema implementa una jerarquía de tres niveles para equilibrar el control 
 El sistema carga dinámicamente las autoridades en el momento del login y del refresco de token:
 - **Roles:** Se mapean como `ROLE_{NOMBRE_ROL}`. Si el rol tiene el flag `is_admin_role`, se añade automáticamente la autoridad global `ROLE_ADMIN`.
 - **Permisos:** Se cargan individualmente como autoridades (ej: `CORE_USER_VIEW`), permitiendo el uso de `@PreAuthorize("hasAuthority('...')")`.
+- **[CRITICAL UPDATE] Multi-Role Assignment**: 
+    - Se modificó la arquitectura de asignación para permitir que un usuario tenga **múltiples roles** por empresa.
+    - Las autoridades resultantes son la **unión** de todos los permisos de todos los roles asignados, permitiendo una granularidad superior y composición de perfiles (ej: "Admin de Nómina" + "Visualizador de Auditoría").
 
 ---
 
@@ -235,11 +239,11 @@ powershell -ExecutionPolicy Bypass -File .\audit\injection_test.ps1
 
 | Capa | Tecnología |
 |---|---|
-| Autenticación | JWT + Cookies HttpOnly |
+| Autenticación | Estrategia Híbrida (JWT Header + Cookie) |
 | Refresco de Sesión | RxJS (Interceptor + Mutex) |
 | Protección CSRF | Double Submit + JSON Delivery |
 | Almacenamiento | MinIO (Object Storage) |
 | Seguridad Backend | Spring Security 6.x |
-| Control de Tráfico | RateLimitFilter (Custom Java) |
+| Control de Tráfico | `com.project.backend_api.security.RateLimitFilter` |
 | Auditoría de Datos | GlobalExceptionHandler (Validación 400) |
 | Herramientas de Test | PowerShell Pentesting Scripts (`audit/`) |

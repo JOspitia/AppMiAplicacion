@@ -49,6 +49,7 @@ export class IconComponent {
         'globe': 'globe',
         'building': 'building',
         'user': 'user',
+        'user-plus': 'user-plus',
         'users': 'users',
         'check': 'check',
         'x': 'times',
@@ -76,7 +77,19 @@ export class IconComponent {
         'lock': 'lock',
         'unlock': 'unlock',
         'settings': 'cog',
-        'log-out': 'sign-out'
+        'log-out': 'sign-out',
+        'money-bill': 'money-bill',
+        'refresh-cw': 'sync',
+        'refresh': 'sync',
+        'play': 'play',
+        'shield': 'shield',
+        'key': 'key',
+        'gauge': 'sliders-h',
+        'user-circle': 'user',
+        'user-edit': 'pencil',
+        'wallet': 'wallet',
+        'sitemap': 'sitemap',
+        'folder-open': 'folder-open'
     };
 
     isSvg(): boolean {

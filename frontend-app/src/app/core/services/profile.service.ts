@@ -27,7 +27,7 @@ export interface UserProfile {
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/profile'; // Assuming this endpoint will be created/mapped
+    private apiUrl = '/api/core/management/users/profile';
 
     getProfile(): Observable<UserProfile> {
         return this.http.get<UserProfile>(`${this.apiUrl}/me`);
@@ -50,18 +50,18 @@ export class ProfileService {
     }
 
     getCountries(): Observable<any[]> {
-        return this.http.get<any[]>('/api/geo/countries');
+        return this.http.get<any[]>('/api/core/administration/geo/countries');
     }
 
     getStates(countryId: string): Observable<any[]> {
-        return this.http.get<any[]>(`/api/geo/states?countryId=${countryId}`);
+        return this.http.get<any[]>(`/api/core/administration/geo/states?countryId=${countryId}`);
     }
 
     getCities(stateId: string): Observable<any[]> {
-        return this.http.get<any[]>(`/api/geo/cities?stateId=${stateId}`);
+        return this.http.get<any[]>(`/api/core/administration/geo/cities?stateId=${stateId}`);
     }
 
     getGenders(): Observable<any[]> {
-        return this.http.get<any[]>('/api/geo/genders');
+        return this.http.get<any[]>('/api/core/administration/geo/genders');
     }
 }

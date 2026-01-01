@@ -1,83 +1,68 @@
----
-description: Documentación específica del sistema de Formularios y Listados de Empresas (UX/UI y Lógica).
----
+# Sistema de Formulario de Compañía
 
-# Company Form System Documentation
+Este documento detalla la arquitectura técnica, la lógica de negocio y los estándares de diseño del módulo de Gestión de Compañías (`/core/companies`). Este sistema ha sido diseñado para ser robusto, escalable y con una experiencia de usuario de nivel empresarial.
 
-Este documento se centra específicamente en la interacción y estructura del sistema de formularios y listados dentro del módulo de empresas. Sirve como guía de referencia para la lógica de interfaz de usuario de este dominio.
+## 1. Visión General
 
-## 1. Visión General del Flujo
+El formulario de creación/edición de empresas utiliza un patrón de **Wizard (Asistente)** de 4 pasos para segmentar la carga cognitiva del usuario:
+1.  **Identidad**: Información legal y fiscal.
+2.  **Contacto**: Medios de comunicación y dominios.
+3.  **Ubicación**: Geografía y estado operativo.
+4.  **Branding**: Identidad visual y personalización.
 
-El sistema de gestión de empresas sigue un patrón **List-Detailed-Action**:
-1.  **List View (Directorio)**: Vista de alto nivel con filtros rápidos y acciones inmediatas (Estado).
-2.  **Form View (Gestión)**: Vista detallada para ingreso de datos complejos.
-3.  **Action Feedback**: Ciclo de confirmación y feedback visual para cada operación crítica.
+## 2. Componentes de UI y UX Premium
 
-## 2. Componente de Listado (`CompanyListComponent`)
+### 2.1 Identificador de Pasos (Step Indicator)
+- **Visual**: Línea de progreso con gradiente dinámico (`linear-gradient(to right, var(--primary), var(--primary-stop))`) y nodos interactivos.
+- **Efectos**: Sombras proyectadas (`shadow-primary/30`) y micro-animaciones en los nodos de los pasos.
+- **Estado**: Cambia de color y escala según el paso actual, completado o pendiente.
 
-### Estructura de la Tabla
-La tabla utiliza PrimeNG pero con una capa de personalización CSS intensiva para cumplir con el estándar "Human-Centric":
+### 2.2 Motor de Branding Corporativo
+- **Carga de Logo**: Implementa un área de arrastrar y soltar (Drag & Drop) con previsualización en tiempo real y desenfoque de fondo (`blur-sm`) para un efecto premium.
+- **Selector de Color**: Integración de un selector hexadecimal nativo (`type="color"`) que actualiza la variable `--primary` dinámicamente en el sistema (vía `BrandingService`).
 
-| Elemento | Especificación UX | Implementación Técnica |
-| :--- | :--- | :--- |
-| **Buscador** | Input con icono interno, padding amplio, sin bordes duros. | Clases CSS `pl-12`, `rounded-xl`, `border-slate-200`. Icono posicionado absolutamente. |
-| **Fila de Datos** | Hover suave, fondo alterno sutil, bordes inferiores solamente. | `hover:bg-slate-50`, `border-b`, `last:border-none`. |
-| **Columna Estado** | Badge visual que indica estado (Activo/Inactivo). | `bg-emerald-500/10` (Activo) vs `bg-red-500/10` (Inactivo). |
-| **Acciones** | Botones circulares "Ghost" con tooltips. | `p-button-rounded`, `p-button-text`. Botón de estado cambia icono/color dinámicamente. |
+### 2.3 Sistema Geográfico en Cascada
+- **Carga Secuencial**: Sigue un flujo lógico de `País -> Departamento -> Ciudad`.
+- **Integración con catálogos**: Consume servicios centralizados de geografía para asegurar la integridad de los datos de ubicación.
 
-### Lógica de Cambio de Estado (El "Toggle")
-El botón de estado no dispara la acción inmediatamente.
-1.  **Trigger**: Usuario hace clic en el botón (Icono Power/Ban).
-2.  **Intercepción**: Se abre `ConfirmDialogComponent` con un mensaje contextual ("¿Deseas reactivar...?" o "¿Estás seguro de desactivar...?").
-3.  **Confirmación**: Si el usuario acepta, se llama al servicio.
-4.  **Feedback**: Se muestra `AlertComponent` en la parte superior de la lista confirmando el éxito.
+### 2.4 Integración con AddressBuilder
+- Utiliza el componente compartido `<app-address-builder>` para la estandarización de direcciones físicas, delegando la construcción compleja a un sistema de selección granular.
 
-## 3. Componente de Formulario (`CompanyFormComponent`)
+## 3. Lógica de Formulario e Integridad
 
-### Layout "Glass Card"
-El formulario no es plano; flota sobre el fondo de la aplicación.
-- **Contenedor**: `bg-white/80` (Light) o `bg-[#0F172A]/90` (Dark).
-- **Efecto**: `backdrop-blur-xl`, `shadow-2xl`.
+### 3.1 FormArray para Sitios Web
+- Permite la gestión dinámica de múltiples sitios web corporativos, permitiendo al usuario agregar o eliminar campos según sea necesario.
 
-### Campos y Validacion
-Todos los campos son obligatorios y tienen feedback visual inmediato.
-- **NIT**: Campo clave, se resalta visualmente.
-- **Email Extension**: Input con prefijo visual ("@").
-- **Fechas**: Selectores de fecha para suscripciones.
+### 3.2 Gestión de Dominios
+- El campo `allowedDomain` es crítico para la seguridad, ya que restringe el registro de usuarios a un dominio de correo electrónico específico (ej: `@empresa.com`).
 
-### Lógica de Navegación
-- **Volver**: Botón "Atrás" siempre visible en la cabecera.
-- **Cancelar**: Botón secundario al final del formulario que redirige a la lista.
-- **Success**: Al guardar exitosamente, se muestra un mensaje breve y se redirige automáticamente (`Router.navigate`) a la lista.
+### 3.3 Protección de Estado Operativo
+- El interruptor de "Estado Operativo" está restringido a usuarios con rol `SUPER_ADMIN`, permitiendo la desactivación completa de la operación de una empresa en el SaaS.
 
-## 4. Componentes Compartidos Utilizados
+## 4. Directorio y Gestión de Listado
 
-Este subsistema hace uso intensivo de la librería de componentes compartidos (`shared/components`):
+La vista de administración de empresas (`CompanyListComponent`) incluye herramientas avanzadas de gestión:
+- **Status Toggle**: Un interruptor de estado (`p-toggleSwitch`) permite alternar instantáneamente entre empresas **Activas** e **Inactivas**.
+- **Filtrado Inteligente**: Implementado mediante `Signals` para asegurar una respuesta inmediata en el frontend.
+- **Acciones Rápidas**: Acceso a edición, gestión de suscripciones y activación/desactivación sin salir de la lista.
 
-- **`AppIcon`**: Abstracción de iconos (Feather/PrimeIcons) para consistencia.
-- **`AlertComponent`**: Para feedback de estado (banners).
-- **`ConfirmDialogComponent`**: Para decisiones críticas (modales).
+## 4. Integración con Backend
 
-## 5. Reglas de Estilo CSS (Tailwind)
+### 4.1 Endpoints (`CompanyController`)
+- `GET /api/companies/{id}`: Detalle completo de la empresa.
+- `POST /api/companies`: Creación inicial.
+- `PUT /api/companies/{id}`: Actualización de datos corporativos.
+- `POST /api/companies/{id}/logo`: Carga binaria del logo hacia MinIO.
 
-Para mantener la consistencia en el futuro, referirse a estas clases utilitarias clave usadas en este módulo:
+## 5. Estándares Visuales (Tailwind)
 
-```css
-/* Contenedores Principales */
-.glass-panel {
-    @apply bg-white/80 dark:bg-[#0F172A]/90 backdrop-blur-xl rounded-[2rem] border border-white/20 dark:border-slate-800 shadow-2xl;
-}
+- **Contenedor Glassmorphism**: `bg-white/80 dark:bg-slate-900/40 backdrop-blur-3xl`.
+- **Bordes Premium**: Bordes redondeados ultra-suaves (`rounded-[3.5rem]`) y sombras suaves.
+- **Inputs**: Estilizados con `bg-slate-50`, bordes sutiles y estados de foco con sombras proyectadas del color de marca.
 
-/* Inputs de Texto */
-.input-premium {
-    @apply w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all;
-}
+## 6. Futuro y Extensibilidad
 
-/* Badges de Estado */
-.badge-active {
-    @apply bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 dark:text-emerald-400;
-}
-.badge-inactive {
-    @apply bg-red-500/10 text-red-600 border border-red-500/20 dark:text-red-400;
-}
-```
+El sistema está preparado para:
+- Agregar campos personalizados por sector económico.
+- Implementar validaciones de NIT/RUT específicas por país.
+- Integrar mapas interactivos para geolocalización precisa.

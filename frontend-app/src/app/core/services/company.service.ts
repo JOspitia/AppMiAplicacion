@@ -72,7 +72,7 @@ export interface Company {
 @Injectable({ providedIn: 'root' })
 export class CompanyService {
     private http = inject(HttpClient);
-    private apiUrl = `${environment.apiUrl}/management/companies`;
+    private apiUrl = `${environment.apiUrl}/core/management/companies`;
 
     getAll(): Observable<Company[]> {
         return this.http.get<Company[]>(this.apiUrl);
@@ -91,8 +91,8 @@ export class CompanyService {
     }
 
     // Change active status (activate/inactivate)
-    setStatus(id: string, status: boolean): Observable<Company> {
-        return this.http.put<Company>(`${this.apiUrl}/${id}/status`, { status });
+    setStatus(id: string, status: boolean): Observable<void> {
+        return this.http.patch<void>(`${this.apiUrl}/${id}/toggle`, {});
     }
 
     delete(id: string): Observable<void> {
@@ -102,7 +102,7 @@ export class CompanyService {
     uploadLogo(companyId: string, file: File): Observable<any> {
         const formData = new FormData();
         formData.append('file', file);
-        return this.http.post(`${environment.apiUrl}/management/companies/${companyId}/logo`, formData);
+        return this.http.post(`${environment.apiUrl}/core/management/companies/${companyId}/logo`, formData);
     }
 
 }

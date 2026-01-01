@@ -1,5 +1,6 @@
 package com.project.backend_api.security;
 
+import com.project.backend_api.model.core.management.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -10,8 +11,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import com.project.backend_api.model.User;
 
 import java.security.Key;
 import java.util.Date;

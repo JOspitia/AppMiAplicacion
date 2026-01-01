@@ -6,19 +6,19 @@ description: Estándar de diseño Human-Centric para la interfaz de RR.HH.
 
 Este documento define la identidad visual para software de RR.HH., equilibrando la autoridad empresarial con la accesibilidad humana. **La unificación de colores es crítica para transmitir profesionalismo.**
 
-## 1. Definición de la Paleta de Colores Unificada
+## 1. Definición de la Paleta de Colores Dinámica
 
-Para cualquier implementación, utiliza EXCLUSIVAMENTE estos tokens de color. No uses colores genéricos de Tailwind (como purple-500, green-400) directamente en el HTML.
+Para cualquier implementación, utiliza EXCLUSIVAMENTE estos tokens de color. El sistema es dinámico y se basa en la empresa seleccionada.
 
 ```css
 :root {
-    /* 1. EL COLOR DE CONFIANZA (Primario) */
-    /* Indigo Corporativo: Transmite estabilidad y es el estándar en Tech-HR. */
-    --primary-color: #4f46e5;       /* Indigo 600 */
-    --primary-hover: #4338ca;      /* Indigo 700 */
+    /* 1. EL COLOR DE MARCA (Dinámico via BrandingService) */
+    --primary: #4f46e5;            /* Color base (Hex) */
+    --primary-rgb: 79, 70, 229;    /* Color base (RGB para opacidad) */
+    --primary-dark: #4338ca;       /* Sombra (15% más oscuro) */
+    --primary-light: #6366f1;      /* Resalte (20% más claro) */
     
     /* 2. EL COLOR DE ACCIÓN/CRECIMIENTO (Éxito) */
-    /* Emerald suave: Para estados "Activo", "Aprobado" o botones de conversión secundaria. */
     --success-color: #10b981;      /* Emerald 500 */
     
     /* 3. SEMÁNTICA DE ESTADOS */
@@ -32,20 +32,29 @@ Para cualquier implementación, utiliza EXCLUSIVAMENTE estos tokens de color. No
     --text-main: #1e293b;          /* Texto principal (Slate 800) */
     --text-muted: #64748b;         /* Texto secundario (Slate 500) */
     --border-main: #f1f5f9;        /* Bordes sutiles */
-
-    /* 5. TIPOGRAFÍA */
-    --font-main: "Plus Jakarta Sans", sans-serif;
 }
 
 /* Modo Oscuro - Midnight Blue */
 .dark {
-    --bg-light: #0f172a;           /* Slate 900 */
-    --bg-card: #1e293b;            /* Slate 800 */
-    --text-main: #f1f5f9;          /* Slate 100 */
+    --bg-light: #0b1120;           /* Midnight Blue (Slate 950) */
+    --bg-card: #1e293b;            /* Dark Card (Slate 800) */
+    --text-main: #f8fafc;          /* Off White (Slate 50) */
     --text-muted: #94a3b8;         /* Slate 400 */
     --border-main: rgba(255, 255, 255, 0.05);
 }
 ```
+
+## 2. Branding Dinámico (Empresa)
+
+El sistema soporta el cambio de identidad visual en tiempo real basado en la empresa del usuario:
+
+- **Mecánica**: El `BrandingService` intercepta la selección de empresa e inyecta las variables CSS directamente en `:root`.
+- **Primary RGB**: Es VITAL usar `--primary-rgb` para efectos de resplandor (glow) y estados de selección.
+- **Uso en Glows**: Para evitar la saturación visual, los resplandores deben usar opacidades bajas:
+    - Fondos ornamentales: `rgba(var(--primary-rgb), 0.05)`.
+    - Sombras de tarjetas: `0 25px 50px -12px rgba(var(--primary-rgb), 0.25)`.
+    - Highlights de selección: `rgba(var(--primary-rgb), 0.1)`.
+
 
 ## 2. Reglas de Unificación Visual
 

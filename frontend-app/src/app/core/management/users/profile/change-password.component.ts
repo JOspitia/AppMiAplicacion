@@ -22,7 +22,7 @@ import { IconComponent } from '../../../../shared/components/icon.component';
                 <div>
                      <span class="text-primary font-bold tracking-widest text-[10px] uppercase block mb-1">Seguridad de Cuenta</span>
                      <h1 class="text-4xl font-black text-slate-900 dark:text-white">
-                        Robustecer <span class="bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent">Contraseña</span>
+                        Robustecer <span class="bg-clip-text text-transparent" [style.backgroundImage]="'linear-gradient(to right, var(--primary), var(--primary-stop))'">Contraseña</span>
                      </h1> 
                 </div>
                 <button [routerLink]="['/core/management/users/profile']" class="p-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm">
@@ -40,7 +40,7 @@ import { IconComponent } from '../../../../shared/components/icon.component';
 
         <!-- Main Card Container -->
         <div class="max-w-4xl mx-auto">
-            <div class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[3.5rem] border border-white/20 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-500">
+            <div class="bg-white/80 dark:bg-[var(--bg-card)] backdrop-blur-3xl rounded-[3.5rem] border border-white/20 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-500">
                 <div class="p-12 md:p-16 lg:p-20">
                     
                     <!-- Change Password Form -->   
@@ -108,7 +108,7 @@ export class ChangePasswordComponent implements OnInit {
             confirmPassword: ['', [Validators.required]]
         }, { validators: this.passwordsMatch });
 
-    
+
     }
 
     private passwordsMatch(group: FormGroup) {

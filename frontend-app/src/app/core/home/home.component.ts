@@ -7,16 +7,16 @@ import { IconComponent } from '../../shared/components/icon.component';
 
 
 interface UserProfile {
-    firstName: string;
-    companyName: string;
+  firstName: string;
+  companyName: string;
 }
 
 @Component({
-    selector: 'app-home',
-    standalone: true,
-    imports: [CommonModule, RouterModule, IconComponent],
+  selector: 'app-home',
+  standalone: true,
+  imports: [CommonModule, RouterModule, IconComponent],
 
-    template: `
+  template: `
     <div class="min-h-[calc(100vh-8rem)] flex flex-col">
       <!-- Personalized Welcome Section -->
       <div class="mb-14 animate-fadeinup">
@@ -35,7 +35,7 @@ interface UserProfile {
 
         <div class="space-y-6">
           <h2 class="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-            ¡Hola, <span class="bg-gradient-to-r from-primary via-indigo-500 to-violet-500 bg-clip-text text-transparent uppercase">{{ userProfile().firstName }}</span>! 
+            ¡Hola, <span class="bg-clip-text text-transparent uppercase" [style.backgroundImage]="'linear-gradient(to right, var(--primary), var(--primary-stop))'">{{ userProfile().firstName }}</span>! 
             <span class="inline-block animate-bounce">👋</span>
           </h2>
           <p class="text-lg md:text-xl text-slate-500 dark:text-slate-400 max-w-3xl leading-relaxed font-medium">
@@ -56,7 +56,8 @@ interface UserProfile {
           style="animation: fadeinup 0.5s ease-out both;">
           
           <!-- Gradient Overlay on Hover -->
-          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-indigo-600 to-indigo-900"></div>
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+               [style.background]="'linear-gradient(135deg, var(--primary), var(--primary-dark))'"></div>
           
           <!-- Content -->
           <div class="relative z-10">
@@ -77,7 +78,8 @@ interface UserProfile {
             </p>
             
             <!-- Arrow -->
-            <div class="mt-6 flex items-center gap-2 text-primary group-hover:text-white transition-colors">
+            <div class="mt-6 flex items-center gap-2 group-hover:text-white transition-colors"
+                 [style.color]="'var(--primary)'">
               <span class="text-sm font-bold">Explorar</span>
               <i class="pi pi-arrow-right text-sm transition-transform group-hover:translate-x-2"></i>
             </div>
@@ -103,8 +105,8 @@ interface UserProfile {
         <div class="relative bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-8 overflow-hidden border border-slate-700/50">
           <!-- Background Pattern -->
           <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-primary blur-[100px]"></div>
-            <div class="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500 blur-[80px]"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 blur-[100px]" [style.backgroundColor]="'var(--primary)'"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 blur-[80px]" [style.backgroundColor]="'var(--primary-dark)'"></div>
           </div>
           
           <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -130,7 +132,7 @@ interface UserProfile {
       </div>
     </div>
     `,
-    styles: [`
+  styles: [`
     @keyframes fadeinup {
       from {
         opacity: 0;
@@ -144,36 +146,36 @@ interface UserProfile {
   `]
 })
 export class HomeComponent implements OnInit {
-    private dashboardService = inject(DashboardService);
-    private http = inject(HttpClient);
+  private dashboardService = inject(DashboardService);
+  private http = inject(HttpClient);
 
-    userProfile = signal<UserProfile>({ firstName: 'Usuario', companyName: 'tu empresa' });
-    modules = this.dashboardService.modules;
+  userProfile = signal<UserProfile>({ firstName: 'Usuario', companyName: 'tu empresa' });
+  modules = this.dashboardService.modules;
 
-    ngOnInit() {
-        this.loadUserProfile();
-        if (this.modules().length === 0) {
-            this.dashboardService.loadUserModules().subscribe();
+  ngOnInit() {
+    this.loadUserProfile();
+    if (this.modules().length === 0) {
+      this.dashboardService.loadUserModules().subscribe();
+    }
+  }
+
+  private loadUserProfile() {
+    // Load user info
+    this.http.get<any>('/api/auth/me').subscribe({
+      next: (user) => {
+        if (user && user.firstName) {
+          this.userProfile.update(p => ({ ...p, firstName: user.firstName }));
         }
-    }
+      }
+    });
 
-    private loadUserProfile() {
-        // Load user info
-        this.http.get<any>('/api/auth/me').subscribe({
-            next: (user) => {
-                if (user && user.firstName) {
-                    this.userProfile.update(p => ({ ...p, firstName: user.firstName }));
-                }
-            }
-        });
-
-        // Load from company context
-        this.http.get<any>('/api/companies/current').subscribe({
-            next: (company) => {
-                if (company && company.name) {
-                    this.userProfile.update(p => ({ ...p, companyName: company.name }));
-                }
-            }
-        });
-    }
+    // Load from company context
+    this.http.get<any>('/api/companies/current').subscribe({
+      next: (company) => {
+        if (company && company.name) {
+          this.userProfile.update(p => ({ ...p, companyName: company.name }));
+        }
+      }
+    });
+  }
 }

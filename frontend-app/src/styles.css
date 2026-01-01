@@ -7,8 +7,9 @@
 
 /* Global Design tokens */
 :root {
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
+  --primary-color: var(--primary, #4f46e5);
+  --primary-rgb: 79, 70, 229;
+  --primary-hover: var(--primary-dark, #4338ca);
   --success-color: #10b981;
   --warning-color: #f59e0b;
   --danger-color: #ef4444;
@@ -19,6 +20,9 @@
   --text-main: #1e293b;
   --text-muted: #64748b;
   --border-main: #f1f5f9;
+
+  /* Helper for shadows and rings */
+  --primary-ring: color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
 
 html {
@@ -26,9 +30,10 @@ html {
 }
 
 .dark {
-  --bg-light: #0f172a;
+  --bg-light: #0b1120;
   --bg-card: #1e293b;
-  --text-main: #f1f5f9;
+  --bg-sidebar: #0f172a;
+  --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --border-main: rgba(255, 255, 255, 0.05);
 }
@@ -118,21 +123,21 @@ html {
     @apply h-11 text-sm rounded-2xl border-slate-200 dark:border-white/10 !important;
     @apply bg-white dark:bg-white/5 !important;
     @apply font-bold transition-all px-4 !important;
-    @apply focus:border-primary focus:ring-4 focus:ring-indigo-500/20 !important;
+    @apply focus:border-primary focus:ring-4 focus:ring-[var(--primary-ring)] !important;
   }
 
   /* Dropdown/Select Visuals */
   .p-select,
   .p-dropdown {
     @apply rounded-2xl border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 !important;
-    @apply focus-within:border-primary focus-within:ring-4 focus-within:ring-indigo-500/20 !important;
+    @apply focus-within:border-primary focus-within:ring-4 focus-within:ring-[var(--primary-ring)] !important;
   }
 
   /* Datepicker Visuals */
   .p-datepicker,
   .p-calendar {
     @apply rounded-2xl border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 !important;
-    @apply focus-within:border-primary focus-within:ring-4 focus-within:ring-indigo-500/20 !important;
+    @apply focus-within:border-primary focus-within:ring-4 focus-within:ring-[var(--primary-ring)] !important;
   }
 
   /* Overlays (Dropdown/Datepicker panels) */
@@ -141,7 +146,21 @@ html {
   .p-datepicker-panel,
   .p-calendar-panel {
     @apply rounded-[2.5rem] border-slate-100 dark:border-white/10 shadow-2xl !important;
-    @apply backdrop-blur-3xl bg-white/90 dark:bg-slate-900/90 !important;
+    @apply backdrop-blur-3xl bg-white/90 dark:bg-[#0f172a]/95 !important;
+  }
+
+  /* Custom Select option hover/selected states */
+  .p-select-option.p-focus,
+  .p-select-option:not(.p-selected):not(.p-disabled).p-focus,
+  .p-select-option:not(.p-selected):not(.p-disabled):hover {
+    background: var(--p-select-option-focus-background) !important;
+    color: var(--primary) !important;
+  }
+
+  .p-select-option.p-selected {
+    background: var(--p-select-option-selected-background) !important;
+    color: var(--primary) !important;
+    font-weight: 700 !important;
   }
 
   /* Password Input Standardization */
@@ -152,7 +171,7 @@ html {
   .p-password input {
     /* Visuals are applied to the input inside p-password */
     @apply border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 !important;
-    @apply focus:border-primary focus:ring-4 focus:ring-indigo-500/20 !important;
+    @apply focus:border-primary focus:ring-4 focus:ring-[var(--primary-ring)] !important;
   }
 
   /* InputNumber Standardization */
@@ -191,9 +210,84 @@ html {
   .p-button-lg {
     @apply h-14 text-base !important;
   }
+
+  /* ========================================
+     PRIME-NG TABLE & PAGINATOR STANDARDIZATION
+     Fixes dark backgrounds to match the theme
+     ======================================== */
+
+  .p-datatable {
+    @apply bg-transparent !important;
+  }
+
+  .p-datatable-thead>tr>th {
+    @apply bg-transparent border-slate-200 dark:border-slate-800/50 !important;
+    @apply text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-xs !important;
+  }
+
+  .p-datatable-tbody>tr {
+    @apply bg-transparent border-slate-200 dark:border-slate-800/50 !important;
+  }
+
+  .p-paginator {
+    @apply bg-transparent border-t border-slate-200 dark:border-slate-800/50 p-4 !important;
+  }
+
+  .p-paginator .p-paginator-pages .p-paginator-page {
+    @apply rounded-xl transition-all !important;
+  }
+
+  .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background-color: rgba(var(--primary-rgb), 0.1) !important;
+    color: var(--primary) !important;
+    border-color: rgba(var(--primary-rgb), 0.2) !important;
+  }
+
+  .p-paginator {
+    @apply text-slate-600 dark:text-slate-400 !important;
+  }
+
+  .p-paginator button:not(.p-highlight):not(.p-disabled):hover {
+    @apply bg-slate-100 dark:bg-white/5 !important;
+  }
+}
+
+/* Global Brand Utilities */
+.bg-brand-gradient {
+  background: linear-gradient(135deg, var(--primary), var(--primary-stop)) !important;
+}
+
+.text-brand-gradient {
+  background: linear-gradient(to right, var(--primary), var(--primary-stop));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.badge-brand {
+  background-color: var(--p-select-option-focus-background) !important;
+  color: var(--primary) !important;
+  border: 1px solid var(--p-select-option-selected-background) !important;
+  @apply px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider !important;
 }
 
 /* Badge Utility */
 .badge-indigo {
   @apply bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20;
+}
+
+/* ========================================
+   PRIME-NG TOKEN OVERRIDES (Final Priority)
+   ======================================== */
+.dark {
+  --p-datatable-header-background: transparent;
+  --p-datatable-row-background: transparent;
+  --p-datatable-row-hover-background: rgba(255, 255, 255, 0.03);
+  --p-paginator-background: transparent;
+  --p-listbox-background: #1e293b;
+  --p-listbox-list-background: transparent;
+  --p-select-background: #1e293b;
+  --p-select-panel-background: #1e293b;
+  --p-datepicker-panel-background: #1e293b;
+  --p-overlay-background: #1e293b;
+  --p-content-background: transparent;
 }

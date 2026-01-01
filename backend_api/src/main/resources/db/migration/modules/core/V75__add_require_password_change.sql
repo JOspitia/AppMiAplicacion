@@ -1,0 +1,2 @@
+ALTER TABLE security.users
+ADD COLUMN IF NOT EXISTS require_password_change BOOLEAN NOT NULL DEFAULT FALSE;

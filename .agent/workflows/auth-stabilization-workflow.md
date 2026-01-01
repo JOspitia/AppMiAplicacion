@@ -17,14 +17,20 @@ Para garantizar la estabilidad en entornos modernos (SPA + Cloudflare + Spring S
     - Lee el nuevo token CSRF **directamente del cuerpo JSON** de la respuesta.
     - **Por qué:** Elimina la dependencia de `document.cookie`, tiempos de espera del navegador y condiciones de carrera.
 
-### B. Configuración de Cookies (Compatibilidad Cloudflare)
-Las cookies se generan dinámicamente según el entorno (`application.properties` -> `app.security.cookie-secure`):
+### B. Configuración de Cookies y Transporte Híbrido (Fallback)
+Las cookies primarias (`HttpOnly`) son el método preferido por seguridad. Sin embargo, para entornos con restricciones estrictas de dominio/puerto (ej. localhost vs dominio simulado) donde el navegador bloquea cookies, implementamos una **Estrategia Híbrida de Transporte**:
 
-| Cookie | Path | HttpOnly | SameSite (Prod) | SameSite (Dev) | Razón |
-|--------|------|----------|-----------------|----------------|-------|
-| `accessToken` | `/` | Sí | `None` | `Lax` | Path `/` garantiza sobrescritura y compatibilidad total SPA. |
-| `refreshToken` | `/api/auth/refreshtoken` | Sí | `None` | `Lax` | Restringido al endpoint de renovación por seguridad. |
-| `XSRF-TOKEN` | `/` | **NO** | `None` | `Lax` | Debe ser legible por JS (HttpOnly=false). |
+1.  **Backend (`AuthService` / `LoginResponse`)**: Retorna el JWT en el cuerpo de la respuesta (`token`), además de establecer la cookie.
+2.  **Frontend (`AuthService`)**: Guarda este token en `localStorage` como respaldo.
+3.  **Frontend (`AuthInterceptor`)**:
+    *   Siempre envía `withCredentials: true` (para intentar Cookies).
+    *   **Además**, inyecta el header `Authorization: Bearer <token>` si el token existe en `localStorage`.
+
+### C. Filtro de Seguridad (`com.project.backend_api.auth.JwtTokenFilter.java`) Reforzado
+El filtro de seguridad implementa una **Estrategia Híbrida (Priorización)**:
+1.  **Prioridad 1 (Header)**: Intenta leer el header `Authorization: Bearer <token>`. Es la fuente más confiable para SPAs y evita problemas de "Third-party Cookies".
+2.  **Prioridad 2 (Cookie)**: Si el header no existe, lee la cookie `auth_token` (HttpOnly).
+3.  **Contexto**: Inyecta `CustomUserDetails` con el `companyId` (recuperado de cookie `companyContext` o cabecera `X-Company-Id`).
 
 ---
 
@@ -97,9 +103,11 @@ Utiliza esta lista antes de cualquier despliegue para asegurar que la autenticac
 *   **Causa:** El endpoint `/api/auth/login` no está en la lista `PUBLIC_ENDPOINTS` del interceptor.
 *   **Solución:** Agregar la URL exacta a la lista en `auth.interceptor.ts`.
 
-### Síntoma: Cookies no se guardan en Producción (Cloudflare)
-*   **Causa:** `app.security.cookie-secure` está en `false` o no hay HTTPS.
 *   **Solución:** `SameSite=None` REQUIERE `Secure=true`. Configurar la env var `APP_SECURITY_COOKIE_SECURE=true`.
+
+### Síntoma: "ClassCastException: class jdk.proxy... cannot be cast to CustomUserDetailsService"
+*   **Causa:** Spring Security envuelve el servicio en un Proxy para manejar transacciones y seguridad.
+*   **Solución:** Inyectar directamente `com.project.backend_api.security.CustomUserDetailsService` (clase) usando `@Autowired` y `@Lazy` en el filtro.
 
 ---
 

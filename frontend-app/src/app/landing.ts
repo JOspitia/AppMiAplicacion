@@ -16,21 +16,21 @@ import { ContactFormComponent } from './public/contact-form/contact-form';
     <section class="relative w-full min-h-[90vh] flex flex-col pt-32 pb-20 overflow-hidden bg-white dark:bg-slate-900">
         <!-- Background Effects -->
         <div class="absolute inset-0 pointer-events-none">
-            <div class="absolute -top-[10%] left-[25%] w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full"></div>
-            <div class="absolute -bottom-[10%] right-[25%] w-[600px] h-[600px] bg-info/5 blur-[120px] rounded-full"></div>
+            <div class="absolute -top-[10%] left-[25%] w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full"></div>
+            <div class="absolute -bottom-[10%] right-[25%] w-[600px] h-[600px] bg-sky-500/5 blur-[120px] rounded-full"></div>
         </div>
 
         <div class="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center z-10">
             <!-- Text Content -->
             <div class="text-center lg:text-left">
                 <span class="inline-flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-widest badge-indigo rounded-full mb-8 backdrop-blur-md">
-                    <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                    <span class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
                     Plataforma SaaS Empresarial
                 </span>
                 
                 <h1 class="text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight mb-8 text-slate-900 dark:text-white">
                     Automatiza tu <br>
-                    <span class="bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent">Gestión Empresarial</span>
+                    <span class="bg-gradient-to-r from-indigo-600 to-violet-400 bg-clip-text text-transparent">Gestión Empresarial</span>
                 </h1>
                 
                 <p class="text-lg lg:text-xl text-slate-500 dark:text-slate-400 mb-10 max-w-lg mx-auto lg:mx-0 leading-relaxed">
@@ -38,7 +38,7 @@ import { ContactFormComponent } from './public/contact-form/contact-form';
                 </p>
                 
                 <div class="flex flex-wrap gap-4 justify-center lg:justify-start mb-12">
-                    <button pButton pRipple label="Atención Personalizada" icon="pi pi-arrow-right" iconPos="right" class="p-button-lg font-bold bg-primary text-white shadow-xl shadow-primary/20 rounded-2xl px-8 py-4 hover:scale-105 transition-transform"></button>
+                    <button pButton pRipple label="Atención Personalizada" icon="pi pi-arrow-right" iconPos="right" class="p-button-lg font-bold bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 rounded-2xl px-8 py-4 hover:scale-105 transition-transform"></button>
                     
                     <button pButton pRipple label="Ver Demo" icon="pi pi-play" class="p-button-lg p-button-outlined font-bold border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 rounded-2xl px-8 py-4"></button>
                 </div>
@@ -46,15 +46,15 @@ import { ContactFormComponent } from './public/contact-form/contact-form';
                  <!-- Micro Stats -->
                 <div class="flex gap-10 justify-center lg:justify-start pt-8 border-t border-slate-200 dark:border-white/5">
                     <div>
-                        <span class="block text-2xl font-black text-primary">500+</span>
+                        <span class="block text-2xl font-black text-indigo-600">500+</span>
                         <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Empresas</span>
                     </div>
                     <div>
-                        <span class="block text-2xl font-black text-primary">99.9%</span>
+                        <span class="block text-2xl font-black text-indigo-600">99.9%</span>
                         <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Uptime</span>
                     </div>
                     <div>
-                        <span class="block text-2xl font-black text-primary">24/7</span>
+                        <span class="block text-2xl font-black text-indigo-600">24/7</span>
                         <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Soporte</span>
                     </div>
                 </div>
@@ -69,15 +69,15 @@ import { ContactFormComponent } from './public/contact-form/contact-form';
     <section id="features" class="py-24 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-white/5">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-16 max-w-2xl mx-auto">
-                <span class="text-primary font-bold tracking-widest text-xs uppercase mb-2 block">Características</span>
+                <span class="text-indigo-600 font-bold tracking-widest text-xs uppercase mb-2 block">Características</span>
                 <h2 class="text-4xl font-black text-slate-900 dark:text-white mb-4">Todo lo que necesitas</h2>
                 <p class="text-slate-500 dark:text-slate-400">Potentes herramientas diseñadas para escalar tu negocio sin complicaciones.</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
-                <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-primary/30 transition-all hover:-translate-y-1 hover:shadow-xl group">
-                    <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-indigo-500/30 transition-all hover:-translate-y-1 hover:shadow-xl group">
+                    <div class="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 transition-transform">
                         <i class="pi pi-bolt text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Automatización</h3>
@@ -87,8 +87,8 @@ import { ContactFormComponent } from './public/contact-form/contact-form';
                 </div>
 
                 <!-- Feature 2 -->
-                 <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-primary/30 transition-all hover:-translate-y-1 hover:shadow-xl group">
-                    <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                 <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-indigo-500/30 transition-all hover:-translate-y-1 hover:shadow-xl group">
+                    <div class="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 transition-transform">
                         <i class="pi pi-shield text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Seguridad Total</h3>
@@ -98,8 +98,8 @@ import { ContactFormComponent } from './public/contact-form/contact-form';
                 </div>
 
                 <!-- Feature 3 -->
-                 <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-primary/30 transition-all hover:-translate-y-1 hover:shadow-xl group">
-                    <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                 <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-indigo-500/30 transition-all hover:-translate-y-1 hover:shadow-xl group">
+                    <div class="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 transition-transform">
                         <i class="pi pi-chart-line text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Analítica Avanzada</h3>

@@ -1,8 +1,10 @@
 package com.project.backend_api.security;
 
-import com.project.backend_api.model.RefreshToken;
-import com.project.backend_api.repository.RefreshTokenRepository;
-import com.project.backend_api.repository.UserRepository;
+
+
+import com.project.backend_api.model.core.administration.RefreshToken;
+import com.project.backend_api.repository.core.administration.RefreshTokenRepository;
+import com.project.backend_api.repository.core.management.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,3 +50,9 @@ public class RefreshTokenService {
         return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
     }
 }
+
+
+
+
+
+

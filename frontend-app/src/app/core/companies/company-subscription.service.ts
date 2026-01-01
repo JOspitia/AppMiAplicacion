@@ -1,0 +1,27 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface ModuleSubscription {
+    id: string; // Module ID
+    code: string;
+    name: string;
+    description: string;
+    isSubscribed: boolean;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class CompanySubscriptionService {
+    private http = inject(HttpClient);
+    private apiUrl = '/api/core/management/companies';
+
+    listModules(companyId: string): Observable<ModuleSubscription[]> {
+        return this.http.get<ModuleSubscription[]>(`${this.apiUrl}/${companyId}/subscriptions`);
+    }
+
+    toggleModule(companyId: string, moduleId: string): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/${companyId}/subscriptions/${moduleId}/toggle`, {});
+    }
+}

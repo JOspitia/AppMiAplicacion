@@ -17,13 +17,13 @@ interface CarouselImage {
     <div class="relative hidden lg:block perspective-1000">
       
       <!-- Ambient Background Glows -->
-      <div class="absolute -top-20 -right-20 w-64 h-64 bg-primary/20 blur-[100px] rounded-full animate-pulse"></div>
-      <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full delay-700"></div>
+      <div class="absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/20 blur-[100px] rounded-full animate-pulse"></div>
+      <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-sky-500/10 blur-[100px] rounded-full delay-700"></div>
 
       <!-- Floating Decoration 1: Status Card -->
       <div class="absolute -left-12 top-1/4 z-20 animate-float">
         <div class="glass p-4 rounded-2xl shadow-xl flex items-center gap-4 border-white/20">
-          <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+          <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-600">
             <i class="pi pi-users text-lg"></i>
           </div>
           <div>
@@ -36,7 +36,7 @@ interface CarouselImage {
       <!-- Floating Decoration 2: Performance Card -->
       <div class="absolute -right-8 bottom-12 z-20 animate-float-delayed">
         <div class="glass p-4 rounded-2xl shadow-xl flex items-center gap-4 border-white/20">
-          <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          <div class="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600">
             <i class="pi pi-bolt text-lg"></i>
           </div>
           <div>
@@ -76,7 +76,7 @@ interface CarouselImage {
                 <div class="w-full h-full flex items-center justify-center p-12">
                   <div class="image-container group/image relative">
                     <!-- Subtle glow behind image -->
-                    <div class="absolute -inset-4 bg-primary/20 blur-2xl rounded-2xl opacity-0 group-hover/image:opacity-100 transition-opacity duration-500"></div>
+                    <div class="absolute -inset-4 bg-indigo-500/20 blur-2xl rounded-2xl opacity-0 group-hover/image:opacity-100 transition-opacity duration-500"></div>
                     
                     <img
                       [src]="image.url || fallbackDataUrl"
@@ -99,7 +99,7 @@ interface CarouselImage {
 
           <ng-template #loadingTemplate>
             <div class="flex flex-col items-center">
-              <div class="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin mb-4"></div>
+              <div class="w-12 h-12 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin mb-4"></div>
               <span class="text-[10px] tracking-[0.3em] uppercase opacity-40 font-black">Cargando Sistema...</span>
             </div>
           </ng-template>
@@ -108,12 +108,12 @@ interface CarouselImage {
         <!-- Floating Status (Dynamic Badge) -->
         <div *ngIf="showStatusBadge" 
              class="absolute top-16 right-6 z-30 animate-in fade-in slide-in-from-right-4 duration-1000">
-          <div class="glass p-2 border border-primary/20 rounded-full flex items-center gap-2 pr-4 shadow-xl">
+          <div class="glass p-2 border border-indigo-500/20 rounded-full flex items-center gap-2 pr-4 shadow-xl">
              <div class="flex h-2 w-2 relative ml-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/40 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-500/40 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
              </div>
-             <span class="text-[9px] font-bold text-primary uppercase tracking-tighter">Servidor: Online</span>
+             <span class="text-[9px] font-bold text-indigo-600 uppercase tracking-tighter">Servidor: Online</span>
              <button (click)="showStatusBadge = false" class="ml-2 w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] hover:bg-slate-300 transition-colors">&times;</button>
           </div>
         </div>
