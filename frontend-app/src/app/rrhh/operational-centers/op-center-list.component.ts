@@ -98,12 +98,12 @@ import { OperationalCenterService, OperationalCenter } from '../../core/services
                         </td>
                         <td class="py-6 px-4">
                             <div class="flex items-center gap-4">
-                                <div class="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform">
+                                <div class="h-10 w-10 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform">
                                     <app-icon name="archive" size="18"></app-icon>
                                 </div>
                                 <div class="flex flex-col">
                                     <span class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ item.name }}</span>
-                                    <span class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">{{ item.description || 'Sin descripción' }}</span>
+                                    <span class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1" [pTooltip]="item.description || 'Sin descripción'" tooltipStyleClass="tooltip-wide">{{ item.description || 'Sin descripción' }}</span>
                                 </div>
                             </div>
                         </td>

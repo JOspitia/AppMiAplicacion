@@ -66,3 +66,18 @@ Se ha definido un mapa de rutas para la expansión de la aplicación, siguiendo 
 /rrhh/document-types
 /rrhh/employees
 ```
+
+## 7. Patrones de Listas y Formularios (CRUD Standard)
+
+Para garantizar la consistencia "Premium" en todos los módulos (Empresas, Usuarios, Roles, Sedes, etc.), se deben seguir estos estándares de feedback visual:
+
+### 7.1 Feedback en Listados
+- **Empty States Estilizados**: Nunca mostrar una tabla vacía sin más. Usar un contenedor con icono de búsqueda y mensaje claro.
+- **Filtros de Estado Reactivos**: Usar `p-toggleSwitch` para alternar entre Activos/Inactivos inmediatamente.
+- **Tooltips Compactos**: Usar el estilo `.tooltip-wide` para descripciones largas, evitando barras de desplazamiento internas.
+
+### 7.2 Feedback en Guardado (Stability Pattern)
+- **Spinners de Acción**: Todos los botones de envío (`Guardar`, `Crear`, `Actualizar`) deben mostrar un spinner animado (`pi-spinner`) mientras `loading()` sea true.
+- **Deshabilitación Preventiva**: El botón debe deshabilitarse visualmente (`disabled:opacity-70`) para evitar clics dobles.
+- **Persistencia de Carga**: NO desactivar el estado `loading` inmediatamente tras el éxito. Mantenerlo activo mientras se muestra el mensaje de confirmación hasta que ocurra la navegación final. Esto proporciona un feedback fluido y profesional.
+- **Standard Delay**: Usar un `setTimeout` de 1500ms a 2000ms antes de la redirección para que el usuario pueda leer el mensaje de éxito.

@@ -60,3 +60,9 @@ El sistema cuenta con un sincronizador de datos geográficos para poblar el cat�
 1. En el listado, usar el icono de prohibición (`pi-ban`).
 2. Confirmar en el diálogo de seguridad.
 3. La sede pasará a estado "Inactiva" y solo será visible activando el filtro de inactivos.
+
+## 6. Aspectos a Tener en Cuenta (Stability & UI)
+
+- **Confusión de Rutas**: Diferenciar claramente entre `/core/management/locations` (Sync Geográfico) y `/rrhh/sedes` (Sedes Físicas).
+- **Address Builder Synchronization**: Cualquier cambio en el modelo `Location` debe reflejarse en los `@Output` del componente `AddressBuilder`.
+- **Feedback de Guardado**: Seguir el patrón de persistencia de carga (`loading signal`) en el botón de guardado para asegurar una transición "Premium" a la lista.

@@ -192,10 +192,10 @@ import { RoleService, Role } from '../../services/role.service';
                             Cancelar
                         </button>
                         <button type="button" (click)="onSubmit()" [disabled]="loading()"
-                                class="px-10 py-3 bg-primary text-white rounded-2xl hover:scale-105 active:scale-95 transition-all font-bold shadow-lg shadow-primary/30 flex items-center gap-2">
+                                class="px-10 py-3 bg-primary text-white rounded-2xl hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed transition-all font-bold shadow-lg shadow-primary/30 flex items-center gap-2">
                             <app-icon *ngIf="!loading()" name="save" size="18"></app-icon>
-                            <span *ngIf="!loading()">{{ isEditMode() ? 'Actualizar Usuario' : 'Crear Usuario' }}</span>
-                            <span *ngIf="loading()">Procesando...</span>
+                            <app-icon *ngIf="loading()" icon="pi-spin pi-spinner" size="18"></app-icon>
+                            <span>{{ loading() ? 'Procesando...' : (isEditMode() ? 'Actualizar Usuario' : 'Crear Usuario') }}</span>
                         </button>
                     </div>
 
@@ -304,7 +304,7 @@ export class UserFormComponent implements OnInit {
         if (this.isEditMode() && this.realUserId) {
             this.userService.updateRoles(this.realUserId, userData.roleIds).subscribe({
                 next: () => {
-                    this.loading.set(false);
+                    // We DON'T set loading to false here to maintain the button state until navigation
                     this.successMessage.set('Roles actualizados exitosamente.');
                     setTimeout(() => this.router.navigate(['/core/management/users']), 1500);
                 },
@@ -316,7 +316,7 @@ export class UserFormComponent implements OnInit {
         } else {
             this.userService.create(userData).subscribe({
                 next: () => {
-                    this.loading.set(false);
+                    // We DON'T set loading to false here to maintain the button state until navigation
                     this.successMessage.set('Usuario registrado exitosamente. Se han enviado las credenciales por correo.');
                     setTimeout(() => this.router.navigate(['/core/management/users']), 2000);
                 },

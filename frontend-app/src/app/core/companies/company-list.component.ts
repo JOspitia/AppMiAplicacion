@@ -41,7 +41,7 @@ import { computed } from '@angular/core';
                 </h1>
                 <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm">Gestiona las entidades legales y sucursales del sistema.</p>
             </div>
-            <a *ngIf="isSuperAdmin()" routerLink="/core/companies/create" 
+            <a *ngIf="isSuperAdmin()" routerLink="/core/management/companies/create" 
                class="flex items-center gap-2 bg-primary hover:bg-primary-600 text-white px-5 py-2.5 rounded-full font-bold shadow-lg shadow-primary/30 transition-all transform hover:scale-105 active:scale-95">
                 <app-icon name="plus" size="18"></app-icon>
                 <span>Nueva Empresa</span>
@@ -96,7 +96,7 @@ import { computed } from '@angular/core';
                         </td>
                         <td class="py-6 px-4">
                             <div class="flex items-center gap-4">
-                                <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform overflow-hidden border border-white/10">
+                                <div class="h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform overflow-hidden border border-white/10">
                                     <img *ngIf="company.logoUrl" [src]="getLogoUrl(company.logoUrl)" alt="Logo" class="w-full h-full object-contain p-2 bg-white">
                                     <span *ngIf="!company.logoUrl">{{ company.name.substring(0, 2).toUpperCase() }}</span>
                                 </div>
@@ -110,7 +110,7 @@ import { computed } from '@angular/core';
                             <div class="flex flex-col text-sm gap-1">
                                 <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400" *ngIf="company.notificationEmail">
                                     <i class="pi pi-envelope text-[10px] opacity-70 text-primary"></i>
-                                    <span class="text-[11px] font-medium">{{ company.notificationEmail }}</span>
+                                    <span class="text-[11px] font-medium truncate max-w-[180px]" [pTooltip]="company.notificationEmail" tooltipStyleClass="tooltip-wide">{{ company.notificationEmail }}</span>
                                 </div>
                                 <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400" *ngIf="company.mainPhone">
                                     <i class="pi pi-phone text-[10px] opacity-70 text-primary"></i>
@@ -121,7 +121,7 @@ import { computed } from '@angular/core';
                         <td class="py-6 px-4">
                              <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm" *ngIf="company.streetAddress; else noAddress">
                                 <i class="pi pi-map-marker text-[10px] opacity-70 text-primary"></i>
-                                <span class="truncate max-w-[150px] text-[11px] font-medium" [title]="company.streetAddress">{{ company.streetAddress }}</span>
+                                <span class="line-clamp-2 overflow-hidden text-[11px] font-medium pr-4" [pTooltip]="company.streetAddress" tooltipStyleClass="tooltip-wide">{{ company.streetAddress }}</span>
                             </div>
                             <ng-template #noAddress>
                                 <span class="text-slate-400 text-[10px] italic">No registrada</span>
@@ -137,12 +137,12 @@ import { computed } from '@angular/core';
                         <td class="py-6 px-4 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <button *ngIf="canEditCompany()" pButton icon="pi pi-pencil" 
-                                        [routerLink]="['/core/companies/edit', company.id]"
+                                        [routerLink]="['/core/management/companies/edit', company.id]"
                                         class="p-button-rounded p-button-text p-button-secondary p-button-sm w-8 h-8 hover:bg-slate-100 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors"
                                         pTooltip="Editar"></button>
 
                                 <button *ngIf="isSuperAdmin()" pButton icon="pi pi-server" 
-                                        [routerLink]="['/core/companies', company.id, 'subscriptions']"
+                                        [routerLink]="['/core/management/companies', company.id, 'subscriptions']"
                                         class="p-button-rounded p-button-text p-button-secondary p-button-sm w-8 h-8 hover:bg-slate-100 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors"
                                         pTooltip="Gestionar Suscripciones"></button>
  

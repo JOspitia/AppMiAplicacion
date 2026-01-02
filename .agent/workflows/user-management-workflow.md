@@ -27,6 +27,7 @@ Siguiendo el sistema de diseño premium, la lista de usuarios y el formulario de
     - **Multi-Role**: Uso de `p-multiSelect` altamente personalizado para permitir la asignación de varios roles por usuario.
     - **Visualización**: Se muestran "chips" o "tags" para cada rol asignado tanto en la lista como en el formulario.
     - **Validación**: Los roles deshabilitados o de sistema están protegidos.
+- **[NUEVO] Feedback de Operación**: Implementación obligatoria de spinners en botones de acción. El botón de "Crear" o "Actualizar" debe permanecer bloqueado y procesando hasta que el sistema navegue fuera de la vista, asegurando que el usuario perciba una transición limpia.
 
 ## 2. Integración Backend (API)
 

@@ -59,7 +59,10 @@ public class SecurityConfig {
                                                                 new AntPathRequestMatcher("/api/core/**"),
                                                                 new AntPathRequestMatcher("/api/rrhh/**"),
                                                                 new AntPathRequestMatcher("/api/companies/**"),
-                                                                new AntPathRequestMatcher("/error")))
+                                                                new AntPathRequestMatcher("/error"),
+                                                                new AntPathRequestMatcher("/v3/api-docs/**"),
+                                                                new AntPathRequestMatcher("/swagger-ui/**"),
+                                                                new AntPathRequestMatcher("/swagger-ui.html")))
 
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .sessionManagement(session -> session
@@ -67,7 +70,8 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                                                 .requestMatchers("/api/auth/**", "/api/public/**", "/api/assets/**",
-                                                                "/api/companies/current", "/error")
+                                                                "/api/companies/current", "/error", "/v3/api-docs/**",
+                                                                "/swagger-ui/**", "/swagger-ui.html")
                                                 .permitAll()
                                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 .requestMatchers(org.springframework.http.HttpMethod.GET,

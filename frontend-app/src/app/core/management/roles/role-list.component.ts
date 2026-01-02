@@ -89,12 +89,19 @@ import { computed } from '@angular/core';
                     <tr class="hover:bg-slate-50/80 dark:hover:bg-indigo-500/5 transition-all duration-300 group border-b border-slate-100 dark:border-slate-800/50 last:border-none">
                         <td class="py-6 px-4">
                             <div class="flex items-center gap-4">
-                                <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                                <div class="h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                                     {{ role.name.substring(0,2).toUpperCase() }}
                                 </div>
                                 <div class="flex flex-col">
                                     <span class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ role.name }}</span>
-                                    <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400" *ngIf="role.description">{{ role.description }}</span>
+                                    <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 line-clamp-2 overflow-hidden" 
+                                          *ngIf="role.description"
+                                          [pTooltip]="role.description" 
+                                          tooltipStyleClass="tooltip-wide"
+                                          tooltipPosition="bottom"
+                                          [showDelay]="500">
+                                        {{ role.description }}
+                                    </span>
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20 mt-1 w-fit" *ngIf="role.isSystemRole">
                                         <i class="pi pi-lock text-[8px]"></i>
                                         Sistema

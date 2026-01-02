@@ -91,12 +91,12 @@ import { computed } from '@angular/core';
                     <tr class="hover:bg-slate-50/80 dark:hover:bg-indigo-500/5 transition-all duration-300 group border-b border-slate-100 dark:border-slate-800/50 last:border-none">
                         <td class="py-6 px-4">
                             <div class="flex items-center gap-4">
-                                <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                                <div class="h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                                     {{ user.username.substring(0,2).toUpperCase() }}
                                 </div>
                                 <div class="flex flex-col">
                                     <span class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ user.firstName }} {{ user.firstSurname }}</span>
-                                    <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">{{ user.email }}</span>
+                                    <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate max-w-[200px]" [pTooltip]="user.email" tooltipStyleClass="tooltip-wide">{{ user.email }}</span>
                                 </div>
                             </div>
                         </td>

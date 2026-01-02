@@ -191,10 +191,10 @@ import { RoleManagementService, PermissionsGrouped } from '../../services/role-m
                             Cancelar
                         </button>
                         <button type="button" (click)="onSubmit()" [disabled]="loading()"
-                                class="px-10 py-3 bg-primary text-white rounded-2xl hover:scale-105 active:scale-95 transition-all font-bold shadow-lg shadow-primary/30 flex items-center gap-2">
+                                class="px-10 py-3 bg-primary text-white rounded-2xl hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed transition-all font-bold shadow-lg shadow-primary/30 flex items-center gap-2">
                             <app-icon *ngIf="!loading()" icon="save" size="18"></app-icon>
-                            <span *ngIf="!loading()">{{ isEditMode() ? 'Actualizar Rol' : 'Crear Rol' }}</span>
-                            <span *ngIf="loading()">Procesando...</span>
+                            <app-icon *ngIf="loading()" icon="pi-spin pi-spinner" size="18"></app-icon>
+                            <span>{{ loading() ? 'Procesando...' : (isEditMode() ? 'Actualizar Rol' : 'Crear Rol') }}</span>
                         </button>
                     </div>
 
@@ -440,7 +440,7 @@ export class RoleFormComponent implements OnInit {
 
         operation.subscribe({
             next: () => {
-                this.loading.set(false);
+                // We DON'T set loading to false here so the button stays in "Processing/Disabled" state until redirection
                 this.successMessage.set(this.isEditMode()
                     ? 'Rol actualizado exitosamente.'
                     : 'Rol creado exitosamente.');

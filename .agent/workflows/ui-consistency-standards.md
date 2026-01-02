@@ -275,8 +275,34 @@ filteredItems = computed(() => {
 });
 ```
 
+## 11. Manejo de Textos Largos en Listados (Truncado Inteligente)
+
+Para evitar que las filas de las tablas crezcan de forma desproporcionada y rompan la armonía visual cuando existen descripciones o campos de texto extensos, se define el siguiente estándar:
+
+### 11.1 Reglas de Truncado
+- **Descripciones**: Máximo de **2 líneas** usando la clase `line-clamp-2` de Tailwind CSS.
+- **Campos Técnicos (Emails, Direcciones, NIT)**: Máximo de **1 línea** usando `truncate` y limitando el ancho máximo del contenedor (ej: `max-w-[200px]`).
+- **Comportamiento**: Ambos deben ir acompañados de la directiva `overflow-hidden`.
+
+### 11.2 Tooltips de Continuidad
+- **Obligatoriedad**: Siempre que se trunque un texto, se debe añadir la directiva `[pTooltip]` de PrimeNG para permitir la lectura completa.
+- **Configuración Premium**:
+    - `tooltipPosition="bottom"` o `"top"` según el contexto.
+    - `[showDelay]="500"` (Previene el ruido visual al mover el cursor rápidamente).
+    - El tooltip debe contener el texto original completo.
+
+```html
+<!-- Ejemplo de Implementación Estándar -->
+<span class="text-[11px] font-medium text-slate-500 line-clamp-2 overflow-hidden" 
+      [pTooltip]="item.description" 
+      tooltipPosition="bottom"
+      [showDelay]="500">
+    {{ item.description }}
+</span>
+```
+
 ---
 
-**Última Actualización**: 2025-12-31
-**Responsable**: Equipo de Frontend (Antigravity AI)
+**Última Actualización**: 2026-01-02
+**Responsable**: Equipo de UX/UI (Antigravity AI)
 **Estado**: ✅ Implementado y Estandarizado

@@ -158,10 +158,10 @@ import { ProfileService } from '../../core/services/profile.service';
                             Cancelar
                         </button>
                         <button type="submit" [disabled]="loading()"
-                                class="px-10 py-3 bg-primary text-white rounded-2xl hover:scale-105 active:scale-95 transition-all font-bold shadow-lg shadow-primary/30 flex items-center gap-2">
+                                class="px-10 py-3 bg-primary text-white rounded-2xl hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed transition-all font-bold shadow-lg shadow-primary/30 flex items-center gap-2">
                             <app-icon *ngIf="!loading()" name="save" size="18"></app-icon>
-                            <span *ngIf="!loading()">{{ isEditMode() ? 'Actualizar Sede' : 'Crear Sede' }}</span>
-                            <span *ngIf="loading()">Procesando...</span>
+                            <app-icon *ngIf="loading()" icon="pi-spin pi-spinner" size="18"></app-icon>
+                            <span>{{ loading() ? 'Procesando...' : (isEditMode() ? 'Actualizar Sede' : 'Crear Sede') }}</span>
                         </button>
                     </div>
 
@@ -313,7 +313,7 @@ export class LocationFormComponent implements OnInit {
 
         operation.subscribe({
             next: () => {
-                this.loading.set(false);
+                // We DON'T set loading to false here to maintain the button state until navigation
                 this.successMessage.set(this.isEditMode() ? 'Sede actualizada exitosamente.' : 'Sede creada exitosamente.');
                 setTimeout(() => this.router.navigate(['/rrhh/sedes']), 1500);
             },

@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -30,6 +31,34 @@ public class AuthController {
         private final JwtUtils jwtUtils;
         private final RefreshTokenService refreshTokenService;
         private final com.project.backend_api.repository.core.management.UserCompanyRoleRepository userCompanyRoleRepository;
+        private final com.project.backend_api.service.core.management.UserService userService;
+
+        @PostMapping("/register")
+        public ResponseEntity<?> register(
+                        @Valid @RequestBody com.project.backend_api.dto.core.administration.RegisterRequest registerRequest) {
+                userService.registerUser(registerRequest);
+                return ResponseEntity.ok(Map.of("message", "¡Registro casi completo! Por favor revisa tu correo."));
+        }
+
+        @PostMapping("/verify")
+        public ResponseEntity<?> verify(@RequestBody Map<String, String> request) {
+                String token = request.get("token");
+                if (token == null) {
+                        return ResponseEntity.badRequest().body(Map.of("message", "Token es requerido"));
+                }
+                userService.verifyEmail(token);
+                return ResponseEntity.ok(Map.of("message", "Email verificado con éxito."));
+        }
+
+        @PostMapping("/resend-verification")
+        public ResponseEntity<?> resendVerification(@RequestBody Map<String, String> request) {
+                String email = request.get("email");
+                if (email == null) {
+                        return ResponseEntity.badRequest().body(Map.of("message", "Email es requerido"));
+                }
+                userService.resendVerificationEmail(email);
+                return ResponseEntity.ok(Map.of("message", "Email de verificación reenviado."));
+        }
 
         @PostMapping("/login")
         public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request,

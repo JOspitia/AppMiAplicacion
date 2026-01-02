@@ -1,7 +1,5 @@
 package com.project.backend_api.controller.rrhh;
 
-
-
 import com.project.backend_api.dto.rrhh.OperationalCenterDto;
 import com.project.backend_api.service.rrhh.OperationalCenterService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +26,12 @@ public class OperationalCenterController {
         return ResponseEntity.ok(service.getAllOperationalCenters());
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('RRHH_OPCENTER_VIEW')")
+    public ResponseEntity<OperationalCenterDto> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.getOperationalCenterById(id));
+    }
+
     @PostMapping
     @PreAuthorize("hasAuthority('RRHH_OPCENTER_EDIT')")
     public ResponseEntity<OperationalCenterDto> create(@RequestBody OperationalCenterDto dto) {
@@ -48,5 +52,3 @@ public class OperationalCenterController {
         return ResponseEntity.noContent().build();
     }
 }
-
-

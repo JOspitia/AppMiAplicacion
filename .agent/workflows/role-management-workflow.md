@@ -120,6 +120,8 @@ Este componente ha sido rediseñado para máxima estabilidad y UX:
 - **Categorías Claras**: El usuario ya no ve "Plataforma Base" para todo, sino secciones funcionales claras.
 - **Asignación Flexible**: Capacidad de componer perfiles de seguridad complejos mediante la asignación de múltiples roles pequeños (principio de menor privilegio).
 - **Estabilidad**: El formulario es robusto ante miles de permisos.
+- **[NUEVO] Feedback de Guardado**: Mantener el spinner y el botón deshabilitado hasta que la navegación a la lista sea efectiva, garantizando una UX fluida y sin clics repetidos.
+- **Validación Cruzada**: Recordar que la lógica de cascada (VIEW -> EDIT) debe estar sincronizada entre el `RoleFormComponent` y la validación en el `RoleService` de Java.
 
 ---
 

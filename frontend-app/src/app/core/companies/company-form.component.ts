@@ -40,7 +40,7 @@ import { AuthService } from '../services/auth.service';
                         {{ isEditMode() ? 'Editar' : 'Nueva' }} <span class="bg-clip-text text-transparent" [style.backgroundImage]="'linear-gradient(to right, var(--primary), var(--primary-stop))'">Empresa</span>
                     </h1>
                 </div>
-                <button [routerLink]="['/core/companies']" class="p-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm">
+                <button [routerLink]="['/core/management/companies']" class="p-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm">
                     <app-icon icon="arrow-left" class="w-5 h-5 text-slate-400 group-hover:text-primary transition-colors"></app-icon>
                 </button>
             </div>
@@ -394,12 +394,12 @@ import { AuthService } from '../services/auth.service';
                         </button>
 
                         <button *ngIf="currentStep() === 3" (click)="onSubmit()" [disabled]="loading()"
-                                class="flex items-center gap-2 px-8 py-3 text-white rounded-2xl hover:scale-105 active:scale-95 transition-all font-bold shadow-lg ml-auto"
+                                class="flex items-center gap-2 px-8 py-3 text-white rounded-2xl hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed transition-all font-bold shadow-lg ml-auto"
                                 [style.background]="'linear-gradient(to right, var(--primary), var(--primary-dark))'"
                                 [style.boxShadow]="'0 10px 15px -3px var(--primary-light)'">
                             <app-icon *ngIf="!loading()" icon="check" class="w-4 h-4"></app-icon>
-                            <span *ngIf="!loading()">{{ isEditMode() ? 'Actualizar Empresa' : 'Crear Empresa' }}</span>
-                            <span *ngIf="loading()">Procesando...</span>
+                            <app-icon *ngIf="loading()" icon="pi-spin pi-spinner" class="w-4 h-4"></app-icon>
+                            <span>{{ loading() ? 'Procesando...' : (isEditMode() ? 'Actualizar Empresa' : 'Crear Empresa') }}</span>
                         </button>
                     </div>
                 </div>
@@ -687,9 +687,9 @@ export class CompanyFormComponent implements OnInit {
     }
 
     private finalizeSubmit() {
-        this.loading.set(false);
+        // We DON'T set loading to false here to maintain the button state until navigation
         this.showSuccess(this.isEditMode() ? 'Empresa actualizada exitosamente' : 'Empresa creada exitosamente');
-        setTimeout(() => this.router.navigate(['/core/companies']), 1500);
+        setTimeout(() => this.router.navigate(['/core/management/companies']), 1500);
     }
 
 

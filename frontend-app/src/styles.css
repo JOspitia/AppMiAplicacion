@@ -252,6 +252,29 @@ html {
   }
 }
 
+/* ========================================
+   PRIME-NG TOOLTIP STANDARDIZATION
+   ======================================== */
+body .p-tooltip {
+  @apply z-[9999] !important;
+}
+
+body .p-tooltip .p-tooltip-text {
+  @apply bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/10 !important;
+  @apply text-white text-[10px] font-bold py-1 px-3 rounded-lg shadow-xl !important;
+}
+
+/* Specific class for long descriptions in lists */
+body .tooltip-wide .p-tooltip-text {
+  @apply text-[11px] leading-relaxed p-4 px-6 rounded-2xl font-medium !important;
+  max-width: 450px !important;
+  min-width: 280px !important;
+  text-align: left !important;
+  word-break: break-word !important;
+}
+
+
+
 /* Global Brand Utilities */
 .bg-brand-gradient {
   background: linear-gradient(135deg, var(--primary), var(--primary-stop)) !important;

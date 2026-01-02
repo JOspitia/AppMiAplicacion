@@ -1,7 +1,5 @@
 package com.project.backend_api.controller.core.management;
 
-
-
 import com.project.backend_api.dto.core.management.LocationDto;
 import com.project.backend_api.service.core.management.LocationService;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +28,22 @@ public class LocationController {
         return ResponseEntity.ok(service.getActiveLocations());
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('RRHH_LOCATION_VIEW')")
+    public ResponseEntity<LocationDto> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.getLocationById(id));
+    }
+
     @PostMapping
     @PreAuthorize("hasAuthority('RRHH_LOCATION_EDIT')")
-    public ResponseEntity<LocationDto> save(@RequestBody LocationDto dto) {
+    public ResponseEntity<LocationDto> create(@RequestBody LocationDto dto) {
+        return ResponseEntity.ok(service.saveLocation(dto));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('RRHH_LOCATION_EDIT')")
+    public ResponseEntity<LocationDto> update(@PathVariable UUID id, @RequestBody LocationDto dto) {
+        dto.setId(id);
         return ResponseEntity.ok(service.saveLocation(dto));
     }
 
@@ -43,9 +54,3 @@ public class LocationController {
         return ResponseEntity.noContent().build();
     }
 }
-
-
-
-
-
-

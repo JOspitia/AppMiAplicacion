@@ -250,7 +250,7 @@ export class RegisterComponent implements OnInit {
         },
         error: (err: any) => {
           this.loading = false;
-          this.error = err.error || 'Ocurrió un error al registrar el usuario.';
+          this.error = err.error?.message || err.message || 'Ocurrió un error al registrar el usuario.';
         }
       });
     }

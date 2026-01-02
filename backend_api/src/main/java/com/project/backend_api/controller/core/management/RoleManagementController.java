@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.project.backend_api.dto.core.administration.PermissionDto;
 import com.project.backend_api.dto.core.management.RoleDetailDto;
+import com.project.backend_api.dto.core.management.RoleRequestDto;
 
 import java.util.List;
 import java.util.Map;
@@ -35,20 +36,20 @@ public class RoleManagementController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('CORE_ROLE_EDIT')")
-    public ResponseEntity<RoleDto> saveRole(@RequestBody Role role) {
+    public ResponseEntity<RoleDto> saveRole(@RequestBody RoleRequestDto roleRequest) {
         UUID companyId = authService.getSelectedCompanyId();
         UUID currentUserId = authService.getCurrentUser().getId();
 
-        Set<UUID> permissionIds = role.getPermissions().stream()
-                .map(p -> p.getId())
-                .collect(Collectors.toSet());
+        Set<UUID> permissionIds = roleRequest.getPermissionIds();
 
-        if (role.getId() == null) {
-            return ResponseEntity.ok(roleService.createRole(role.getName(), role.getDescription(), permissionIds,
-                    companyId, currentUserId));
+        if (roleRequest.getId() == null) {
+            return ResponseEntity
+                    .ok(roleService.createRole(roleRequest.getName(), roleRequest.getDescription(), permissionIds,
+                            companyId, currentUserId));
         } else {
-            return ResponseEntity.ok(roleService.updateRole(role.getId(), role.getName(), role.getDescription(),
-                    permissionIds, companyId, currentUserId));
+            return ResponseEntity
+                    .ok(roleService.updateRole(roleRequest.getId(), roleRequest.getName(), roleRequest.getDescription(),
+                            permissionIds, companyId, currentUserId));
         }
     }
 
@@ -68,9 +69,9 @@ public class RoleManagementController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('CORE_ROLE_EDIT')")
-    public ResponseEntity<RoleDto> updateRole(@PathVariable UUID id, @RequestBody Role role) {
-        role.setId(id);
-        return saveRole(role);
+    public ResponseEntity<RoleDto> updateRole(@PathVariable UUID id, @RequestBody RoleRequestDto roleRequest) {
+        roleRequest.setId(id);
+        return saveRole(roleRequest);
     }
 
     @PatchMapping("/{id}/toggle")

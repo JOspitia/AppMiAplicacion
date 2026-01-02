@@ -95,7 +95,9 @@ El sistema implementa una mecánica de **Marca Blanca Dinámica** que personaliz
 - **Glows Suaves**: Se evita la saturación usando opacidades ultra-bajas (`5-10%`) sobre el color primario dinámico en componentes como el Login y el Selector de Empresas.
 - **Sincronización de Componentes**: Todos los componentes estandarizados (inputs, botones, tablas) heredan automáticamente estos tokens para asegurar que la "app" se sienta como propiedad de la empresa seleccionada.
 
-## 7. Próximos Pasos
+## 7. Aspectos a Tener en Cuenta (Stability & UI)
 
-- Agregar validación de unicidad de NIT en tiempo real.
-- Extender el branding dinámico a componentes complejos como gráficos y dashboards.
+- **Sincronización de Rutas**: Tras mover carpetas o refactorizar módulos, verificar siempre `app.routes.ts` y los `routerLink` en tablas de listado para evitar errores de carga 404.
+- **Manejo de Imágenes**: Validar que `getLogoUrl` maneje correctamente los paths provenientes de MinIO con el prefijo `/api/private-assets/`. (Ej: `http://localhost:8080/api/private-assets/...`).
+- **Feedback Premium**: Seguir el patrón de persistencia de carga en el botón de guardado para evitar el parpadeo de la UI durante la redirección. El estado `loading()` debe ser el último en cambiar, idealmente dejando que la navegación lo destruya.
+- **Mapeo de DTOs**: Asegurar que los campos `id`, `uuid` y nombres de propiedades coincidan exactamente entre el `CompanyDto.java` y la interfaz `Company.ts`.

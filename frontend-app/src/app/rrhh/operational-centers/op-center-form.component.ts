@@ -110,9 +110,10 @@ import { LocationService, Location } from '../../core/services/location.service'
                             Cancelar
                         </button>
                         <button type="submit" [disabled]="loading()"
-                                class="px-10 py-3 bg-primary text-white rounded-2xl hover:bg-primary-600 transition-all font-bold shadow-lg shadow-primary/30 disabled:opacity-50 flex items-center gap-2">
-                             <i *ngIf="loading()" class="pi pi-spin pi-spinner"></i>
-                             {{ isEditMode() ? 'Actualizar Centro' : 'Crear Centro' }}
+                                class="px-10 py-3 bg-primary text-white rounded-2xl hover:scale-105 active:scale-95 transition-all font-bold shadow-lg shadow-primary/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2">
+                             <app-icon *ngIf="!loading()" icon="save" size="18"></app-icon>
+                             <app-icon *ngIf="loading()" icon="pi-spin pi-spinner" size="18"></app-icon>
+                             <span>{{ loading() ? 'Procesando...' : (isEditMode() ? 'Actualizar Centro' : 'Crear Centro') }}</span>
                         </button>
                     </div>
                 </form>
@@ -196,7 +197,7 @@ export class OperationalCenterFormComponent implements OnInit {
 
         request.subscribe({
             next: () => {
-                this.loading.set(false);
+                // We DON'T set loading to false here to maintain the button state until navigation
                 this.successMessage.set(this.isEditMode() ? 'Centro operacional actualizado exitosamente.' : 'Centro operacional creado exitosamente.');
                 setTimeout(() => this.router.navigate(['/rrhh/operational-centers']), 1500);
             },
