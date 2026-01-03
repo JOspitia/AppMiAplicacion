@@ -21,7 +21,7 @@ import { AlertComponent } from '../../shared/components/alert/alert.component';
 
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
             <div>
-                <a routerLink="/core/companies" class="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors text-sm font-bold mb-2">
+                <a routerLink="/core/management/companies" class="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors text-sm font-bold mb-2">
                     <app-icon name="arrow-left" size="12"></app-icon> Volver a Empresas
                 </a>
                 <span class="text-primary font-bold tracking-widest text-[10px] uppercase block mb-1">Suscripciones SaaS</span>

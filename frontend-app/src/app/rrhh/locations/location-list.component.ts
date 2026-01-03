@@ -123,7 +123,7 @@ import { LocationService, Location } from '../../core/services/location.service'
                             <div class="flex items-center justify-end gap-2 text-primary">
                                 <button pButton icon="pi pi-pencil" 
                                         [routerLink]="['/rrhh/sedes/edit', location.id]"
-                                        class="p-button-rounded p-button-text p-button-secondary p-button-sm w-8 h-8 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                        class="p-button-rounded p-button-text p-button-sm w-8 h-8 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                                         pTooltip="Editar"></button>
 
                                 <button pButton
