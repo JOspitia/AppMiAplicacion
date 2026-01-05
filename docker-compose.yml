@@ -1,6 +1,15 @@
 version: '3.8'
 
 services:
+
+  # ---------------------------------------------------------------------
+  # 0. TUNNEL (CLOUDFLARE)
+  # ---------------------------------------------------------------------
+  cloudflare_tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    command: tunnel --no-autoupdate run --token eyJhIjoiOTk5NmQ1NzQyOGM5ZmIxNTdlZTU5YTBmMzNlNWNjZjYiLCJ0IjoiODc5NTFkN2QtM2FiYy00NDJlLWEzYzMtMzQ0MDQ3NGQ4ZjI2IiwicyI6Ik5HTXhOVFprTkdNdE5UUTRZaTAwWm1GbUxUZ3lNalV0T1RKbU5tWXlOREkwWWpKaSJ9
+
   # ---------------------------------------------------------------------
   # 1. FRONTEND APP (Angular + Nginx)
   # ---------------------------------------------------------------------
@@ -139,6 +148,9 @@ services:
       - app-network
     volumes:
       - ./minio_setup:/scripts
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     entrypoint: /bin/sh
     command: /scripts/init.sh
     restart: on-failure

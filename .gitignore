@@ -24,3 +24,6 @@ frontend-app/yarn-error.log
 
 # Docker/Environment
 .env
+
+# Legacy
+legacy/
