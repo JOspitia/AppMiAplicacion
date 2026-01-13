@@ -1,7 +1,6 @@
 package com.project.backend_api.controller.core.management;
 
 import com.project.backend_api.dto.core.management.RoleDto;
-import com.project.backend_api.model.core.management.Role;
 import com.project.backend_api.service.core.management.RoleService;
 import com.project.backend_api.service.core.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/core/management/roles")

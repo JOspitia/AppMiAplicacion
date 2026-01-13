@@ -1,7 +1,5 @@
 package com.project.backend_api.controller.core.administration;
 
-
-
 import com.project.backend_api.service.core.MinioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,27 +33,31 @@ public class PublicAssetsController {
             // Decodificar URL encoding (%20 -> espacio)
             String decodedFileName = URLDecoder.decode(cleanFileName, StandardCharsets.UTF_8);
 
-            // Intentar con múltiples claves candidatas (original, images/, images/landing/)
+            // Intentar con múltiples claves candidatas (original, images/, images/landing/,
+            // music/)
             String[] candidates = new String[] {
                     decodedFileName,
                     "images/" + decodedFileName,
-                    "images/landing/" + decodedFileName
+                    "images/landing/" + decodedFileName,
+                    "music/" + decodedFileName
             };
 
             for (String candidate : candidates) {
                 try {
+                    log.debug("Intentando cargar desde MinIO: {}", candidate);
                     InputStream inputStream = minioService.getPublicAsset(candidate);
                     byte[] content = inputStream.readAllBytes();
                     inputStream.close();
 
                     String mediaType = getMediaType(candidate);
-                    log.debug("Sirviendo recurso público '{}' (candidata: {})", decodedFileName, candidate);
+                    log.info("✓ Sirviendo recurso público '{}' exitosamente (candidata: {})", decodedFileName,
+                            candidate);
                     return ResponseEntity.ok()
                             .contentType(MediaType.parseMediaType(mediaType))
                             .cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
                             .body(content);
                 } catch (Exception e) {
-                    log.debug("Candidata no encontrada en MinIO: {}", candidate);
+                    log.warn("✗ Candidata '{}' falló: {}", candidate, e.getMessage());
                     // intentar con la siguiente candidata
                 }
             }
@@ -77,10 +79,10 @@ public class PublicAssetsController {
             return "image/jpeg";
         if (fileName.endsWith(".gif"))
             return "image/gif";
+        if (fileName.endsWith(".mp3"))
+            return "audio/mpeg";
+        if (fileName.endsWith(".webp"))
+            return "image/webp";
         return "application/octet-stream";
     }
 }
-
-
-
-

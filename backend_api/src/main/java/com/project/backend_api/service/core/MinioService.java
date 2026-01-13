@@ -1,7 +1,5 @@
 package com.project.backend_api.service.core;
 
-
-
 import io.minio.GetObjectArgs;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
@@ -115,6 +113,20 @@ public class MinioService {
         }
     }
 
+    public void uploadPublicFile(String path, InputStream inputStream, long size, String contentType) {
+        try {
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(publicBucket)
+                            .object(path)
+                            .stream(inputStream, size, -1)
+                            .contentType(contentType)
+                            .build());
+        } catch (Exception e) {
+            throw new RuntimeException("Error uploading public asset: " + path, e);
+        }
+    }
+
     /**
      * Generic method to process and upload a private file following the
      * architecture standard.
@@ -165,8 +177,7 @@ public class MinioService {
     private boolean isAllowedAsset(String fileName) {
 
         return fileName.endsWith(".png") || fileName.endsWith(".jpg") ||
-                fileName.endsWith(".jpeg") || fileName.endsWith(".gif");
+                fileName.endsWith(".jpeg") || fileName.endsWith(".gif") ||
+                fileName.endsWith(".webp") || fileName.endsWith(".mp3");
     }
 }
-
-
