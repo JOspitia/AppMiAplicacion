@@ -80,6 +80,26 @@ export const routes: Routes = [
             { path: 'rrhh/cost-centers/new', loadComponent: () => import('./rrhh/cost-centers/cost-center-form.component').then(m => m.CostCenterFormComponent) },
             { path: 'rrhh/cost-centers/edit/:id', loadComponent: () => import('./rrhh/cost-centers/cost-center-form.component').then(m => m.CostCenterFormComponent) },
 
+            // Contract Types
+            { path: 'rrhh/contract-types', loadComponent: () => import('./rrhh/contract-types/contract-type-list.component').then(m => m.ContractTypeListComponent) },
+            { path: 'rrhh/contract-types/create', loadComponent: () => import('./rrhh/contract-types/contract-type-form.component').then(m => m.ContractTypeFormComponent) },
+            { path: 'rrhh/contract-types/edit/:id', loadComponent: () => import('./rrhh/contract-types/contract-type-form.component').then(m => m.ContractTypeFormComponent) },
+            { path: 'rrhh/contract-types/:id', loadComponent: () => import('./rrhh/contract-types/contract-type-form.component').then(m => m.ContractTypeFormComponent) },
+
+            // Work Schedules
+            {
+                path: 'rrhh/work-schedules',
+                loadComponent: () => import('./rrhh/work-schedules/work-schedule-list.component').then(m => m.WorkScheduleListComponent)
+            },
+            {
+                path: 'rrhh/work-schedules/create',
+                loadComponent: () => import('./rrhh/work-schedules/work-schedule-form.component').then(m => m.WorkScheduleFormComponent)
+            },
+            {
+                path: 'rrhh/work-schedules/edit/:id',
+                loadComponent: () => import('./rrhh/work-schedules/work-schedule-form.component').then(m => m.WorkScheduleFormComponent)
+            },
+
             // Niveles Organizacionales
             { path: 'rrhh/organizational-levels', loadComponent: () => import('./rrhh/organizational-levels/org-level-list.component').then(m => m.OrganizationalLevelListComponent) },
             { path: 'rrhh/organizational-levels/create', loadComponent: () => import('./rrhh/organizational-levels/org-level-form.component').then(m => m.OrganizationalLevelFormComponent) },

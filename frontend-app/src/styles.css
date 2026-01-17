@@ -124,8 +124,19 @@ html {
   .p-inputtext {
     @apply h-11 text-sm rounded-2xl border-slate-200 dark:border-white/10 !important;
     @apply bg-white dark:bg-white/5 !important;
-    @apply font-bold transition-all px-4 !important;
-    @apply focus:border-primary focus:ring-4 focus:ring-[var(--primary-ring)] !important;
+    @apply font-bold transition-all duration-300 px-4 !important;
+    @apply text-slate-800 dark:text-slate-100 !important;
+  }
+
+  /* Transition for common layout containers to prevent flashing */
+  div,
+  span,
+  button {
+    @apply transition-colors duration-300;
+  }
+
+  .p-inputtext:enabled:focus {
+    @apply border-primary ring-4 ring-[var(--primary-ring)] !important;
   }
 
   /* Dropdown/Select/MultiSelect Visuals */
@@ -133,7 +144,13 @@ html {
   .p-dropdown,
   .p-multiselect {
     @apply rounded-2xl border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 !important;
-    @apply focus-within:border-primary focus-within:ring-4 focus-within:ring-[var(--primary-ring)] !important;
+    @apply transition-colors duration-200 !important;
+  }
+
+  .p-select:not(.p-disabled).p-focus,
+  .p-dropdown:not(.p-disabled).p-focus,
+  .p-multiselect:not(.p-disabled).p-focus {
+    @apply border-primary ring-4 ring-[var(--primary-ring)] !important;
   }
 
   /* MultiSelect Selected Items (Chips/Tokens) */
@@ -167,17 +184,42 @@ html {
   .p-datepicker,
   .p-calendar {
     @apply rounded-2xl border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 !important;
-    @apply focus-within:border-primary focus-within:ring-4 focus-within:ring-[var(--primary-ring)] !important;
+    @apply transition-colors duration-200 !important;
+  }
+
+  .p-datepicker:not(.p-disabled).p-focus-within,
+  .p-calendar:not(.p-disabled).p-focus-within {
+    @apply border-primary ring-4 ring-[var(--primary-ring)] !important;
   }
 
   /* Overlays (Dropdown/Datepicker panels) */
   .p-select-overlay,
   .p-dropdown-panel,
   .p-multiselect-panel,
-  .p-datepicker-panel,
   .p-calendar-panel {
     @apply rounded-[2.5rem] border-slate-100 dark:border-white/10 shadow-2xl overflow-hidden !important;
     @apply backdrop-blur-3xl bg-white/90 dark:bg-[#0f172a]/95 !important;
+  }
+
+  /* DatePicker/Calendar Time Selection Visuals */
+  .p-datepicker-time-picker {
+    @apply p-4 !important;
+  }
+
+  .p-datepicker-time-picker span {
+    @apply font-extrabold text-lg !important;
+  }
+
+  .p-datepicker-hour-picker:hover,
+  .p-datepicker-minute-picker:hover,
+  .p-datepicker-ampm-picker:hover {
+    color: var(--primary-color) !important;
+    background: rgba(var(--primary-rgb), 0.1) !important;
+    @apply rounded-xl !important;
+  }
+
+  .p-datepicker input {
+    @apply text-center font-bold !important;
   }
 
   /* Custom Scrollbar for Panels */
@@ -245,16 +287,37 @@ html {
     @apply rounded-2xl relative !important;
   }
 
+  /* Password Input Standardization */
   .p-password input {
     /* Visuals are applied to the input inside p-password */
     @apply border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 !important;
-    @apply focus:border-primary focus:ring-4 focus:ring-[var(--primary-ring)] !important;
+    @apply text-slate-800 dark:text-slate-100 !important;
+  }
+
+  .p-password.p-inputwrapper-focus input {
+    @apply border-primary ring-4 ring-[var(--primary-ring)] !important;
   }
 
   /* InputNumber Standardization */
-  .p-inputnumber,
+  .p-inputnumber {
+    @apply rounded-2xl overflow-hidden !important;
+    @apply bg-white dark:bg-white/5 !important;
+    @apply border border-slate-200 dark:border-white/10 !important;
+    @apply transition-all duration-300 !important;
+  }
+
   .p-inputnumber-input {
-    @apply w-full h-11 !important;
+    @apply h-11 border-none bg-transparent !important;
+  }
+
+  .p-inputnumber-button {
+    @apply bg-slate-50 dark:bg-white/10 border-slate-100 dark:border-white/5 !important;
+    @apply text-slate-400 dark:text-slate-500 !important;
+    @apply transition-all duration-300 !important;
+  }
+
+  .p-inputnumber-button:hover {
+    @apply bg-primary/10 text-primary !important;
   }
 
   /* Textarea Standardization */

@@ -4,55 +4,77 @@ description: Estándares técnicos de formularios y componentes PrimeNG para el 
 
 # Estándares de Formularios (UI Consistency)
 
-Este documento define la estructura y el estilo obligatorio para todos los formularios del sistema, asegurando una experiencia **Human-Centric** y premium.
+Este documento define la estructura, el estilo y la jerarquía visual obligatoria para todos los formularios del sistema, asegurando una experiencia **Human-Centric** y premium.
 
-## 1. Campos de Entrada (Inputs)
+## 1. Cabecera del Formulario (Hero Header)
 
-### 1.1 Inputs con Iconos
-Todos los campos de identidad (Código, Nombre, Usuario, Email) deben integrar sus iconos dentro del campo:
-- **Estructura**: `relative group` con `app-icon` posicionado con `absolute left-4 top-1/2 -translate-y-1/2`.
-- **Spacing**: El input debe tener `style="padding-left: 3.5rem !important;"`.
-- **Interactividad**: Uso de `group-focus-within:text-primary` para animar el color del icono.
+Todos los formularios de creación o edición deben seguir esta estructura visual para mantener la orientación del usuario:
 
-### 1.2 Selectores (Dropdowns)
-Se utiliza el componente `p-select` (PrimeNG v21+):
-- **Autocomplete**: Atributo `[filter]="true"` y `filterBy="name"` siempre habilitado.
-- **Overlay**: `appendTo="body"` para evitar problemas de posicionamiento y scroll.
-- **Limpieza**: `[showClear]="true"` para campos opcionales.
+- **Breadcrumb Contextual**: Un `span` superior con `text-primary font-bold tracking-widest text-[10px] uppercase`.
+- **Título Dinámico**: `h1` en `text-4xl font-black text-slate-900 dark:text-white`. La palabra clave (ej: Sede, Departamento) debe ir en un `span` con gradiente: `bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark`.
+- **Botón de Retorno**: Ubicado a la derecha, diseño circular/cuadrado redondeado (`rounded-2xl`), fondo blanco/transparente con borde sutil, e icono `arrow-left`.
+- **Descripción de Contexto**: Un párrafo corto (`text-sm text-slate-500`) que explique el propósito del formulario.
 
-### 1.3 Textareas
-Utilizados para descripciones:
-- **Clases**: `w-full px-4 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl resize-none`.
-- **Filas**: Mínimo 3 o 4 filas según el contexto.
+## 2. Contenedor de Formulario (Glass Container)
 
-## 2. Patrones de Selección Avanzada
+Para lograr el efecto de profundidad y modernidad:
+- **Clases**: `bg-white/80 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[3.5rem] border border-white/20 dark:border-slate-800 shadow-2xl p-8 md:p-12`.
+- **Transiciones**: Debe usar `transition-all duration-500` y animaciones de entrada `animate-fade-in`.
 
-### 2.1 Asignación Múltiple (Sedes, Roles, Permisos)
-Cuando se requiere asignar múltiples elementos, se sigue el patrón de **Chips Externos**:
-1.  **Área de Visualización**: Un contenedor superior que muestra `chips` personalizados de los elementos ya seleccionados.
-2.  **Selector**: Un `p-multiSelect` que muestra solo un resumen (ej: "3 elementos asignados") cuando está cerrado.
-3.  **Gestión**: El usuario puede eliminar elementos directamente desde los chips superiores o deseleccionarlos en el dropdown.
+## 3. Estructura de Secciones
 
-## 3. Botones y Confirmación
-- **Ubicación**: Alineados a la derecha al final del formulario.
-- **Estilo**: Botón primario con `shadow-lg shadow-primary/30` y efecto de escala al pulsar.
-- **Estado**: Deben mostrar un spinner de carga y deshabilitarse durante el procesamiento (`[loading]="loading()"`).
+Agrupar campos relacionados para reducir la carga cognitiva:
+- **Indicador**: Barra vertical de color primario (`w-1.5 h-6 bg-primary rounded-full`).
+- **Título + Icono**: `h2` en `text-xl font-black` acompañado de un `app-icon` descriptivo en `text-slate-400`.
+- **Espaciado**: Margen inferior generoso (`mb-8` a `mb-10`) entre secciones.
 
-## 4. Estándares de Listados (Visual Hierarchy)
-Para optimizar el espacio y mejorar la lectura, todos los listados principales deben seguir el patrón de **Columna Combinada**:
+## 4. Campos de Entrada (Inputs)
 
-### 4.1 Columna "Nombre y Descripción"
-- **Estructura**: Un `flexbox` con alineación superior (`items-start`).
-- **Icono**: El icono representativo del módulo dentro de un contenedor `h-10 w-10rounded-xl bg-primary/10 transition-transform group-hover:scale-110`.
-- **Información**: 
-    - **Nombre**: Texto principal en `text-sm font-bold`.
-    - **Metadatos**: Seguido (opcionalmente) por badges o textos pequeños (ej: Nivel Organizacional).
-    - **Descripción**: Una línea truncada (`line-clamp-1`) en `text-xs text-slate-500` con `[pTooltip]` accesible (Estándar: 14px, font-medium, `tooltip-wide`).
+### 4.1 Inputs con Iconos
+Campos de identidad (Código, Nombre, Usuario, Email) deben integrar sus iconos:
+- **Estructura**: `relative group` con `app-icon` posicionado `absolute left-4 top-1/2 -translate-y-1/2`.
+- **Padding**: El input debe tener `style="padding-left: 3.5rem !important;"`.
+- **Diseño**: `bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-xl`.
 
-### 4.2 Columna "Código"
-- **Estilo**: El código debe visualizarse como un badge sutil: `text-xs font-black px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600`. No debe ser el foco de atención, sino una referencia rápida.
+### 4.2 Selectores (p-select)
+- **Configuración**: `[filter]="true"`, `filterBy="name"`, `appendTo="body"`.
+- **Estilo**: Debe coincidir con el radio de borde y fondo de los inputs de texto.
 
-## 5. Estructura de Secciones
-Utilizar indicadores visuales de sección para agrupar campos relacionados:
-- Una barra vertical de color primario (`w-1.5 h-6 bg-primary rounded-full`).
-- Título en `text-xl font-black`.
+### 4.3 Campo de Descripción (Premium Textarea)
+- **Diseño**: `w-full p-4 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-xl text-sm resize-none`.
+- **Label**: Usar siempre **"Descripción (Opcional)"** para mayor claridad.
+
+### 4.4 Selectores de Tiempo (p-datepicker)
+- **Modo**: `[timeOnly]="true" hourFormat="12"`.
+- **Anclaje**: Siempre `appendTo="body"` para evitar saltos en el layout de grids o modales.
+- **Estilo**: Fondo transparente con bordes nulos cuando se usa dentro de tablas.
+
+### 4.5 Campos Numéricos (p-inputNumber)
+- **Estilo**: Deben usar bordes redondeados `rounded-xl` y heredar el tema oscuro/claro de forma fluida.
+- **Botones**: Los botones de incremento deben tener transiciones suaves para evitar parpadeos.
+
+### 4.6 Grillas Complejas (Sub-filas)
+Para formularios que requieren múltiples entradas por fila (ej: Jornada Partida):
+- **Alineación de Cabecera**: El grid de la sub-fila debe coincidir exactamente con el `grid-cols` de los títulos superiores.
+- **Consistencia Vertical**: Usar `items-stretch` en el contenedor grid y `h-full` en los divs de las celdas para asegurar que el fondo y los bordes cubran toda la altura de la fila, independientemente del contenido.
+- **Micro-interacciones**: Los botones de acción (eliminar/editar) deben usar iconos estándar (`times` para borrar) con colores de alta visibilidad (`rose-500`) y feedback al hover.
+- **Jerarquía**: Usar badges o números de índice (`#1`, `#2`) con posicionamiento absoluto para identificar elementos sin desplazar los inputs principales.
+
+## 5. Patrones de Selección Avanzada
+
+### 5.1 Asignación Múltiple (Chips Externos)
+1.  **Área de Chips**: Contenedor superior con `flex-wrap gap-2` que muestra `chips` personalizados.
+2.  **Selector**: `p-multiSelect` que actúa como disparador, mostrando solo un resumen (ej: "3 sedes asignadas").
+
+## 6. Botones y Confirmación
+
+- **Ubicación**: Alineados a la derecha en un bloque con `border-t border-slate-200 pt-8`.
+- **Estilo Primario**: `px-10 py-3 bg-primary text-white rounded-2xl hover:scale-105 active:scale-95 transition-all font-bold shadow-lg shadow-primary/30`.
+- **Estado de Carga**: Integrar `app-icon` con `pi-spin pi-spinner` cuando `loading()` sea verdadero.
+
+## 7. Estabilidad Visual (Anti-Flash)
+
+Para evitar el parpadeo blanco al cambiar entre temas claro/oscuro o al cargar datos:
+- **Transiciones Globales**: Aplicar `transition-colors duration-300` en contenedores, celdas y labels.
+- **Color de Texto**: Forzar `text-slate-800 dark:text-slate-100` en componentes de terceros (PrimeNG) para garantizar contraste inmediato.
+- **Bordes Dinámicos**: Usar opacidades bajas en modo oscuro (`dark:border-white/10`) para un look más integrado (glassmorphism).

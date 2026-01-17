@@ -81,8 +81,8 @@ import { LocationService } from '../../core/services/location.service';
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Descripción</label>
-                            <textarea pTextarea formControlName="description" rows="4" placeholder="Breve descripción de las funciones..." 
+                            <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Descripción (Opcional)</label>
+                            <textarea pTextarea formControlName="description" rows="3" placeholder="Breve descripción de las funciones..." 
                                       class="w-full px-4 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm resize-none"></textarea>
                         </div>
                     </div>
