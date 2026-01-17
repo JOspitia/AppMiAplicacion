@@ -1,93 +1,58 @@
 ---
-description: Estándares técnicos de formularios y componentes PrimeNG
+description: Estándares técnicos de formularios y componentes PrimeNG para el sistema core.
 ---
 
-# Estandarización de Componentes y Formularios
+# Estándares de Formularios (UI Consistency)
 
-## 1. Arquitectura de Clases Globales
+Este documento define la estructura y el estilo obligatorio para todos los formularios del sistema, asegurando una experiencia **Human-Centric** y premium.
 
-Se creó una capa de estandarización en `src/styles.css` usando Tailwind CSS `@layer components` para aplicar el principio **DRY (Don't Repeat Yourself)**.
+## 1. Campos de Entrada (Inputs)
 
-**Ubicación**: `frontend-app/src/styles.css`
+### 1.1 Inputs con Iconos
+Todos los campos de identidad (Código, Nombre, Usuario, Email) deben integrar sus iconos dentro del campo:
+- **Estructura**: `relative group` con `app-icon` posicionado con `absolute left-4 top-1/2 -translate-y-1/2`.
+- **Spacing**: El input debe tener `style="padding-left: 3.5rem !important;"`.
+- **Interactividad**: Uso de `group-focus-within:text-primary` para animar el color del icono.
 
-```css
-@layer components {
-  /* ========================================
-     HUMAN-CENTRIC FORM STANDARDIZATION
-     Ensures visual consistency across all inputs
-     ======================================== */
-  
-  /* Master Input Class - Applies to all text inputs */
-  .p-inputtext {
-    @apply h-11 text-sm rounded-2xl border-slate-200 dark:border-white/10 !important;
-    @apply bg-white dark:bg-white/5 !important;
-    @apply font-bold transition-all !important;
-    @apply focus:border-primary focus:ring-4 focus:ring-[var(--primary-ring)] !important;
-  }
+### 1.2 Selectores (Dropdowns)
+Se utiliza el componente `p-select` (PrimeNG v21+):
+- **Autocomplete**: Atributo `[filter]="true"` y `filterBy="name"` siempre habilitado.
+- **Overlay**: `appendTo="body"` para evitar problemas de posicionamiento y scroll.
+- **Limpieza**: `[showClear]="true"` para campos opcionales.
 
-  /* Force Dropdowns to full width and standard height */
-  .p-select, .p-dropdown {
-    @apply w-full !important;
-  }
+### 1.3 Textareas
+Utilizados para descripciones:
+- **Clases**: `w-full px-4 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl resize-none`.
+- **Filas**: Mínimo 3 o 4 filas según el contexto.
 
-  .p-select .p-select-label,
-  .p-dropdown .p-dropdown-label {
-    @apply h-11 flex items-center text-sm font-bold !important;
-  }
+## 2. Patrones de Selección Avanzada
 
-  /* Calendar/DatePicker Standardization */
-  .p-datepicker, .p-calendar {
-    @apply w-full !important;
-  }
+### 2.1 Asignación Múltiple (Sedes, Roles, Permisos)
+Cuando se requiere asignar múltiples elementos, se sigue el patrón de **Chips Externos**:
+1.  **Área de Visualización**: Un contenedor superior que muestra `chips` personalizados de los elementos ya seleccionados.
+2.  **Selector**: Un `p-multiSelect` que muestra solo un resumen (ej: "3 elementos asignados") cuando está cerrado.
+3.  **Gestión**: El usuario puede eliminar elementos directamente desde los chips superiores o deseleccionarlos en el dropdown.
 
-  .p-datepicker input,
-  .p-calendar input {
-    @apply h-11 text-sm font-bold rounded-2xl !important;
-  }
-}
-```
+## 3. Botones y Confirmación
+- **Ubicación**: Alineados a la derecha al final del formulario.
+- **Estilo**: Botón primario con `shadow-lg shadow-primary/30` y efecto de escala al pulsar.
+- **Estado**: Deben mostrar un spinner de carga y deshabilitarse durante el procesamiento (`[loading]="loading()"`).
 
-## 2. Estándares Físicos Definidos
+## 4. Estándares de Listados (Visual Hierarchy)
+Para optimizar el espacio y mejorar la lectura, todos los listados principales deben seguir el patrón de **Columna Combinada**:
 
-| Propiedad        | Valor Estandarizado | Justificación                                              |
-|------------------|---------------------|------------------------------------------------------------|
-| **Altura**       | `h-11` (44px)       | Cumple con estándares de accesibilidad táctil (min. 44px)  |
-| **Ancho**        | `w-full` (100%)     | Ocupa el 100% del contenedor padre (Grid/Flex)             |
-| **Border Radius**| `rounded-2xl`       | Consistencia visual premium con el Design System           |
-| **Font Size**    | `text-sm` (14px)    | Tamaño legible sin sacrificar densidad de información      |
-| **Font Weight**  | `font-bold`         | Mayor jerarquía visual y legibilidad                       |
-| **Border Color** | `border-slate-200`  | Sutil en modo claro, resalta en dark mode                  |
+### 4.1 Columna "Nombre y Descripción"
+- **Estructura**: Un `flexbox` con alineación superior (`items-start`).
+- **Icono**: El icono representativo del módulo dentro de un contenedor `h-10 w-10rounded-xl bg-primary/10 transition-transform group-hover:scale-110`.
+- **Información**: 
+    - **Nombre**: Texto principal en `text-sm font-bold`.
+    - **Metadatos**: Seguido (opcionalmente) por badges o textos pequeños (ej: Nivel Organizacional).
+    - **Descripción**: Una línea truncada (`line-clamp-1`) en `text-xs text-slate-500` con `[pTooltip]` accesible (Estándar: 14px, font-medium, `tooltip-wide`).
 
-## 3. Componentes Estandarizados
+### 4.2 Columna "Código"
+- **Estilo**: El código debe visualizarse como un badge sutil: `text-xs font-black px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600`. No debe ser el foco de atención, sino una referencia rápida.
 
-✅ **Input Text** (`pInputText`)  
-✅ **Dropdown/Select** (`p-select`, `p-dropdown`)  
-✅ **DatePicker/Calendar** (`p-datepicker`, `p-calendar`)  
-✅ **Password** (`p-password`)  
-✅ **InputNumber** (`p-inputnumber`)  
-✅ **Textarea** (`p-inputtextarea`)  
-✅ **Buttons** (`p-button`)  
-✅ **Dialogs** (`p-dialog`)
-✅ **Tables/Paginators** (`p-datatable`, `p-paginator`)
-
-## 4. Inputs Especiales (Iconos y Padding)
-
-Para inputs numéricos (`p-inputNumber`) que requieren un icono interno (ej: Moneda), se debe usar una clase CSS específica para garantizar el padding correcto, ya que los estilos en línea a veces son sobrescritos.
-
-**Implementación Correcta:**
-
-1.  Definir la clase en el componente:
-    ```typescript
-    styles: [`
-        :host ::ng-deep .icon-padding-left {
-            padding-left: 3.5rem !important;
-        }
-    `]
-    ```
-2.  Aplicar la clase a `inputStyleClass`:
-    ```html
-    <p-inputNumber 
-        styleClass="w-full"
-        inputStyleClass="w-full ... icon-padding-left">
-    </p-inputNumber>
-    ```
+## 5. Estructura de Secciones
+Utilizar indicadores visuales de sección para agrupar campos relacionados:
+- Una barra vertical de color primario (`w-1.5 h-6 bg-primary rounded-full`).
+- Título en `text-xl font-black`.

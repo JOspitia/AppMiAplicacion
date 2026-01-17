@@ -131,10 +131,19 @@ Para módulos que requieren una estructura de precedencia o jerarquía (ej: Nive
 - **Actualización Optimista**: Al soltar la fila, el componente debe recalcular los números de orden visualmente de inmediato mientras se procesa la petición en el backend.
 
 ### 6.2 Estrategia de Consistencia (Backend)
-Para evitar errores de "Duplicate Key" en bases de datos con restricciones únicas (`unique_order_per_company`), el servicio debe procesar el reordenamiento en dos fases dentro de una misma transacción:
+Para evitar errores de "Duplicate Key" y manejar correctamente elementos inactivos:
 
-1.  **Fase Temporal (Cleanup)**: Asignar valores negativos temporales (`-1, -2, ...`) a todos los registros involucrados. Realizar un `flush` a la base de datos.
-2.  **Fase Final (Reorder)**: Asignar los valores positivos definitivos (`1, 2, ...`) basados en el nuevo orden recibido.
+1.  **Índice Único Parcial**: Se debe usar un índice único que solo aplique a registros activos y donde el orden no sea nulo.
+    ```sql
+    CREATE UNIQUE INDEX unique_active_order_per_company 
+    ON schema.table (company_id, hierarchy_order) 
+    WHERE (active = TRUE AND hierarchy_order IS NOT NULL);
+    ```
+2.  **Manejo de Inactivos**: Los registros con `active = false` deben tener obligatoriamente `hierarchy_order = NULL`.
+3.  **Procesamiento en Dos Fases (Reorder)**:
+    - **Fase Temporal (Cleanup)**: Asignar valores negativos temporales (`-1, -2, ...`) a todos los registros involucrados. Realizar un `flush` a la base de datos.
+    - **Fase Final (Reorder)**: Asignar los valores positivos definitivos (`1, 2, ...`) basados en el nuevo orden recibido.
+4.  **Auto-asignación al Activar**: Al reactivar un elemento, el sistema debe buscar el `MAX(order) + 1` de la compañía para reinsertarlo al final de la jerarquía activa.
 
 ### 6.3 Ejemplo Técnico (Angular)
 ```typescript

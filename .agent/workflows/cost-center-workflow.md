@@ -22,10 +22,11 @@ El módulo de Centros de Costos permite la segmentación financiera de los gasto
 
 ## 2. Experiencia de Usuario (Frontend)
 
-### 2.1 Visualización de Datos
-- **Tabla Premium**: Uso de `p-table` con filtros globales.
+### 2.1 Visualización de Datos (Tabla Premium)
+- **Standard de Visualización**: Uso del patrón de **Columna Combinada** (Nombre y Descripción) para optimizar el espacio.
 - **Formateo**: Los valores monetarios deben mostrarse con el símbolo de la moneda asociada y formato decimal estándar.
-- **Indicadores de Estado**: Uso de badges circulares de estado (Emerald/Rose).
+- **Indicadores de Estado**: Uso de badges circulares de estado (Emerald/Rose) con punto indicador.
+- **Iconografía**: Uso obligatorio del icono `calculator` o `building` en contenedor premium (`h-10 w-10rounded-xl`).
 
 ### 2.2 Formulario de Gestión
 - **Validación en Tiempo Real**: El sistema debe validar que el código no esté duplicado antes de permitir el guardado.

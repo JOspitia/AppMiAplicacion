@@ -26,6 +26,10 @@ export class OrganizationalLevelService {
         return this.http.get<OrganizationalLevel[]>(url);
     }
 
+    getActive(): Observable<OrganizationalLevel[]> {
+        return this.getAll(true);
+    }
+
     getById(id: string): Observable<OrganizationalLevel> {
         return this.http.get<OrganizationalLevel>(`${this.apiUrl}/${id}`);
     }

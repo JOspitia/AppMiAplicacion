@@ -24,6 +24,10 @@ export class LocationService {
         return this.http.get<Location[]>(this.apiUrl);
     }
 
+    getActive(): Observable<Location[]> {
+        return this.http.get<Location[]>(`${this.apiUrl}/active`);
+    }
+
     getById(id: string): Observable<Location> {
         return this.http.get<Location>(`${this.apiUrl}/${id}`);
     }

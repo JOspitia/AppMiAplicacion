@@ -30,6 +30,10 @@ export class CostCenterService {
         return this.http.get<CostCenter[]>(this.apiUrl, { params });
     }
 
+    getActive(): Observable<CostCenter[]> {
+        return this.getAll(true);
+    }
+
     getById(id: string): Observable<CostCenter> {
         return this.http.get<CostCenter>(`${this.apiUrl}/${id}`);
     }

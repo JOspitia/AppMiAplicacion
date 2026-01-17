@@ -85,6 +85,11 @@ export const routes: Routes = [
             { path: 'rrhh/organizational-levels/create', loadComponent: () => import('./rrhh/organizational-levels/org-level-form.component').then(m => m.OrganizationalLevelFormComponent) },
             { path: 'rrhh/organizational-levels/edit/:id', loadComponent: () => import('./rrhh/organizational-levels/org-level-form.component').then(m => m.OrganizationalLevelFormComponent) },
 
+            // Departamentos
+            { path: 'rrhh/departments', loadComponent: () => import('./rrhh/departments/department-list.component').then(m => m.DepartmentListComponent) },
+            { path: 'rrhh/departments/create', loadComponent: () => import('./rrhh/departments/department-form.component').then(m => m.DepartmentFormComponent) },
+            { path: 'rrhh/departments/edit/:id', loadComponent: () => import('./rrhh/departments/department-form.component').then(m => m.DepartmentFormComponent) },
+
             { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] }
         ]
     },

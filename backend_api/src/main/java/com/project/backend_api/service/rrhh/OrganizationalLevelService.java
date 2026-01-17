@@ -52,21 +52,26 @@ public class OrganizationalLevelService {
     @Transactional
     public OrganizationalLevelDto create(OrganizationalLevelDto dto) {
         UUID companyId = getCurrentCompanyId();
+        boolean isActive = dto.getActive() != null ? dto.getActive() : true;
 
-        if (dto.getHierarchyOrder() == null) {
-            Integer maxOrder = repository.findMaxHierarchyOrder(companyId);
-            dto.setHierarchyOrder(maxOrder != null ? maxOrder + 1 : 1);
+        Integer order = null;
+        if (isActive) {
+            order = dto.getHierarchyOrder();
+            if (order == null) {
+                Integer maxOrder = repository.findMaxHierarchyOrder(companyId);
+                order = (maxOrder != null ? maxOrder + 1 : 1);
+            }
+            validateHierarchyOrderUnique(order, null, companyId);
         }
 
-        validateHierarchyOrderUnique(dto.getHierarchyOrder(), null, companyId);
         validateNameUnique(dto.getName(), null, companyId);
 
         OrganizationalLevel entity = new OrganizationalLevel();
         entity.setCompany(Company.builder().id(companyId).build());
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
-        entity.setHierarchyOrder(dto.getHierarchyOrder());
-        entity.setActive(dto.getActive() != null ? dto.getActive() : true);
+        entity.setHierarchyOrder(order);
+        entity.setActive(isActive);
 
         return toDto(repository.save(entity));
     }
@@ -127,14 +132,29 @@ public class OrganizationalLevelService {
             throw new RuntimeException("No autorizado");
         }
 
-        validateHierarchyOrderUnique(dto.getHierarchyOrder(), id, companyId);
+        boolean wasActive = entity.getActive();
+        boolean isNowActive = dto.getActive() != null ? dto.getActive() : wasActive;
+
+        Integer targetOrder = dto.getHierarchyOrder();
+
+        if (isNowActive) {
+            if (targetOrder == null && !wasActive) {
+                // If it was inactive and becoming active without order, assign one
+                Integer maxOrder = repository.findMaxHierarchyOrder(companyId);
+                targetOrder = (maxOrder != null ? maxOrder + 1 : 1);
+            }
+            validateHierarchyOrderUnique(targetOrder, id, companyId);
+        } else {
+            // Inactive items must have null order
+            targetOrder = null;
+        }
+
         validateNameUnique(dto.getName(), id, companyId);
 
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
-        entity.setHierarchyOrder(dto.getHierarchyOrder());
-        if (dto.getActive() != null)
-            entity.setActive(dto.getActive());
+        entity.setHierarchyOrder(targetOrder);
+        entity.setActive(isNowActive);
 
         return toDto(repository.save(entity));
     }
@@ -144,11 +164,23 @@ public class OrganizationalLevelService {
         OrganizationalLevel entity = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nivel organizacional no encontrado"));
 
-        if (!entity.getCompany().getId().equals(getCurrentCompanyId())) {
+        UUID companyId = getCurrentCompanyId();
+        if (!entity.getCompany().getId().equals(companyId)) {
             throw new RuntimeException("No autorizado");
         }
 
-        entity.setActive(!entity.getActive());
+        boolean willBeActive = !entity.getActive();
+        entity.setActive(willBeActive);
+
+        if (willBeActive) {
+            // Assign next available order when reactivating
+            Integer maxOrder = repository.findMaxHierarchyOrder(companyId);
+            entity.setHierarchyOrder(maxOrder != null ? maxOrder + 1 : 1);
+        } else {
+            // Clear order when deactivating to avoid collisions with reordering
+            entity.setHierarchyOrder(null);
+        }
+
         repository.save(entity);
     }
 

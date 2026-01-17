@@ -10,11 +10,11 @@ import { FormsModule } from '@angular/forms';
 import { IconComponent } from '../../shared/components/icon.component';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { OrganizationalLevelService, OrganizationalLevel } from '../../core/services/organizational-level.service';
+import { DepartmentService, Department } from '../../core/services/department.service';
 import { effect } from '@angular/core';
 
 @Component({
-    selector: 'app-org-level-list',
+    selector: 'app-department-list',
     standalone: true,
     imports: [
         CommonModule, RouterModule, TableModule, ButtonModule,
@@ -39,24 +39,23 @@ import { effect } from '@angular/core';
             <div>
                 <span class="text-primary font-bold tracking-widest text-[10px] uppercase block mb-1">Recursos Humanos</span>
                 <h1 class="text-3xl font-black text-slate-900 dark:text-white">
-                    Niveles <span class="text-primary">Organizacionales</span>
+                    Departamentos <span class="text-primary">& Estructura</span>
                 </h1>
-                <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm">Define la jerarquía estructual de la empresa (Ej: Estratégico, Táctico, Operativo).</p>
+                <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm">Gestiona la estructura funcional y jerárquica de la empresa.</p>
             </div>
-            <a routerLink="/rrhh/organizational-levels/create" 
+            <a routerLink="/rrhh/departments/create" 
                class="flex items-center gap-2 bg-primary hover:bg-primary-600 text-white px-5 py-2.5 rounded-full font-bold shadow-lg shadow-primary/30 transition-all transform hover:scale-105 active:scale-95">
                 <app-icon name="plus" size="18"></app-icon>
-                <span>Nuevo Nivel</span>
+                <span>Nuevo Departamento</span>
             </a>
         </div>
 
         <div class="bg-white/80 dark:bg-[var(--bg-card)] backdrop-blur-xl rounded-[2rem] border border-white/20 dark:border-slate-800 shadow-2xl overflow-hidden p-6 transition-all duration-300">
             
             <p-table #dt [value]="displayItems" [rows]="10" [paginator]="true" 
-                     (onRowReorder)="onRowReorder($event)"
-                     [globalFilterFields]="['name', 'description']"
+                     [globalFilterFields]="['name', 'code', 'parentName', 'costCenterName']"
                      styleClass="p-datatable-sm" 
-                     [tableStyle]="{ 'min-width': '50rem' }">
+                     [tableStyle]="{ 'min-width': '60rem' }">
                 
                 <ng-template pTemplate="caption">
                     <div class="flex items-center justify-between pb-6 gap-4">
@@ -64,7 +63,7 @@ import { effect } from '@angular/core';
                             <i class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-primary transition-colors z-10 text-base"></i>
                             <input pInputText type="text" 
                                    (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
-                                   placeholder="Buscar por nombre o descripción..." 
+                                   placeholder="Buscar por código, nombre o padre..." 
                                    style="padding-left: 3.5rem !important;"
                                    class="w-full pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm" />
                         </div>
@@ -83,39 +82,30 @@ import { effect } from '@angular/core';
 
                 <ng-template pTemplate="header">
                     <tr class="border-b border-slate-200 dark:border-slate-700/50">
-                        <th class="py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-transparent text-center" style="width:5%"></th>
-                        <th class="py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-transparent text-center" style="width:10%">Orden</th>
-                        <th class="py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-transparent" style="width:55%">Nombre y Descripción</th>
-                        <th class="py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-transparent text-center" style="width:15%">Estado</th>
+                        <th class="py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-transparent" style="width:10%">Código</th>
+                        <th class="py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-transparent" style="width:35%">Nombre y Descripción</th>
+                        <th class="py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-transparent" style="width:15%">Padre</th>
+                        <th class="py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-transparent" style="width:15%">Centro Costo</th>
+                        <th class="py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-transparent text-center" style="width:10%">Estado</th>
                         <th class="py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-transparent text-right" style="width:15%">Gestión</th>
                     </tr>
                 </ng-template>
 
-                <ng-template pTemplate="body" let-item let-index="rowIndex">
-                    <tr [pReorderableRow]="showInactive() ? null : index" class="dark:hover:bg-indigo-500/5 transition-all duration-300 group border-b border-slate-100 dark:border-slate-800/50 last:border-none">
-                        <td *ngIf="!showInactive()" class="pl-6 py-6 text-center w-20">
-                            <div pReorderableRowHandle 
-                                 class="flex items-center justify-center w-10 h-10 mx-auto rounded-xl cursor-move hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95 group border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                                <i class="pi pi-bars text-slate-400 group-hover:text-primary transition-colors text-lg"></i>
-                            </div>
-                        </td>
-                        <td *ngIf="showInactive()" class="pl-6 py-6 text-center w-20 opacity-30 select-none">
-                            <div class="flex items-center justify-center w-10 h-10 mx-auto rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
-                                <i class="pi pi-lock text-slate-300 dark:text-slate-600 text-sm"></i>
-                            </div>
-                        </td>
-                        <td class="py-6 px-4 text-center">
-                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-black text-sm border border-slate-200 dark:border-slate-700">
-                                {{ index + 1 }}
+                <ng-template pTemplate="body" let-item>
+                    <tr class="hover:bg-slate-50/80 dark:hover:bg-indigo-500/5 transition-all duration-300 group border-b border-slate-100 dark:border-slate-800/50 last:border-none">
+                        <td class="py-6 px-4">
+                            <span class="text-xs font-black px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                {{ item.code }}
                             </span>
                         </td>
                         <td class="py-6 px-4">
                             <div class="flex items-start gap-4">
                                 <div class="h-10 w-10 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform mt-1">
-                                    <app-icon name="sitemap" size="18"></app-icon>
+                                    <app-icon name="building" size="18"></app-icon>
                                 </div>
                                 <div class="flex flex-col gap-0.5">
                                     <span class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight">{{ item.name }}</span>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ item.organizationalLevelName || '-' }}</span>
                                     <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-1 max-w-sm cursor-default" 
                                        *ngIf="item.description"
                                        [pTooltip]="item.description" tooltipPosition="bottom" tooltipStyleClass="tooltip-wide">
@@ -123,6 +113,16 @@ import { effect } from '@angular/core';
                                     </p>
                                 </div>
                             </div>
+                        </td>
+                        <td class="py-6 px-4">
+                            <div class="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300" *ngIf="item.parentName">
+                                <app-icon name="pi-angle-right" size="12" class="text-slate-400"></app-icon>
+                                <span class="font-medium">{{ item.parentName }}</span>
+                            </div>
+                            <span class="text-xs text-slate-400" *ngIf="!item.parentName">-</span>
+                        </td>
+                        <td class="py-6 px-4">
+                            <span class="text-sm text-slate-600 dark:text-slate-300 font-medium">{{ item.costCenterName || '-' }}</span>
                         </td>
                         <td class="py-6 px-4 text-center">
                             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border transition-colors"
@@ -134,7 +134,7 @@ import { effect } from '@angular/core';
                         <td class="py-6 px-4 text-right">
                             <div class="flex items-center justify-end gap-2 text-primary">
                                 <button pButton icon="pi pi-pencil" 
-                                        [routerLink]="['/rrhh/organizational-levels/edit', item.id]"
+                                        [routerLink]="['/rrhh/departments/edit', item.id]"
                                         class="p-button-rounded p-button-text p-button-sm w-8 h-8 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                                         pTooltip="Editar"></button>
 
@@ -154,10 +154,10 @@ import { effect } from '@angular/core';
                         <td colspan="6" class="text-center py-20">
                             <div class="flex flex-col items-center">
                                 <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-800 text-slate-400 mb-4 flex items-center justify-center border border-slate-100 dark:border-slate-700 transition-transform hover:scale-110">
-                                    <app-icon name="sitemap" size="32"></app-icon>
+                                    <app-icon name="building" size="32"></app-icon>
                                 </div>
-                                <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Sin niveles organizacionales</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-xs mt-2">No se han configurado niveles jerárquicos.</p>
+                                <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Sin departamentos</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-xs mt-2">No se han configurado departamentos.</p>
                             </div>
                         </td>
                     </tr>
@@ -167,23 +167,22 @@ import { effect } from '@angular/core';
     </div>
     `
 })
-export class OrganizationalLevelListComponent implements OnInit {
-    private service = inject(OrganizationalLevelService);
+export class DepartmentListComponent implements OnInit {
+    private service = inject(DepartmentService);
 
-    items = signal<OrganizationalLevel[]>([]);
+    items = signal<Department[]>([]);
     showInactive = signal<boolean>(false);
-    displayItems: OrganizationalLevel[] = [];
+    displayItems: Department[] = [];
 
     successMessage = signal<string | null>(null);
     errorMessage = signal<string | null>(null);
-    confirmationData = signal<{ title: string, message: string, item: OrganizationalLevel } | null>(null);
+    confirmationData = signal<{ title: string, message: string, item: Department } | null>(null);
 
     constructor() {
         effect(() => {
-            const filtered = this.items()
+            this.displayItems = this.items()
                 .filter(item => item.active === !this.showInactive())
-                .sort((a, b) => (a.hierarchyOrder || 0) - (b.hierarchyOrder || 0));
-            this.displayItems = [...filtered];
+                .sort((a, b) => a.code.localeCompare(b.code));
         });
     }
 
@@ -194,40 +193,17 @@ export class OrganizationalLevelListComponent implements OnInit {
     loadItems() {
         this.service.getAll().subscribe({
             next: (data) => this.items.set(data),
-            error: () => this.errorMessage.set('Error al cargar los niveles organizacionales.')
+            error: () => this.errorMessage.set('Error al cargar los departamentos.')
         });
     }
 
-    onRowReorder(event: any) {
-        if (this.showInactive()) return;
-
-        const orderedIds = this.displayItems
-            .map(item => item.id)
-            .filter(id => !!id) as string[];
-
-        // Optimistic
-        this.displayItems.forEach((item, index) => {
-            item.hierarchyOrder = index + 1;
-        });
-
-        this.service.reorder(orderedIds).subscribe({
-            next: () => {
-                this.successMessage.set('Orden jerárquico actualizado.');
-            },
-            error: () => {
-                this.errorMessage.set('Error al guardar el orden.');
-                this.loadItems();
-            }
-        });
-    }
-
-    toggleActive(item: OrganizationalLevel) {
+    toggleActive(item: Department) {
         const isActivating = !item.active;
         this.confirmationData.set({
-            title: isActivating ? '¿Activar Nivel?' : '¿Desactivar Nivel?',
+            title: isActivating ? '¿Activar Departamento?' : '¿Desactivar Departamento?',
             message: isActivating
-                ? `¿Deseas reactivar el nivel "${item.name}"?`
-                : `¿Estás seguro de desactivar el nivel "${item.name}"?`,
+                ? `¿Deseas reactivar el departamento "${item.name}"?`
+                : `¿Estás seguro de desactivar el departamento "${item.name}"?`,
             item: item
         });
     }
@@ -241,12 +217,12 @@ export class OrganizationalLevelListComponent implements OnInit {
                 this.loadItems();
                 this.confirmationData.set(null);
                 this.successMessage.set(data.item.active
-                    ? 'Nivel desactivado correctamente.'
-                    : 'Nivel activado correctamente.');
+                    ? 'Departamento desactivado correctamente.'
+                    : 'Departamento activado correctamente.');
             },
             error: () => {
                 this.confirmationData.set(null);
-                this.errorMessage.set('Error al cambiar el estado del nivel.');
+                this.errorMessage.set('Error al cambiar el estado del departamento.');
             }
         });
     }
