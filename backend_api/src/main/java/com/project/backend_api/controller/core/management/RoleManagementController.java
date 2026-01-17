@@ -29,7 +29,8 @@ public class RoleManagementController {
     @PreAuthorize("hasAuthority('CORE_ROLE_VIEW')")
     public ResponseEntity<List<RoleDto>> listRoles() {
         UUID companyId = authService.getSelectedCompanyId();
-        return ResponseEntity.ok(roleService.listAllUserRoles(companyId));
+        UUID currentUserId = authService.getCurrentUser().getId();
+        return ResponseEntity.ok(roleService.listAllUserRoles(companyId, currentUserId));
     }
 
     @PostMapping
@@ -43,11 +44,12 @@ public class RoleManagementController {
         if (roleRequest.getId() == null) {
             return ResponseEntity
                     .ok(roleService.createRole(roleRequest.getName(), roleRequest.getDescription(), permissionIds,
-                            companyId, currentUserId));
+                            companyId, currentUserId, roleRequest.getIsAdminRole(), roleRequest.getIsRootRole()));
         } else {
             return ResponseEntity
                     .ok(roleService.updateRole(roleRequest.getId(), roleRequest.getName(), roleRequest.getDescription(),
-                            permissionIds, companyId, currentUserId));
+                            permissionIds, companyId, currentUserId, roleRequest.getIsAdminRole(),
+                            roleRequest.getIsRootRole()));
         }
     }
 

@@ -69,7 +69,7 @@ import { AuthService } from '../services/auth.service';
                         <ng-container *ngFor="let step of ['Identidad', 'Contacto', 'Ubicación', 'Branding']; let i = index">
                             <div class="flex flex-col items-center gap-4 relative z-10 group">
                                 <!-- Outer Container -->
-                                <div [class]="currentStep() === i ? 'bg-white dark:bg-slate-900 ring-4 ring-primary/10' : (currentStep() > i ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-950/40')"
+                                <div [class]="currentStep() === i ? 'bg-white dark:bg-slate-900 ring-4 ring-primary/10' : (currentStep() > i ? 'bg-white dark:bg-slate-900' : 'bg-white dark:bg-slate-900')"
                                      class="p-1.5 rounded-[1.25rem] transition-all duration-500 border border-slate-200 dark:border-white/5">
                                     
                                     <!-- Inner Container -->
@@ -379,7 +379,7 @@ import { AuthService } from '../services/auth.service';
                     </form>
 
                     <!-- Navigation -->
-                    <div class="flex items-center justify-between mt-12 pt-8 border-t border-slate-200 dark:border-white/10">
+                    <div class="flex items-center justify-between mt-12 pt-8 pb-4 border-t border-slate-200 dark:border-white/10">
                         <button *ngIf="currentStep() > 0" (click)="previousStep()" 
                                 class="flex items-center gap-2 px-6 py-3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-2xl hover:bg-slate-200 dark:hover:bg-white/10 transition-all font-bold">
                             <app-icon icon="arrow-left" class="w-4 h-4"></app-icon>
@@ -394,9 +394,7 @@ import { AuthService } from '../services/auth.service';
                         </button>
 
                         <button *ngIf="currentStep() === 3" (click)="onSubmit()" [disabled]="loading()"
-                                class="flex items-center gap-2 px-8 py-3 text-white rounded-2xl hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed transition-all font-bold shadow-lg ml-auto"
-                                [style.background]="'linear-gradient(to right, var(--primary), var(--primary-dark))'"
-                                [style.boxShadow]="'0 10px 15px -3px var(--primary-light)'">
+                                class="flex items-center gap-2 px-8 py-4 text-white rounded-2xl hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed transition-all font-black shadow-xl ml-auto bg-brand-gradient">
                             <app-icon *ngIf="!loading()" icon="check" class="w-4 h-4"></app-icon>
                             <app-icon *ngIf="loading()" icon="pi-spin pi-spinner" class="w-4 h-4"></app-icon>
                             <span>{{ loading() ? 'Procesando...' : (isEditMode() ? 'Actualizar Empresa' : 'Crear Empresa') }}</span>

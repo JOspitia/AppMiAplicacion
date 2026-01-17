@@ -16,6 +16,8 @@ Este documento detalla la implementación técnica, arquitectura y decisiones de
   - `id`, `name`, `description`, `company_id`, `active`
   - **[UPDATED]** `createdBy`, `updatedBy`, `deletedBy`: Cambiados de `String` a `UUID` para consistencia con el esquema de base de datos.
   - `is_system_role`: Protege roles críticos del sistema.
+  - **[NUEVO]** `is_root_role`: Booleano que identifica al rol maestro "ROOT". Se usa para validaciones de seguridad estrictas (no string comparison).
+  - **[NUEVO]** `is_admin_role`: Booleano para roles administrativos generales.
   - `permissions`: Relación Many-to-Many.
 
 #### `UserCompanyRole` (Relación M:N)
@@ -100,12 +102,14 @@ Este componente ha sido rediseñado para máxima estabilidad y UX:
   - **Auto-Selección**: Al marcar una acción (ej: Crear), el sistema selecciona automáticamente el permiso "Ver" del mismo recurso.
   - **Auto-Desactivación**: Al desmarcar "Ver", todas las acciones dependientes del mismo recurso se desmarcan automáticamente.
   - **Protección de Estado**: Las acciones de escritura permanecen bloqueadas/deshabilitadas visualmente si no se tiene seleccionado el permiso "Ver".
+  - **Visibilidad Root**: Los roles marcados como `isRootRole` solo son visibles y editables por usuarios que tengan `isRoot=true` o `isSuperAdmin`. Se ocultan completamente para otros administradores para prevenir escalada de privilegios.
 
 ## 3. Base de Datos y Migraciones
 
 ### 3.1 Flyway V77 y V80: Mejoras Estructurales
 - **V77 (Categorización)**: Clasifica permisos en categorías legibles (HR-Tech, Seguridad, etc.).
 - **V80 (Multi-Role)**: Modifica `user_company_roles` para permitir múltiples entradas por usuario/empresa.
+- **V98 (Security Flags)**: Añade columnas `is_root_role` a la tabla `roles` y `is_root`/`is_admin` a `users` para reemplazar comparaciones de texto frágiles por verificaciones booleanas robustas.
 
 ## 4. Workflow de Implementación (Paso a Paso)
 

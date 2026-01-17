@@ -33,7 +33,7 @@ import { BrandingService } from '../../core/services/branding.service';
 
       <!-- Top Left: Back Button -->
       <a 
-        href="/"
+        routerLink="/"
         class="absolute top-6 left-6 z-50 group inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/50 dark:bg-white/5 backdrop-blur-md text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-300 hover:text-primary transition-all border border-slate-200 dark:border-white/10 shadow-sm"
       >
         <i class="pi pi-arrow-left transition-transform group-hover:-translate-x-1"></i>
@@ -94,7 +94,6 @@ import { BrandingService } from '../../core/services/branding.service';
               [toggleMask]="true" 
               styleClass="w-full" 
               autocomplete="new-password"
-              (paste)="$event.preventDefault()"
               inputStyleClass="w-full !rounded-2xl !py-4 !pl-4 !bg-slate-50 dark:!bg-[#0f172a] !border-slate-200 dark:!border-slate-700 text-slate-900 dark:text-slate-100 focus:!border-primary focus:!ring-4 focus:!ring-primary/10 transition-all font-semibold placeholder:text-slate-400" 
               placeholder="••••••••">
             </p-password>

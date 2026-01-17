@@ -25,12 +25,14 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class AuthController {
 
         private final AuthenticationManager authenticationManager;
         private final JwtUtils jwtUtils;
         private final RefreshTokenService refreshTokenService;
         private final com.project.backend_api.repository.core.management.UserCompanyRoleRepository userCompanyRoleRepository;
+        private final com.project.backend_api.repository.core.management.UserRepository userRepository;
         private final com.project.backend_api.service.core.management.UserService userService;
 
         @PostMapping("/register")
@@ -64,9 +66,48 @@ public class AuthController {
         public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request,
                         HttpServletResponse response) {
 
-                Authentication authentication = authenticationManager.authenticate(
-                                new UsernamePasswordAuthenticationToken(loginRequest.username(),
-                                                loginRequest.password()));
+                log.info("Intento de login para: {}", loginRequest.username());
+
+                // 1. Manual validation BEFORE authentication using repository directly
+                var userOpt = userRepository.findByUsernameOrEmail(loginRequest.username());
+
+                if (userOpt.isPresent()) {
+                        var user = userOpt.get();
+                        log.info("Usuario detectado: {}. Verificado: {}", user.getUsername(), user.getVerified());
+
+                        if (!Boolean.TRUE.equals(user.getVerified())) {
+                                log.warn("Bloqueo por falta de verificación (403): {}", loginRequest.username());
+                                return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                                                .body(Map.of(
+                                                                "message",
+                                                                "Cuenta no verificada. Por favor, revisa tu correo electrónico.",
+                                                                "email", user.getEmail()));
+                        }
+                } else {
+                        log.info("Usuario no existe en el sistema: {}", loginRequest.username());
+                }
+
+                // 2. Proceed with standard authentication
+                Authentication authentication;
+                try {
+                        log.debug("Llamando a AuthenticationManager...");
+                        authentication = authenticationManager.authenticate(
+                                        new UsernamePasswordAuthenticationToken(loginRequest.username(),
+                                                        loginRequest.password()));
+                        log.info("Autenticación exitosa (200) para: {}", loginRequest.username());
+                } catch (org.springframework.security.authentication.BadCredentialsException e) {
+                        log.warn("Credenciales inválidas (401) para: {}", loginRequest.username());
+                        return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                                        .body(Map.of("message", "Usuario o contraseña incorrectos."));
+                } catch (org.springframework.security.core.AuthenticationException e) {
+                        log.error("Error de seguridad (Spring): {} - {}", e.getClass().getSimpleName(), e.getMessage());
+                        return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                                        .body(Map.of("message", "Error de autenticación: " + e.getMessage()));
+                } catch (Exception e) {
+                        log.error("ERROR CRÍTICO inesperado: ", e);
+                        return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .body(Map.of("message", "Error interno en el servidor."));
+                }
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

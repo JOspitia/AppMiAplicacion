@@ -40,6 +40,14 @@ public class User {
     @Builder.Default
     private Boolean isSuperAdmin = false;
 
+    @Column(name = "is_admin", nullable = false)
+    @Builder.Default
+    private Boolean isAdmin = false;
+
+    @Column(name = "is_root", nullable = false)
+    @Builder.Default
+    private Boolean isRoot = false;
+
     @Builder.Default
     private Boolean verified = false;
 

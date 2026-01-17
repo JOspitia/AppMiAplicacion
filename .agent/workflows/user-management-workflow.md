@@ -19,15 +19,16 @@ Siguiendo el sistema de diseño premium, la lista de usuarios y el formulario de
 - **[NUEVO] Filtro de Estado**: Se implementó un switch de alternancia (`p-toggleSwitch`) en la cabecera para filtrar entre usuarios Activos e Inactivos sin recargar la página.
 - **Búsqueda**: Filtro global superior integrado.
 
-### Formulario de Usuario (Creation/Edit)
-- **Secciones Claras**: Dividido en "Credenciales de Acceso", "Perfil Personal" y "Asignación de Roles".
+### Formulario de Usuario (Wizard System)
+- **Navegación por Pasos**: Implementación de un **Wizard de 3 pasos** (Identidad -> Perfil -> Roles) con barra de progreso visual premium.
+- **Validación Progresiva**: Cada paso valida sus campos antes de permitir avanzar.
 - **Generación Automática**: Contraseñas generadas por sistema para usuarios nuevos creados por admin.
-- **Flujo de Seguridad Obligatorio**: Si un usuario entra con contraseña temporal, el sistema bloquea el acceso y lo redirige a la pantalla de cambio de contraseña obligatoria.
+- **Linking Global**: Si el sistema detecta que el usuario (email/username) ya existe en otra empresa (Global User), muestra un **Modal de Vinculación** para asociarlo al tenant actual sin duplicar la cuenta.
 - **Inputs Premium**: 
-    - **Multi-Role**: Uso de `p-multiSelect` altamente personalizado para permitir la asignación de varios roles por usuario.
-    - **Visualización**: Se muestran "chips" o "tags" para cada rol asignado tanto en la lista como en el formulario.
+    - **Multi-Role**: Uso de `p-multiSelect` altamente personalizado.
+    - **Visualización**: Se muestran "chips" o "tags" para cada rol asignado.
     - **Validación**: Los roles deshabilitados o de sistema están protegidos.
-- **[NUEVO] Feedback de Operación**: Implementación obligatoria de spinners en botones de acción. El botón de "Crear" o "Actualizar" debe permanecer bloqueado y procesando hasta que el sistema navegue fuera de la vista, asegurando que el usuario perciba una transición limpia.
+- **[NUEVO] Feedback de Operación**: Implementación obligatoria de spinners en botones de acción.
 
 ## 2. Integración Backend (API)
 
@@ -45,9 +46,10 @@ El sistema se conecta a los endpoints de gestión corporativa:
 - `GET /api/core/management/users/profile/me`: Obtiene el perfil del usuario autenticado.
 
 ### Servicios Java (Refactorizados)
-- `com.project.backend_api.service.core.management.UserService`: Centraliza la lógica de registro y conversión a DTOs de gestión. Envía `EMAIL_VERIFICATION`. Maneja transacciones atómicas para la actualización de roles múltiples.
+- `com.project.backend_api.service.core.management.UserService`: Centraliza la lógica de registro. Envía `EMAIL_VERIFICATION`. Maneja transacciones atómicas para la actualización de roles múltiples.
+- **Seguridad Booleana**: Se implementaron flags `isRoot` y `isAdmin` en la entidad `User`. Solo usuarios con `isRoot=true` o `isSuperAdmin=true` pueden asignar roles marcados como `isRootRole` a otros usuarios.
 - `com.project.backend_api.service.core.ProfileService`: Gestiona el cambio de contraseña y limpia la bandera `requirePasswordChange`.
-- `com.project.backend_api.repository.core.management.UserCompanyRoleRepository`: Gestiona los vínculos entre usuarios, empresas y roles.
+- `com.project.backend_api.repository.core.management.UserCompanyRoleRepository`: Gestiona los vínculos entre usuarios, empresas y roles usando el nuevo esquema.
 
 ## 3. Estructura de Rutas (Angular)
 

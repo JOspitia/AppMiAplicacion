@@ -1,0 +1,201 @@
+version: '3.8'
+
+services:
+
+  # ---------------------------------------------------------------------
+  # 0. TUNNEL (CLOUDFLARE)
+  # ---------------------------------------------------------------------
+  cloudflare_tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+
+  # ---------------------------------------------------------------------
+  # 1. FRONTEND APP (Angular + Nginx - PRODUCCIÓN)
+  # ---------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend-app
+      dockerfile: Dockerfile # Usa el Dockerfile de producción (build + nginx)
+    container_name: app_frontend
+    ports:
+      - "${FRONTEND_PORT:-8080}:8080"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: always
+
+  # ---------------------------------------------------------------------
+  # 2. BACKEND API (Spring Boot - PRODUCCIÓN)
+  # ---------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend_api
+      dockerfile: Dockerfile # Usa el Dockerfile de producción (maven build + jre runtime)
+    container_name: app_backend
+    ports:
+      - "${BACKEND_PORT:-8081}:8080"
+    environment:
+      # Database
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+      # JPA/Flyway
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_FLYWAY_ENABLED=true
+      - SPRING_FLYWAY_BASELINE_ON_MIGRATE=true
+      - SPRING_FLYWAY_VALIDATE_ON_MIGRATE=false
+      - SPRING_FLYWAY_OUT_OF_ORDER=true
+      - SPRING_FLYWAY_IGNORE_MIGRATION_PATTERNS=*:missing
+      - SPRING_FLYWAY_SCHEMAS=configuration,security,business,public_access
+
+      # MinIO Storage
+      - STORAGE_ENDPOINT=${STORAGE_ENDPOINT}
+      - STORAGE_ACCESS_KEY=${STORAGE_ACCESS_KEY}
+      - STORAGE_SECRET_KEY=${STORAGE_SECRET_KEY}
+      - STORAGE_BUCKET_NAME=${STORAGE_BUCKET_NAME}
+      - STORAGE_PUBLIC_BUCKET=${STORAGE_PUBLIC_BUCKET}
+      - STORAGE_PRIVATE_BUCKET=${STORAGE_PRIVATE_BUCKET}
+
+      # JWT
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
+      - JWT_REFRESH_EXPIRATION_MS=${JWT_REFRESH_EXPIRATION_MS}
+
+      # App Config
+      - APP_SECURITY_COOKIE_SECURE=${APP_SECURITY_COOKIE_SECURE}
+      - APP_BASE_URL=${APP_BASE_URL}
+
+      # Email
+      - SPRING_MAIL_ENABLED=${SPRING_MAIL_ENABLED}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}
+
+      # Chatbot
+      - CHATBOT_INTERNAL_API_KEY=${CHATBOT_INTERNAL_API_KEY}
+      - CHATBOT_N8N_WEBHOOK_URL=${CHATBOT_N8N_WEBHOOK_URL}
+      - CHATBOT_N8N_API_KEY=${CHATBOT_N8N_API_KEY}
+
+      # MercadoPago
+      - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN}
+      - MERCADOPAGO_PUBLIC_KEY=${MERCADOPAGO_PUBLIC_KEY}
+
+      # Anti-Malware
+      - CLAMAV_HOST=${CLAMAV_HOST:-clamav}
+      - CLAMAV_PORT=${CLAMAV_PORT:-3310}
+
+    depends_on:
+      - postgres
+      - minio
+      - clamav
+    networks:
+      - app-network
+    restart: always
+
+  # ---------------------------------------------------------------------
+  # 3. BASE DE DATOS (POSTGRES)
+  # ---------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: always
+
+  # ---------------------------------------------------------------------
+  # 4. ALMACENAMIENTO (MINIO)
+  # ---------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: minio_storage
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - app-network
+    restart: always
+
+  # ---------------------------------------------------------------------
+  # 5. INICIALIZACIÓN DE MINIO
+  # ---------------------------------------------------------------------
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio_init
+    depends_on:
+      - minio
+    networks:
+      - app-network
+    volumes:
+      - ./minio_setup:/scripts
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    entrypoint: /bin/sh
+    command: /scripts/init.sh
+    restart: on-failure
+
+  # ---------------------------------------------------------------------
+  # 6. AUTOMATIZACIÓN (N8N)
+  # ---------------------------------------------------------------------
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n_app
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    environment:
+      - N8N_HOST=n8n_app
+      - N8N_PORT=${N8N_PORT:-5678}
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - WEBHOOK_URL=http://n8n_app:5678/
+      - GENERIC_TIMEZONE=America/Bogota
+      - TZ=America/Bogota
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - app-network
+    restart: always
+
+  # ---------------------------------------------------------------------
+  # 7. ANTI-MALWARE (CLAMAV)
+  # ---------------------------------------------------------------------
+  clamav:
+    image: clamav/clamav:latest
+    container_name: clamav_scanner
+    restart: always
+    networks:
+      - app-network
+    ports:
+      - "3310:3310"
+    mem_limit: 2g
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+        reservations:
+          memory: 1g
+
+networks:
+
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
+  n8n_data:

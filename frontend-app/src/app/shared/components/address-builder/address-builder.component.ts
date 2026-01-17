@@ -29,17 +29,20 @@ import { IconComponent } from '../icon.component';
             styleClass="max-w-2xl w-full"
             (onHide)="close()">
             
-            <div class="p-4 sm:p-6 space-y-6 sm:space-y-8">
+            <div class="p-6 sm:p-10 space-y-8 sm:space-y-10">
                 <!-- Live Preview -->
-                <div class="relative p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl overflow-hidden"
-                     [style.background]="'linear-gradient(135deg, var(--primary), var(--primary-stop))'"
-                     [style.boxShadow]="'0 20px 25px -5px var(--primary-light)'">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                    <span class="text-[9px] font-black text-white/60 uppercase tracking-widest block mb-4">Vista Previa Real</span>
-                    <p class="text-xl sm:text-2xl font-black text-white leading-tight min-h-[3rem]">
-                        {{ addressPreview }}
-                    </p>
-                    <app-icon icon="map-pin" class="absolute bottom-4 sm:bottom-6 right-6 sm:right-8 w-10 sm:w-12 h-10 sm:h-12 text-white/20"></app-icon>
+                <div class="relative mb-8 mx-2 sm:mx-4">
+                    <div class="relative p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden bg-brand-gradient shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] border border-white/10">
+                        <!-- Decorative Orbs -->
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white/15 rounded-full blur-3xl -mr-16 -mt-16 animate-pulse"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -ml-12 -mb-12"></div>
+                        
+                        <span class="text-[9px] font-black text-white/60 uppercase tracking-widest block mb-4">Vista Previa Real</span>
+                        <p class="text-xl sm:text-2xl font-black text-white leading-tight min-h-[3rem] drop-shadow-lg">
+                            {{ addressPreview }}
+                        </p>
+                        <app-icon icon="map-pin" class="absolute bottom-4 sm:bottom-6 right-6 sm:right-8 w-10 sm:w-12 h-10 sm:h-12 text-white/20"></app-icon>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">

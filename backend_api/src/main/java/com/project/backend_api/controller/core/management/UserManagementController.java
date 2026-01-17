@@ -25,7 +25,9 @@ public class UserManagementController {
     @PreAuthorize("hasAuthority('CORE_USER_VIEW')")
     public ResponseEntity<List<UserManagementDto>> listUsers() {
         UUID companyId = authService.getSelectedCompanyId();
-        return ResponseEntity.ok(userService.listUsersByCompany(companyId));
+        var user = authService.getCurrentUser();
+        boolean isPrivileged = Boolean.TRUE.equals(user.getIsSuperAdmin()) || Boolean.TRUE.equals(user.getIsRoot());
+        return ResponseEntity.ok(userService.listUsersByCompany(companyId, isPrivileged));
     }
 
     @GetMapping("/{id}")

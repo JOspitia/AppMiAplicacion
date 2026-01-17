@@ -1,5 +1,6 @@
 package com.project.backend_api.service.core.management;
 
+import com.project.backend_api.service.core.AuthService;
 import com.project.backend_api.repository.core.management.RoleRepository;
 import com.project.backend_api.repository.core.management.CompanyRepository;
 import com.project.backend_api.service.core.EmailService;
@@ -14,6 +15,8 @@ import com.project.backend_api.dto.core.administration.RegisterRequest;
 import com.project.backend_api.dto.core.management.UserManagementDto;
 import com.project.backend_api.model.core.management.User;
 import com.project.backend_api.model.core.management.UserCompanyRole;
+import com.project.backend_api.model.core.management.Company;
+import com.project.backend_api.model.core.management.Role;
 import com.project.backend_api.model.core.administration.VerificationToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,6 +43,7 @@ public class UserService {
         private final PasswordEncoder passwordEncoder;
         private final EmailService emailService;
         private final GlobalConfigurationRepository globalConfigurationRepository;
+        private final AuthService authService;
 
         @Value("${app.registration.default-company-name}")
         private String defaultCompanyName;
@@ -118,6 +122,10 @@ public class UserService {
                 return savedUser;
         }
 
+        public java.util.Optional<User> getUserByUsernameOrEmail(String identifier) {
+                return userRepository.findByUsernameOrEmail(identifier);
+        }
+
         public List<UserManagementDto> listUsersByCompany(UUID companyId) {
                 return listUsersByCompany(companyId, false);
         }
@@ -126,8 +134,10 @@ public class UserService {
                 // Get all UserCompanyRoles for the company
                 List<UserCompanyRole> allRoles = userCompanyRoleRepository.findByCompanyId(companyId)
                                 .stream()
-                                .filter(ucr -> isSuperAdmin || (ucr.getRole() != null
-                                                && !Boolean.TRUE.equals(ucr.getRole().getIsAdminRole())))
+                                .filter(ucr -> isSuperAdmin || (!Boolean.TRUE.equals(ucr.getUser().getIsSuperAdmin()) &&
+                                                !Boolean.TRUE.equals(ucr.getUser().getIsRoot()) &&
+                                                (ucr.getRole() == null || !Boolean.TRUE
+                                                                .equals(ucr.getRole().getIsRootRole()))))
                                 .collect(Collectors.toList());
 
                 // Group by user and select the most recent UserCompanyRole for each user
@@ -164,19 +174,53 @@ public class UserService {
         public void toggleActive(UUID userCompanyRoleId) {
                 UserCompanyRole ucr = userCompanyRoleRepository.findById(userCompanyRoleId)
                                 .orElseThrow(() -> new RuntimeException("Asociación de usuario no encontrada"));
-                ucr.setIsActive(!ucr.getIsActive());
+
+                boolean newState = !ucr.getIsActive();
+                ucr.setIsActive(newState);
                 userCompanyRoleRepository.save(ucr);
+
+                // Hierarchy Logic: If inactivated in a real company, check if we need to
+                // reactivate PUBLIC
+                if (!newState && !ucr.getCompany().getName().equalsIgnoreCase("PUBLIC")) {
+                        checkAndReactivatePublicAccess(ucr.getUser());
+                } else if (newState && !ucr.getCompany().getName().equalsIgnoreCase("PUBLIC")) {
+                        // If activated in a real company, we disable PUBLIC to keep it isolated
+                        disablePublicAccess(ucr.getUser());
+                }
         }
 
         @Transactional
         public UserManagementDto createUser(CreateUserRequest request, UUID creatorCompanyId) {
-                if (userRepository.findByUsername(request.username()).isPresent()) {
-                        throw new RuntimeException("El nombre de usuario ya está en uso.");
-                }
-                if (userRepository.findByEmail(request.email()).isPresent()) {
-                        throw new RuntimeException("El correo electrónico ya está en uso.");
+                var company = companyRepository.findById(creatorCompanyId)
+                                .orElseThrow(() -> new RuntimeException("Empresa no encontrada"));
+
+                // 1. Check if user already exists globally
+                var existingUser = userRepository.findByUsernameOrEmail(request.username())
+                                .or(() -> userRepository.findByEmail(request.email()));
+
+                if (existingUser.isPresent()) {
+                        User user = existingUser.get();
+
+                        // Check if already linked to this company
+                        boolean alreadyLinked = userCompanyRoleRepository.findByCompanyId(creatorCompanyId)
+                                        .stream().anyMatch(ucr -> ucr.getUser().getId().equals(user.getId()));
+
+                        if (alreadyLinked) {
+                                throw new RuntimeException("El usuario ya está registrado en esta empresa.");
+                        }
+
+                        // If NOT forced, we throw a Conflict asking for confirmation (409 logic)
+                        if (!Boolean.TRUE.equals(request.forceLink())) {
+                                // We use a special message prefix so the frontend knows it's a "Link" situation
+                                throw new RuntimeException("USER_EXISTS_GLOBAL:" + user.getFirstName() + " "
+                                                + user.getFirstSurname());
+                        }
+
+                        // Force linking: Just add the roles and isolated the user
+                        return linkExistingUser(user, company, request);
                 }
 
+                // 2. New User Creation
                 // Generate a simple random password
                 String rawPassword = UUID.randomUUID().toString().substring(0, 8);
 
@@ -207,27 +251,30 @@ public class UserService {
 
                 user = userRepository.save(user);
 
-                var company = companyRepository.findById(creatorCompanyId)
-                                .orElseThrow(() -> new RuntimeException("Empresa no encontrada"));
+                // Assign Roles (or default)
+                // Security Check: Non-ROOT users cannot assign ROOT role
+                if (request.roleIds() != null) {
+                        for (UUID rId : request.roleIds()) {
+                                roleRepository.findById(rId).ifPresent(r -> {
+                                        boolean isRequesterPrivileged = Boolean.TRUE
+                                                        .equals(authService.getCurrentUser().getIsSuperAdmin()) ||
+                                                        Boolean.TRUE.equals(authService.getCurrentUser().getIsRoot());
+                                        if (Boolean.TRUE.equals(r.getIsRootRole()) && !isRequesterPrivileged) {
+                                                throw new RuntimeException(
+                                                                "No tiene permisos para asignar el rol ROOT");
+                                        }
+                                });
+                        }
+                }
+                List<UserCompanyRole> userCompanyRoles = assignRolesToUserInCompany(user, company, request.roleIds(),
+                                request.active());
 
-                // Create UserCompanyRole entries for each role
-                List<UserCompanyRole> userCompanyRoles = new java.util.ArrayList<>();
-                for (UUID roleId : request.roleIds()) {
-                        var role = roleRepository.findById(roleId)
-                                        .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + roleId));
-
-                        UserCompanyRole ucr = UserCompanyRole.builder()
-                                        .user(user)
-                                        .company(company)
-                                        .role(role)
-                                        .roleName(role.getName())
-                                        .isActive(request.active() != null ? request.active() : true)
-                                        .build();
-
-                        userCompanyRoles.add(userCompanyRoleRepository.save(ucr));
+                // Isolation: Disable PUBLIC if moving to a real company
+                if (!company.getName().equalsIgnoreCase("PUBLIC")) {
+                        disablePublicAccess(user);
                 }
 
-                // Generate Verification Token for Management-created users too
+                // Generate Verification Token
                 String token = UUID.randomUUID().toString();
                 VerificationToken verificationToken = VerificationToken.builder()
                                 .token(token)
@@ -236,7 +283,7 @@ public class UserService {
                                 .build();
                 verificationTokenRepository.save(verificationToken);
 
-                // Send Email with credentials and activation link
+                // Send Email with credentials
                 Map<String, String> emailVars = new HashMap<>();
                 emailVars.put("firstName", user.getFirstName());
                 emailVars.put("username", user.getUsername());
@@ -248,6 +295,120 @@ public class UserService {
                 emailService.sendTemplateEmail(user.getEmail(), "USER_ACCOUNT_CREATED", emailVars);
 
                 return convertToManagementDto(userCompanyRoles);
+        }
+
+        private UserManagementDto linkExistingUser(User user, Company company, CreateUserRequest request) {
+                // Link roles
+                List<UserCompanyRole> linkedRoles = assignRolesToUserInCompany(user, company, request.roleIds(),
+                                request.active());
+
+                // Isolate
+                if (!company.getName().equalsIgnoreCase("PUBLIC")) {
+                        disablePublicAccess(user);
+                }
+
+                return convertToManagementDto(linkedRoles);
+        }
+
+        private List<UserCompanyRole> assignRolesToUserInCompany(User user, Company company, List<UUID> roleIds,
+                        Boolean active) {
+                List<UserCompanyRole> createdRoles = new java.util.ArrayList<>();
+                boolean isActive = active != null ? active : true;
+
+                if (roleIds == null || roleIds.isEmpty()) {
+                        // Assign default role: NUEVO_EMPLEADO
+                        Role defaultRole = getOrCreateDefaultEmployeeRole(company);
+                        UserCompanyRole ucr = UserCompanyRole.builder()
+                                        .user(user)
+                                        .company(company)
+                                        .role(defaultRole)
+                                        .roleName(defaultRole.getName())
+                                        .isActive(isActive)
+                                        .build();
+                        createdRoles.add(userCompanyRoleRepository.save(ucr));
+                } else {
+                        for (UUID roleId : roleIds) {
+                                var role = roleRepository.findById(roleId)
+                                                .orElseThrow(() -> new RuntimeException(
+                                                                "Rol no encontrado: " + roleId));
+
+                                UserCompanyRole ucr = UserCompanyRole.builder()
+                                                .user(user)
+                                                .company(company)
+                                                .role(role)
+                                                .roleName(role.getName())
+                                                .isActive(isActive)
+                                                .build();
+                                createdRoles.add(userCompanyRoleRepository.save(ucr));
+                        }
+                }
+                return createdRoles;
+        }
+
+        private Role getOrCreateDefaultEmployeeRole(Company company) {
+                return roleRepository.findByNameAndCompanyId("NUEVO_EMPLEADO", company.getId())
+                                .orElseGet(() -> {
+                                        Role newRole = Role.builder()
+                                                        .name("NUEVO_EMPLEADO")
+                                                        .description("Rol asignado automáticamente a nuevos integrantes")
+                                                        .company(company)
+                                                        .isSystemRole(true)
+                                                        .active(true)
+                                                        .createdAt(LocalDateTime.now())
+                                                        .build();
+                                        return roleRepository.save(newRole);
+                                });
+        }
+
+        private void disablePublicAccess(User user) {
+                companyRepository.findByName("PUBLIC").ifPresent(publicCompany -> {
+                        userCompanyRoleRepository.findByUserId(user.getId()).stream()
+                                        .filter(ucr -> ucr.getCompany().getId().equals(publicCompany.getId()))
+                                        .forEach(ucr -> {
+                                                ucr.setIsActive(false);
+                                                userCompanyRoleRepository.save(ucr);
+                                        });
+                });
+        }
+
+        private void checkAndReactivatePublicAccess(User user) {
+                // Count active "Real" companies
+                long activeRealCompanies = userCompanyRoleRepository.findByUserId(user.getId()).stream()
+                                .filter(ucr -> !ucr.getCompany().getName().equalsIgnoreCase("PUBLIC"))
+                                .filter(UserCompanyRole::getIsActive)
+                                .count();
+
+                // If no more real jobs, give back the PUBLIC access
+                if (activeRealCompanies == 0) {
+                        companyRepository.findByName("PUBLIC").ifPresent(publicCompany -> {
+                                var publicAssociations = userCompanyRoleRepository.findByUserId(user.getId()).stream()
+                                                .filter(ucr -> ucr.getCompany().getId().equals(publicCompany.getId()))
+                                                .toList();
+
+                                if (publicAssociations.isEmpty()) {
+                                        // Create it if it doesn't exist
+                                        Role defaultRole = roleRepository
+                                                        .findByNameAndCompanyId(defaultRoleName, publicCompany.getId())
+                                                        .orElse(null);
+
+                                        UserCompanyRole ucr = UserCompanyRole.builder()
+                                                        .user(user)
+                                                        .company(publicCompany)
+                                                        .role(defaultRole)
+                                                        .roleName(defaultRole != null ? defaultRole.getName()
+                                                                        : defaultRoleName)
+                                                        .isActive(true)
+                                                        .build();
+                                        userCompanyRoleRepository.save(ucr);
+                                } else {
+                                        // Reactivate all existing ones
+                                        publicAssociations.forEach(ucr -> {
+                                                ucr.setIsActive(true);
+                                                userCompanyRoleRepository.save(ucr);
+                                        });
+                                }
+                        });
+                }
         }
 
         public UserManagementDto getUserManagementById(UUID userCompanyRoleId) {
@@ -437,11 +598,18 @@ public class UserService {
                 finalRoles.removeAll(toDelete);
 
                 // Roles to add (present in new but not in current)
+                boolean isRequesterSuperAdmin = authService.getCurrentUser().getIsSuperAdmin();
                 for (UUID roleId : newRoleIds) {
                         if (!currentRoleIds.contains(roleId)) {
                                 var role = roleRepository.findById(roleId)
                                                 .orElseThrow(() -> new RuntimeException(
                                                                 "Rol no encontrado: " + roleId));
+
+                                boolean isRequesterPrivileged = Boolean.TRUE.equals(isRequesterSuperAdmin) ||
+                                                Boolean.TRUE.equals(authService.getCurrentUser().getIsRoot());
+                                if (Boolean.TRUE.equals(role.getIsRootRole()) && !isRequesterPrivileged) {
+                                        throw new RuntimeException("No tiene permisos para asignar el rol ROOT");
+                                }
 
                                 UserCompanyRole ucr = UserCompanyRole.builder()
                                                 .user(user)

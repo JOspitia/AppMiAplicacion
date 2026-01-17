@@ -180,7 +180,7 @@ interface UserInfo {
             <i class="pi pi-bars"></i>
           </button>
 
-          <div class="hidden sm:block">
+          <div class="hidden sm:block" *ngIf="companies().length > 1">
             <span class="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 leading-none block mb-1">Empresa Actual</span>
             <p class="text-sm font-bold text-slate-900 dark:text-white leading-tight">
                {{ selectedCompany()?.name || 'Cargando...' }}
@@ -351,11 +351,23 @@ export class MainLayoutComponent implements OnInit {
   }
 
   private mapModules(modules: ModuleDto[]): MenuItem[] {
-    return modules.map(m => ({
-      ...m,
-      isOpen: false,
-      children: m.children ? this.mapModules(m.children) : []
-    }));
+    const user = this.authService.currentUser();
+    // Allow if user is explicitly strictly Root or SuperAdmin
+    const isPrivileged = user?.isRoot || user?.isSuperAdmin;
+
+    return modules
+      .filter(m => {
+        // STRICT RESTRICTION: "Ubicaciones" only for ROOT/SuperAdmin
+        if (m.code === 'MENU_LOCATIONS' && !isPrivileged) {
+          return false;
+        }
+        return true;
+      })
+      .map(m => ({
+        ...m,
+        isOpen: false,
+        children: m.children ? this.mapModules(m.children) : []
+      }));
   }
 
 

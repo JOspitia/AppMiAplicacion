@@ -212,7 +212,9 @@ public class GeoSyncService {
 
     private void processCities(State state, List<ExternalCity> extCities,
             Map<UUID, Set<String>> citiesByState, SyncResult result) {
-        Set<String> existingCityNames = citiesByState.getOrDefault(state.getId(), new HashSet<>());
+        // FIX: Use computeIfAbsent to ensure we are working with the persistent Set in
+        // the Map
+        Set<String> existingCityNames = citiesByState.computeIfAbsent(state.getId(), k -> new HashSet<>());
 
         List<City> citiesToSave = new ArrayList<>();
         for (ExternalCity extCity : extCities) {

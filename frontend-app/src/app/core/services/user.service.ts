@@ -25,6 +25,7 @@ export interface CreateUserRequest {
     secondSurname?: string;
     roleIds: string[];
     active: boolean;
+    forceLink?: boolean;
 }
 
 @Injectable({

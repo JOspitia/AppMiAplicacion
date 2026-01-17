@@ -16,5 +16,7 @@ public class RoleRequestDto {
     private UUID id;
     private String name;
     private String description;
+    private Boolean isAdminRole;
+    private Boolean isRootRole;
     private Set<UUID> permissionIds;
 }

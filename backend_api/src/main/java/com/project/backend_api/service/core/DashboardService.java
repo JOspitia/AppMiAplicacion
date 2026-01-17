@@ -102,6 +102,7 @@ public class DashboardService {
 
         return new ModuleDto(
                 menu.getId().toString(),
+                menu.getCode(),
                 menu.getTitle(),
                 menu.getUrl(),
                 menu.getIcon(),

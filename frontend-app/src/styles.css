@@ -1,3 +1,4 @@
+/* stylelint-disable */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @import "primeicons/primeicons.css";
 
@@ -96,6 +97,7 @@ html {
   /* 4. Align internal icons (Dropdown arrows, Datepicker calendars) */
   .p-select-dropdown,
   .p-dropdown-trigger,
+  .p-multiselect-dropdown,
   .p-datepicker-trigger {
     @apply flex items-center justify-center h-full w-10 text-slate-400 !important;
     /* w-10 = 40px trigger area */
@@ -126,11 +128,39 @@ html {
     @apply focus:border-primary focus:ring-4 focus:ring-[var(--primary-ring)] !important;
   }
 
-  /* Dropdown/Select Visuals */
+  /* Dropdown/Select/MultiSelect Visuals */
   .p-select,
-  .p-dropdown {
+  .p-dropdown,
+  .p-multiselect {
     @apply rounded-2xl border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 !important;
     @apply focus-within:border-primary focus-within:ring-4 focus-within:ring-[var(--primary-ring)] !important;
+  }
+
+  /* MultiSelect Selected Items (Chips/Tokens) */
+  .p-multiselect-chip,
+  .p-multiselect-token {
+    @apply bg-primary/10 text-primary border border-primary/20 rounded-lg px-2 py-1 text-xs font-bold !important;
+  }
+
+  .p-multiselect-label {
+    @apply bg-transparent px-4 py-2 flex items-center gap-2 !important;
+    background: transparent !important;
+  }
+
+  /* MultiSelect Panel Item Overrides */
+  .p-multiselect-items,
+  .p-multiselect-item-group {
+    @apply bg-transparent !important;
+  }
+
+  .p-multiselect-item {
+    @apply transition-all duration-200 !important;
+    background: transparent !important;
+  }
+
+  .p-multiselect-chip-icon,
+  .p-multiselect-token-icon {
+    @apply text-primary/60 hover:text-primary ml-1 !important;
   }
 
   /* Datepicker Visuals */
@@ -143,24 +173,71 @@ html {
   /* Overlays (Dropdown/Datepicker panels) */
   .p-select-overlay,
   .p-dropdown-panel,
+  .p-multiselect-panel,
   .p-datepicker-panel,
   .p-calendar-panel {
-    @apply rounded-[2.5rem] border-slate-100 dark:border-white/10 shadow-2xl !important;
+    @apply rounded-[2.5rem] border-slate-100 dark:border-white/10 shadow-2xl overflow-hidden !important;
     @apply backdrop-blur-3xl bg-white/90 dark:bg-[#0f172a]/95 !important;
   }
 
-  /* Custom Select option hover/selected states */
+  /* Custom Scrollbar for Panels */
+  .p-select-overlay .p-select-list-container::-webkit-scrollbar,
+  .p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar,
+  .p-multiselect-panel .p-multiselect-items-wrapper::-webkit-scrollbar {
+    width: 6px !important;
+  }
+
+  .p-select-overlay .p-select-list-container::-webkit-scrollbar-thumb,
+  .p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar-thumb,
+  .p-multiselect-panel .p-multiselect-items-wrapper::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 dark:bg-white/10 rounded-full !important;
+  }
+
+  /* Custom Select/Dropdown/MultiSelect option hover/selected states */
   .p-select-option.p-focus,
-  .p-select-option:not(.p-selected):not(.p-disabled).p-focus,
-  .p-select-option:not(.p-selected):not(.p-disabled):hover {
-    background: var(--p-select-option-focus-background) !important;
+  .p-select-option:not(.p-selected):not(.p-disabled):hover,
+  .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover,
+  .p-multiselect-item:not(.p-highlight):not(.p-disabled):hover,
+  .p-multiselect-item:not(.p-selected):not(.p-disabled):hover {
+    background: color-mix(in srgb, var(--primary) 10%, transparent) !important;
     color: var(--primary) !important;
   }
 
-  .p-select-option.p-selected {
-    background: var(--p-select-option-selected-background) !important;
+  .p-select-option.p-selected,
+  .p-dropdown-item.p-highlight,
+  .p-multiselect-item.p-highlight,
+  .p-multiselect-item.p-selected,
+  .p-multiselect-item.p-focus.p-selected {
+    background: color-mix(in srgb, var(--primary) 20%, transparent) !important;
     color: var(--primary) !important;
     font-weight: 700 !important;
+  }
+
+  /* Force the background of the list container */
+  .p-multiselect-items-wrapper,
+  .p-dropdown-items-wrapper {
+    @apply bg-transparent dark:bg-[#0f172a]/40 !important;
+  }
+
+  /* Search Filter Inputs in Panels */
+  .p-multiselect-filter-container .p-inputtext,
+  .p-dropdown-filter-container .p-inputtext,
+  .p-select-filter-container .p-inputtext {
+    @apply bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 !important;
+    @apply h-9 text-xs rounded-xl !important;
+  }
+
+  /* Checkbox Standardization (especially in dark mode) */
+  .p-checkbox .p-checkbox-box {
+    @apply border-slate-300 dark:border-white/20 bg-white dark:bg-white/5 rounded-md transition-all !important;
+  }
+
+  .p-checkbox.p-checkbox-checked .p-checkbox-box {
+    @apply bg-primary border-primary !important;
+  }
+
+  .p-multiselect-header {
+    @apply bg-transparent border-b border-slate-100 dark:border-white/10 p-4 !important;
   }
 
   /* Password Input Standardization */
@@ -189,8 +266,8 @@ html {
 
   /* Dialog Glassmorphism */
   .p-dialog {
-    @apply bg-white/90 dark:bg-slate-900/95 backdrop-blur-3xl !important;
-    @apply rounded-[4rem] border-white/20 dark:border-slate-800 shadow-2xl !important;
+    @apply bg-white/90 dark:bg-[#0f172a]/95 backdrop-blur-3xl !important;
+    @apply rounded-[4rem] border-white/20 dark:border-white/10 shadow-2xl !important;
   }
 
   .p-dialog-header {
@@ -199,6 +276,10 @@ html {
 
   .p-dialog-content {
     @apply bg-transparent !important;
+  }
+
+  .premium-dialog-alt .p-dialog-content {
+    padding: 0 !important;
   }
 
   /* Button Standardization */

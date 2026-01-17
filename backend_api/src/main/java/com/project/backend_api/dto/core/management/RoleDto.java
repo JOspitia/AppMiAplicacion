@@ -1,7 +1,5 @@
 package com.project.backend_api.dto.core.management;
 
-
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,12 +17,9 @@ public class RoleDto {
     private String name;
     private String description;
     private Boolean isSystemRole;
+    private Boolean isAdminRole;
+    private Boolean isRootRole;
     private Boolean active;
     private LocalDateTime createdAt;
     private Integer permissionCount;
 }
-
-
-
-
-

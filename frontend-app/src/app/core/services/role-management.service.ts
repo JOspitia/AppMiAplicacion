@@ -22,6 +22,8 @@ export interface Role {
     name: string;
     description?: string;
     isSystemRole: boolean;
+    isAdminRole?: boolean;
+    isRootRole?: boolean;
     active: boolean;
     createdAt?: string;
     permissionCount?: number;
@@ -55,11 +57,11 @@ export class RoleManagementService {
         return this.http.get<PermissionsGrouped>(`${this.apiUrl}/permissions/grouped`);
     }
 
-    create(data: { name: string; description?: string; permissionIds: string[] }): Observable<Role> {
+    create(data: { name: string; description?: string; permissionIds: string[]; isAdminRole?: boolean; isRootRole?: boolean }): Observable<Role> {
         return this.http.post<Role>(this.apiUrl, data);
     }
 
-    update(id: string, data: { name: string; description?: string; permissionIds: string[] }): Observable<Role> {
+    update(id: string, data: { name: string; description?: string; permissionIds: string[]; isAdminRole?: boolean; isRootRole?: boolean }): Observable<Role> {
         return this.http.put<Role>(`${this.apiUrl}/${id}`, data);
     }
 

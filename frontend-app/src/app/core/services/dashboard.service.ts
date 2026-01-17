@@ -4,6 +4,7 @@ import { Observable, tap } from 'rxjs';
 
 export interface ModuleDto {
     id: string;
+    code?: string;
     title: string;
     url: string;
     icon: string;

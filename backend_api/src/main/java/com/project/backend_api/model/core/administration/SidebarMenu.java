@@ -1,7 +1,5 @@
 package com.project.backend_api.model.core.administration;
 
-
-
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -29,6 +27,9 @@ public class SidebarMenu {
     @Column(nullable = false)
     private String title;
 
+    @Column(unique = true)
+    private String code;
+
     private String url;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -54,8 +55,3 @@ public class SidebarMenu {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 }
-
-
-
-
-

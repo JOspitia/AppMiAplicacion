@@ -7,8 +7,19 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
     standalone: true,
     imports: [CommonModule],
     template: `
-    <div *ngIf="isSvg()" [innerHTML]="getSafeSvg()" [class]="svgClass" class="flex items-center justify-center fill-current"></div>
-    <i *ngIf="!isSvg()" [class]="getIconClass()" [ngClass]="iconClass"></i>
+    <div *ngIf="isSvg()" 
+         [innerHTML]="getSafeSvg()" 
+         [class]="svgClass" 
+         [style.width.px]="dynamicSize" 
+         [style.height.px]="dynamicSize"
+         class="flex items-center justify-center fill-current"></div>
+    <i *ngIf="!isSvg()" 
+       [class]="getIconClass()" 
+       [ngClass]="iconClass"
+       [style.width.px]="dynamicSize" 
+       [style.height.px]="dynamicSize" 
+       [style.fontSize.px]="dynamicSize"
+       class="flex items-center justify-center"></i>
   `,
     styles: [`
     :host {
@@ -34,12 +45,12 @@ export class IconComponent {
         if (value === undefined || value === null) return;
         const v = typeof value === 'number' ? value : parseInt(String(value), 10);
         if (!isNaN(v)) {
-            // Using arbitrary value syntax so values like 18 become w-[18px]
-            this.svgClass = `w-[${v}px] h-[${v}px]`;
-            // For icon fonts, apply a similar size class so icons scale
-            this.iconClass = `w-[${v}px] h-[${v}px]`;
+            this.dynamicSize = v;
         }
     }
+
+    dynamicSize: number = 20; // Default size if not set
+
 
     // Icon name mapping: Feather/Lucide -> PrimeIcons
     private iconMap: Record<string, string> = {
@@ -89,7 +100,15 @@ export class IconComponent {
         'user-edit': 'pencil',
         'wallet': 'wallet',
         'sitemap': 'sitemap',
-        'folder-open': 'folder-open'
+        'folder-open': 'folder-open',
+        'archive': 'box',
+        'identification': 'id-card',
+        'currency-dollar': 'dollar',
+        'user-group': 'users',
+        'document': 'file',
+        'list': 'list',
+        'grid': 'th-large',
+        'bell': 'bell'
     };
 
     isSvg(): boolean {

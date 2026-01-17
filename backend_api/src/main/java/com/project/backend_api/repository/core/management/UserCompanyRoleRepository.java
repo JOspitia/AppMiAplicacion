@@ -1,7 +1,5 @@
 package com.project.backend_api.repository.core.management;
 
-
-
 import com.project.backend_api.model.core.management.Company;
 import com.project.backend_api.model.core.management.UserCompanyRole;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,11 +14,11 @@ import java.util.UUID;
 public interface UserCompanyRoleRepository extends JpaRepository<UserCompanyRole, UUID> {
 
     // Retorna una lista de empresas a las que pertenece el usuario.
-    @Query("SELECT DISTINCT ucr.company FROM UserCompanyRole ucr WHERE ucr.user.id = :userId AND ucr.company.status = true")
+    @Query("SELECT DISTINCT ucr.company FROM UserCompanyRole ucr WHERE ucr.user.id = :userId AND ucr.company.status = true AND ucr.isActive = true")
     List<Company> findCompaniesByUserId(@Param("userId") UUID userId);
 
     // Verifica si el usuario tiene el rol ROOT en alguna empresa.
-    @Query("SELECT CASE WHEN COUNT(ucr) > 0 THEN true ELSE false END FROM UserCompanyRole ucr WHERE ucr.user.id = :userId AND ucr.role.name = 'ROOT'")
+    @Query("SELECT CASE WHEN COUNT(ucr) > 0 THEN true ELSE false END FROM UserCompanyRole ucr WHERE ucr.user.id = :userId AND ucr.role.isRootRole = true")
     boolean hasRootRole(@Param("userId") UUID userId);
 
     @Query("SELECT DISTINCT ucr.user FROM UserCompanyRole ucr WHERE ucr.company.id = :companyId")
@@ -41,10 +39,7 @@ public interface UserCompanyRoleRepository extends JpaRepository<UserCompanyRole
     // Retorna los roles activos de un usuario
     @Query("SELECT ucr FROM UserCompanyRole ucr WHERE ucr.user.id = :userId AND ucr.isActive = true")
     List<UserCompanyRole> findByUserIdAndIsActiveTrue(@Param("userId") UUID userId);
+
+    // Retorna todos los registros de asociación para un usuario específico
+    List<UserCompanyRole> findByUserId(UUID userId);
 }
-
-
-
-
-
-

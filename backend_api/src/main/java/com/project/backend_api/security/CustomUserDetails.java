@@ -1,6 +1,7 @@
 package com.project.backend_api.security;
 
 import com.project.backend_api.model.core.management.User;
+import com.project.backend_api.model.core.management.Role;
 import com.project.backend_api.model.core.management.UserCompanyRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,31 +31,41 @@ public class CustomUserDetails implements UserDetails {
 
         java.util.Set<SimpleGrantedAuthority> auths = new java.util.HashSet<>();
 
-        // 1. Core Role based on Super Admin status
-        if (Boolean.TRUE.equals(user.getIsSuperAdmin())) {
-            auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        // 1. Core Role based on Super Admin / Root / Admin status
+        if (Boolean.TRUE.equals(user.getIsSuperAdmin()) || Boolean.TRUE.equals(user.getIsRoot())) {
             auths.add(new SimpleGrantedAuthority("ROLE_ROOT"));
+            auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else if (Boolean.TRUE.equals(user.getIsAdmin())) {
+            auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
 
         // 2. Map all company roles to Authorities
         if (userRoles != null) {
             for (UserCompanyRole ucr : userRoles) {
+                Role role = ucr.getRole();
                 // If the role is explicitly deactivated, skip it
-                if (ucr.getRole() != null && !Boolean.TRUE.equals(ucr.getRole().getActive())) {
+                if (role != null && !Boolean.TRUE.equals(role.getActive())) {
                     continue;
                 }
 
-                // Check the explicit boolean flag from the Role entity
-                if (ucr.getRole() != null && Boolean.TRUE.equals(ucr.getRole().getIsAdminRole())) {
-                    auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                } else if (ucr.getRoleName() != null) {
+                // Check markers on the Role
+                if (role != null) {
+                    if (Boolean.TRUE.equals(role.getIsRootRole())) {
+                        auths.add(new SimpleGrantedAuthority("ROLE_ROOT"));
+                        auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                    } else if (Boolean.TRUE.equals(role.getIsAdminRole())) {
+                        auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                    }
+                }
+
+                if (ucr.getRoleName() != null) {
                     // Fallback or other roles (prefixed with ROLE_ for hasRole checks)
                     auths.add(new SimpleGrantedAuthority("ROLE_" + ucr.getRoleName().toUpperCase()));
                 }
 
                 // Add all specific permissions of that role as authorities
-                if (ucr.getRole() != null && ucr.getRole().getPermissions() != null) {
-                    ucr.getRole().getPermissions().forEach(p -> {
+                if (role != null && role.getPermissions() != null) {
+                    role.getPermissions().forEach(p -> {
                         auths.add(new SimpleGrantedAuthority(p.getName()));
                     });
                 }
@@ -104,7 +115,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return Boolean.TRUE.equals(user.getVerified());
     }
 
 }

@@ -30,6 +30,8 @@ export interface User {
     }>;
     requirePasswordChange?: boolean;
     isSuperAdmin?: boolean;
+    isAdmin?: boolean;
+    isRoot?: boolean;
     permissions?: string[];
 }
 

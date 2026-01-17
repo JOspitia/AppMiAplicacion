@@ -22,6 +22,6 @@ export class CompanySubscriptionService {
     }
 
     toggleModule(companyId: string, moduleId: string): Observable<void> {
-        return this.http.post<void>(`${this.apiUrl}/${companyId}/subscriptions/${moduleId}/toggle`, {});
+        return this.http.patch<void>(`${this.apiUrl}/${companyId}/subscriptions/${moduleId}/toggle`, {});
     }
 }

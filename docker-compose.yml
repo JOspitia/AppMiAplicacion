@@ -8,17 +8,25 @@ services:
   cloudflare_tunnel:
     image: cloudflare/cloudflared:latest
     restart: always
-    command: tunnel --no-autoupdate run --token eyJhIjoiOTk5NmQ1NzQyOGM5ZmIxNTdlZTU5YTBmMzNlNWNjZjYiLCJ0IjoiODc5NTFkN2QtM2FiYy00NDJlLWEzYzMtMzQ0MDQ3NGQ4ZjI2IiwicyI6Ik5HTXhOVFprTkdNdE5UUTRZaTAwWm1GbUxUZ3lNalV0T1RKbU5tWXlOREkwWWpKaSJ9
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
 
   # ---------------------------------------------------------------------
-  # 1. FRONTEND APP (Angular + Nginx)
+  # 1. FRONTEND APP (Angular - Turbo Dev Mode)
   # ---------------------------------------------------------------------
   frontend:
-    build:
-      context: ./frontend-app
+    image: node:20-alpine
     container_name: app_frontend
+    working_dir: /app
     ports:
-      - "8080:8080" # Mapeo 8080:8080 para compatibilidad con Cloudflare Tunnel
+      - "${FRONTEND_PORT:-8080}:8080"
+    volumes:
+      - ./frontend-app:/app
+      - /app/node_modules # Evita que los node_modules locales sobrescriban los del contenedor
+    environment:
+      - NODE_ENV=development
+    command: >
+      sh -c "npm install && 
+             npx ng serve frontend-app --host 0.0.0.0 --port 8080"
     depends_on:
       - backend
     networks:
@@ -26,19 +34,22 @@ services:
     restart: on-failure
 
   # ---------------------------------------------------------------------
-  # 2. BACKEND API (Spring Boot)
+  # 2. BACKEND API (Spring Boot - Turbo Dev Mode)
   # ---------------------------------------------------------------------
   backend:
-    build:
-      context: ./backend_api
+    image: maven:3.9.6-eclipse-temurin-21-alpine
     container_name: app_backend
+    working_dir: /app
     ports:
-      - "8081:8080" # Mapeo opcional para acceso directo al API (desde Postman etc)
+      - "${BACKEND_PORT:-8081}:8080"
     environment:
       # Database
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+      # Hot Reload DevTools
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
 
       # JPA/Flyway
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
@@ -95,9 +106,9 @@ services:
     tty: true
     restart: on-failure
     volumes:
-      # Volúmenes para Hot Reload (Ajustados a la estructura /backend_api)
-      - ./backend_api/target/classes:/app/BOOT-INF/classes
-      - ./backend_api/src/main/resources/templates:/app/BOOT-INF/classes/templates
+      - ./backend_api:/app
+      - ~/.m2:/root/.m2 # Cache de Maven para no descargar todo cada vez
+    command: mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
   # ---------------------------------------------------------------------
   # 3. BASE DE DATOS (POSTGRES)

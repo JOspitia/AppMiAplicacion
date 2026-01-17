@@ -1,7 +1,5 @@
 package com.project.backend_api.model.core.management;
 
-
-
 import com.project.backend_api.model.core.administration.Permission;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -43,6 +41,10 @@ public class Role {
     @Builder.Default
     private Boolean isAdminRole = false;
 
+    @Column(name = "is_root_role")
+    @Builder.Default
+    private Boolean isRootRole = false;
+
     @Builder.Default
     private Boolean active = true;
 
@@ -69,9 +71,3 @@ public class Role {
     @Builder.Default
     private Set<Permission> permissions = new HashSet<>();
 }
-
-
-
-
-
-

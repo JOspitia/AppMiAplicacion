@@ -10,6 +10,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { IconComponent } from '../../../shared/components/icon.component';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { RoleManagementService, PermissionsGrouped } from '../../services/role-management.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-role-form',
@@ -73,6 +74,23 @@ import { RoleManagementService, PermissionsGrouped } from '../../services/role-m
                                 <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Descripción</label>
                                 <textarea pTextarea formControlName="description" rows="3" placeholder="Breve descripción del rol y sus responsabilidades..."
                                           class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm resize-none"></textarea>
+                            </div>
+                            <!-- Información de Jerarquía (Solo para Root/SuperAdmin) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4" *ngIf="authService.currentUser()?.isSuperAdmin">
+                                <div class="flex items-center gap-4 p-4 bg-primary/5 dark:bg-primary/10 rounded-2xl border border-primary/20">
+                                    <p-checkbox formControlName="isAdminRole" [binary]="true" inputId="isAdminRole"></p-checkbox>
+                                    <label for="isAdminRole" class="flex flex-col cursor-pointer">
+                                        <span class="text-sm font-bold text-slate-800 dark:text-white">Rol de Administrador</span>
+                                        <span class="text-[10px] text-slate-500 dark:text-slate-400">Otorga permisos básicos de administración por defecto.</span>
+                                    </label>
+                                </div>
+                                <div class="flex items-center gap-4 p-4 bg-red-500/5 dark:bg-red-500/10 rounded-2xl border border-red-500/20">
+                                    <p-checkbox formControlName="isRootRole" [binary]="true" inputId="isRootRole"></p-checkbox>
+                                    <label for="isRootRole" class="flex flex-col cursor-pointer">
+                                        <span class="text-sm font-bold text-red-600 dark:text-red-400">Rol ROOT (Súper Usuario)</span>
+                                        <span class="text-[10px] text-slate-500 dark:text-slate-400">Acceso total al sistema. ¡Usar con extrema precaución!</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -210,6 +228,7 @@ export class RoleFormComponent implements OnInit {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private roleService = inject(RoleManagementService);
+    public authService = inject(AuthService);
 
     isEditMode = signal(false);
     loading = signal(false);
@@ -242,6 +261,8 @@ export class RoleFormComponent implements OnInit {
         this.form = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(3)]],
             description: [''],
+            isAdminRole: [false],
+            isRootRole: [false],
             permissionIds: [[]] // Initialize as an empty array for ngModel
         });
     }
@@ -313,8 +334,17 @@ export class RoleFormComponent implements OnInit {
                 this.form.patchValue({
                     name: data.role.name,
                     description: data.role.description,
+                    isAdminRole: data.role.isAdminRole || false,
+                    isRootRole: data.role.isRootRole || false,
                     permissionIds: data.assignedPermissionIds || [] // Patch the array directly
                 });
+
+                // Security: Disable inputs if ROOT role and user is not superAdmin
+                if (data.role.isRootRole && !this.authService.currentUser()?.isSuperAdmin) {
+                    this.form.get('name')?.disable();
+                    this.form.get('isAdminRole')?.disable();
+                    this.form.get('isRootRole')?.disable();
+                }
             },
             error: () => this.errorMessage.set('Error al cargar la información del rol.')
         });
@@ -429,8 +459,10 @@ export class RoleFormComponent implements OnInit {
 
         this.loading.set(true);
         const formData = {
-            name: this.form.value.name,
+            name: this.form.getRawValue().name, // Use getRawValue to include disabled fields if needed
             description: this.form.value.description,
+            isAdminRole: this.form.value.isAdminRole || false,
+            isRootRole: this.form.value.isRootRole || false,
             permissionIds: this.form.value.permissionIds || []
         };
 

@@ -7,6 +7,7 @@ import com.project.backend_api.model.core.management.Role;
 import com.project.backend_api.repository.core.management.CompanyRepository;
 import com.project.backend_api.repository.core.administration.PermissionRepository;
 import com.project.backend_api.repository.core.management.RoleRepository;
+import com.project.backend_api.repository.core.management.UserCompanyRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +26,20 @@ public class RoleService {
     private final PermissionRepository permissionRepository;
     private final RoleRepository roleRepository;
     private final CompanyRepository companyRepository;
+    private final UserCompanyRoleRepository userCompanyRoleRepository;
 
     @Transactional(readOnly = true)
-    public List<RoleDto> listAllUserRoles(UUID companyId) {
+    public List<RoleDto> listAllUserRoles(UUID companyId, UUID currentUserId) {
+        boolean isCurrentUserRoot = userCompanyRoleRepository.hasRootRole(currentUserId);
+
         return roleRepository.findByCompanyIdOrSystem(companyId).stream()
+                .filter(role -> {
+                    // Solo el usuario ROOT puede ver el rol ROOT
+                    if (Boolean.TRUE.equals(role.getIsRootRole())) {
+                        return isCurrentUserRoot;
+                    }
+                    return true;
+                })
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -39,6 +50,8 @@ public class RoleService {
                 .name(role.getName())
                 .description(role.getDescription())
                 .isSystemRole(role.getIsSystemRole())
+                .isAdminRole(role.getIsAdminRole())
+                .isRootRole(role.getIsRootRole())
                 .active(role.getActive())
                 .createdAt(role.getCreatedAt())
                 .permissionCount(role.getPermissions() != null ? role.getPermissions().size() : 0)
@@ -58,7 +71,16 @@ public class RoleService {
     }
 
     public RoleDto createRole(String name, String description, Set<UUID> permissionIds, UUID companyId,
-            UUID currentUserId) {
+            UUID currentUserId, Boolean isAdminRole, Boolean isRootRole) {
+        // 0. Security Check: Only ROOT users can create/manage a ROOT role
+        boolean isRequestingRoot = Boolean.TRUE.equals(isRootRole);
+        if (isRequestingRoot) {
+            boolean isCurrentUserRoot = userCompanyRoleRepository.hasRootRole(currentUserId);
+            if (!isCurrentUserRoot) {
+                throw new IllegalArgumentException("Solo un usuario con rol ROOT puede gestionar el rol ROOT");
+            }
+        }
+
         // 1. Validar Empresa
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new IllegalArgumentException("Empresa no encontrada"));
@@ -75,6 +97,8 @@ public class RoleService {
                 .company(company)
                 .active(true)
                 .isSystemRole(false)
+                .isAdminRole(Boolean.TRUE.equals(isAdminRole))
+                .isRootRole(Boolean.TRUE.equals(isRootRole))
                 .createdBy(currentUserId)
                 .createdAt(java.time.LocalDateTime.now())
                 .updatedBy(currentUserId)
@@ -88,15 +112,26 @@ public class RoleService {
     }
 
     public RoleDto updateRole(UUID roleId, String name, String description, Set<UUID> permissionIds, UUID companyId,
-            UUID currentUserId) {
+            UUID currentUserId, Boolean isAdminRole, Boolean isRootRole) {
         Role role = getRoleById(roleId, companyId);
 
         if (Boolean.TRUE.equals(role.getIsSystemRole())) {
             throw new IllegalArgumentException("No se pueden editar roles del sistema");
         }
 
+        // 0. Security Check: Only ROOT users can manage a ROOT role
+        boolean isRequestingRoot = Boolean.TRUE.equals(isRootRole);
+        if (Boolean.TRUE.equals(role.getIsRootRole()) || isRequestingRoot) {
+            boolean isCurrentUserRoot = userCompanyRoleRepository.hasRootRole(currentUserId);
+            if (!isCurrentUserRoot) {
+                throw new IllegalArgumentException("Solo un usuario con rol ROOT puede gestionar el rol ROOT");
+            }
+        }
+
         role.setName(name);
         role.setDescription(description);
+        role.setIsAdminRole(Boolean.TRUE.equals(isAdminRole));
+        role.setIsRootRole(Boolean.TRUE.equals(isRootRole));
         role.setUpdatedBy(currentUserId);
         role.setUpdatedAt(java.time.LocalDateTime.now());
 
@@ -152,9 +187,10 @@ public class RoleService {
 
     @Transactional(readOnly = true)
     public Map<String, Map<String, List<PermissionDto>>> getGroupedPermissions(UUID companyId) {
-        List<Permission> allPermissions = permissionRepository.findAll();
+        // Filter by active subscriptions for the specific company
+        List<Permission> activePermissions = permissionRepository.findByActiveSubscriptions(companyId);
 
-        return allPermissions.stream()
+        return activePermissions.stream()
                 .map(this::convertToPermissionDto)
                 .collect(Collectors.groupingBy(
                         p -> p.getModuleName() != null ? p.getModuleName() : "Otros",

@@ -12,7 +12,7 @@ import { SelectCompanyComponent } from './auth/select-company/select-company.com
 import { MainLayoutComponent } from './core/layout/main-layout.component';
 import { DashboardComponent } from './core/dashboard/dashboard.component';
 import { HomeComponent } from './core/home/home.component';
-import { superAdminGuard, authGuard, guestGuard } from './core/guards/auth.guard';
+import { superAdminGuard, authGuard, guestGuard, rootGuard } from './core/guards/auth.guard';
 import { CompanyListComponent } from './core/companies/company-list.component';
 import { CompanyFormComponent } from './core/companies/company-form.component';
 import { UserListComponent } from './core/management/users/user-list.component';
@@ -26,7 +26,20 @@ export const routes: Routes = [
     { path: 'verify-email', component: VerifyEmailComponent, canActivate: [guestGuard] },
     { path: 'select-company', component: SelectCompanyComponent },
 
-    // 2. Internal Application (MainLayout + Auth Guard)
+    // 2. Public Website (PublicLayout) - MOVED UP
+    {
+        path: '',
+        component: PublicLayoutComponent,
+        children: [
+            { path: '', component: LandingComponent, pathMatch: 'full', canActivate: [guestGuard] },
+            { path: 'terms', component: TermsComponent },
+            { path: 'privacy', component: PrivacyComponent },
+            { path: 'cookies', component: CookiesComponent },
+            { path: 'security', component: SecurityInfoComponent }
+        ]
+    },
+
+    // 3. Internal Application (MainLayout + Auth Guard)
     {
         path: '',
         component: MainLayoutComponent,
@@ -47,7 +60,7 @@ export const routes: Routes = [
             { path: 'core/management/companies/:id/subscriptions', loadComponent: () => import('./core/companies/company-subscription.component').then(m => m.CompanySubscriptionComponent), canActivate: [superAdminGuard] },
 
             // Ubicaciones (Geografía - Sync)
-            { path: 'core/management/locations', loadComponent: () => import('./core/management/geo/geo-sync.component').then(m => m.GeoSyncComponent) },
+            { path: 'core/management/locations', loadComponent: () => import('./core/management/geo/geo-sync.component').then(m => m.GeoSyncComponent), canActivate: [rootGuard] },
 
             // Catálogo de Permisos
             { path: 'core/permissions/catalog', loadComponent: () => import('./core/management/permissions/permission-catalog.component').then(m => m.PermissionCatalogComponent) },
@@ -62,20 +75,17 @@ export const routes: Routes = [
             { path: 'rrhh/operational-centers/create', loadComponent: () => import('./rrhh/operational-centers/op-center-form.component').then(m => m.OperationalCenterFormComponent) },
             { path: 'rrhh/operational-centers/edit/:id', loadComponent: () => import('./rrhh/operational-centers/op-center-form.component').then(m => m.OperationalCenterFormComponent) },
 
-            { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] }
-        ]
-    },
+            // Centros de Costos
+            { path: 'rrhh/cost-centers', loadComponent: () => import('./rrhh/cost-centers/cost-center-list.component').then(m => m.CostCenterListComponent) },
+            { path: 'rrhh/cost-centers/new', loadComponent: () => import('./rrhh/cost-centers/cost-center-form.component').then(m => m.CostCenterFormComponent) },
+            { path: 'rrhh/cost-centers/edit/:id', loadComponent: () => import('./rrhh/cost-centers/cost-center-form.component').then(m => m.CostCenterFormComponent) },
 
-    // 1. Public Website (PublicLayout)
-    {
-        path: '',
-        component: PublicLayoutComponent,
-        children: [
-            { path: '', component: LandingComponent, pathMatch: 'full', canActivate: [guestGuard] },
-            { path: 'terms', component: TermsComponent },
-            { path: 'privacy', component: PrivacyComponent },
-            { path: 'cookies', component: CookiesComponent },
-            { path: 'security', component: SecurityInfoComponent }
+            // Niveles Organizacionales
+            { path: 'rrhh/organizational-levels', loadComponent: () => import('./rrhh/organizational-levels/org-level-list.component').then(m => m.OrganizationalLevelListComponent) },
+            { path: 'rrhh/organizational-levels/create', loadComponent: () => import('./rrhh/organizational-levels/org-level-form.component').then(m => m.OrganizationalLevelFormComponent) },
+            { path: 'rrhh/organizational-levels/edit/:id', loadComponent: () => import('./rrhh/organizational-levels/org-level-form.component').then(m => m.OrganizationalLevelFormComponent) },
+
+            { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] }
         ]
     },
 

@@ -24,10 +24,52 @@ export const superAdminGuard: CanActivateFn = (route, state) => {
         return false;
     }
 
+    // If no cached user, check if we have a token at all
+    if (typeof window !== 'undefined' && !localStorage.getItem('auth_token')) {
+        router.navigate(['/login']);
+        return of(false);
+    }
+
     // If no cached user, verify with backend
     return authService.me().pipe(
         map(user => {
             if (user.isSuperAdmin) {
+                return true;
+            }
+            router.navigate(['/home']);
+            return false;
+        }),
+        catchError(() => {
+            router.navigate(['/login']);
+            return of(false);
+        })
+    );
+};
+
+/**
+ * Guard para rutas exclusivas de Root (Acceso total técnicos/devs)
+ */
+export const rootGuard: CanActivateFn = (route, state) => {
+    const authService = inject(AuthService);
+    const router = inject(Router);
+
+    const currentUser = authService.currentUser();
+    if (currentUser) {
+        if (currentUser.isRoot || currentUser.isSuperAdmin) {
+            return true;
+        }
+        router.navigate(['/home']);
+        return false;
+    }
+
+    if (typeof window !== 'undefined' && !localStorage.getItem('auth_token')) {
+        router.navigate(['/login']);
+        return of(false);
+    }
+
+    return authService.me().pipe(
+        map(user => {
+            if (user.isRoot || user.isSuperAdmin) {
                 return true;
             }
             router.navigate(['/home']);
@@ -53,7 +95,13 @@ export const authGuard: CanActivateFn = (route, state) => {
         return true;
     }
 
-    // If no cached user, verify with backend
+    // If no cached user, check if we have a token at all
+    if (typeof window !== 'undefined' && !localStorage.getItem('auth_token')) {
+        router.navigate(['/login']);
+        return of(false);
+    }
+
+    // If we have a token, verify it with backend
     return authService.me().pipe(
         map(() => true),
         catchError(() => {
@@ -69,6 +117,12 @@ export const authGuard: CanActivateFn = (route, state) => {
 export const guestGuard: CanActivateFn = (route, state) => {
     const authService = inject(AuthService);
     const router = inject(Router);
+
+    // Si no hay token en localStorage, asumimos que es invitado sin llamar al backend
+    // Esto evita el 401 en consola para visitantes de la landing
+    if (typeof window !== 'undefined' && !localStorage.getItem('auth_token')) {
+        return of(true);
+    }
 
     return authService.me().pipe(
         map(() => {

@@ -7,9 +7,16 @@ description: Estándares de la Arquitectura de Interfaz SPA (HR-Tech) con Angula
 Este workflow define los pilares de la interfaz de usuario moderna y la navegación SPA.
 
 ## 1. Estructura de Navegación SPA
-- **MainLayoutComponent**: Utiliza este componente como el "Shell" permanente.
-- **Router Outlet**: Todo el contenido dinámico debe inyectarse en el `router-outlet` del layout principal.
-- **Navegación Fluida**: Evita recargas de página utilizando `routerLink` y navegación programática.
+
+### 1.1 Mapeo de Menú Robusto (Code-Based)
+Para evitar rupturas por cambios de texto en la base de datos, la navegación se basa estrictamente en códigos inmutables (`code`) y no en títulos visibles.
+- **Entidad**: `SidebarMenu` tiene una columna `code` única (ej: `MENU_LOCATIONS`).
+- **Frontend**: El filtrado y lógica de negocio verifica `m.code === 'MENU_CODE'` en lugar de `m.title === 'Texto'`.
+- **Layout**: `MainLayoutComponent` es el responsable de renderizar y filtrar estos menús basado en roles.
+
+### 1.2 Layout Principal
+- **Router Outlet**: Todo el contenido dinámico se inyecta aquí.
+- **Navegación Fluida**: Uso de `routerLink` para evitar recargas completas.
 
 ## 2. Lógica de Acceso y Selección de Empresa
 - **Auto-Skip**: Implementa lógica en el login para saltar `/select-company` si el usuario solo pertenece a una empresa.

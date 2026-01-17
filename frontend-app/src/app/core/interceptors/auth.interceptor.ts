@@ -52,7 +52,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                 // CASO A: 403 Forbidden -> Renovar CSRF token
                 // SOLUCIÓN: Leer token directamente del JSON
                 // ============================================================
-                if (error.status === 403) {
+                if (error.status === 403 && !req.url.includes('/api/auth/login')) {
                     // Evitar loop infinito si ya reintentamos
                     if (req.headers.has('X-CSRF-Retry')) {
                         // console.error('[AuthInterceptor] 403: Ya se reintentó con CSRF. Abortando.');

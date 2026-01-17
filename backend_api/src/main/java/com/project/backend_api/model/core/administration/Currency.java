@@ -1,7 +1,5 @@
 package com.project.backend_api.model.core.administration;
 
-
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,9 +28,8 @@ public class Currency {
 
     @Column(name = "native_symbol", length = 10)
     private String nativeSymbol;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean active = true;
 }
-
-
-
-
-

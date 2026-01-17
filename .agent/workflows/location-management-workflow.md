@@ -12,6 +12,9 @@ Este workflow describe la implementación y el mantenimiento del sistema de gest
 2. **Multi-tenancy**: Cada sede está vinculada estrictamente a una `Company` a través de `company_id`. No se permiten cruces de sedes entre tenants.
 3. **Jerarquía Geográfica**: Toda sede debe contar con una estructura geográfica completa utilizando el catálogo maestro de Ubicaciones: `País` -> `Departamento` -> `Ciudad`.
 4. **Sede Principal (Main)**: Cada empresa debe tener exactamente una sede marcada como `isMain`. Si se marca una nueva sede como principal, la anterior pierde automáticamente ese estado.
+5. **Acceso Restringido**: [CRITICAL] Este módulo es de uso exclusivo para **Superusuarios (Root / SuperAdmin)**. No debe ser visible para administradores de tenant regulares.
+  - Protección de Ruta: `rootGuard`.
+  - Protección de Menú: Filtrado en `MainLayout`.
 
 ## Componentes Técnicos
 
@@ -34,7 +37,7 @@ Este workflow describe la implementación y el mantenimiento del sistema de gest
 El sistema cuenta con un sincronizador de datos geográficos para poblar el catálogo de países, estados y ciudades, además de metadatos críticos. Para más detalles técnicos, ver [Documentación de Geo-Sync](../docs/geo-sync-system.md).
 
 1. **Mantenimiento**: `GeoSyncComponent` en `src/app/core/management/geo/geo-sync.component.ts`.
-2. **Ruta**: `/core/management/locations`.
+2. **Ruta**: `/core/management/locations` (Protegida por `rootGuard`).
 3. **Estrategia de Sincronización**: **Nuclear Sync** (Precarga en memoria) para optimizar el rendimiento y evitar timeouts.
 4. **Datos Sincronizados**:
    - **Geografía**: Países -> Estados/Departamentos -> Ciudades.

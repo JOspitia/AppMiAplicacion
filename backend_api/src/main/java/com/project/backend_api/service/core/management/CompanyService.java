@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -293,9 +294,40 @@ public class CompanyService {
             company.setCity(city);
         }
 
-        // Websites - handle separately if needed
-        // For now, we'll skip complex website management in this method
-        // It should be handled through a dedicated endpoint or service method
+        // Websites - Synchronization logic
+        if (dto.getWebsites() != null) {
+            List<CompanyWebsite> currentWebsites = company.getWebsites();
+            if (currentWebsites == null) {
+                currentWebsites = new ArrayList<>();
+                company.setWebsites(currentWebsites);
+            }
+
+            // 1. Remove websites that are not in the DTO
+            currentWebsites.removeIf(existing -> dto.getWebsites().stream()
+                    .noneMatch(d -> d.getId() != null && d.getId().equals(existing.getId())));
+
+            // 2. Add or Update
+            for (CompanyWebsiteDTO websiteDto : dto.getWebsites()) {
+                if (websiteDto.getId() != null) {
+                    // Update existing
+                    currentWebsites.stream()
+                            .filter(w -> w.getId().equals(websiteDto.getId()))
+                            .findFirst()
+                            .ifPresent(w -> {
+                                w.setUrl(websiteDto.getUrl());
+                                w.setIsPrimary(websiteDto.getIsPrimary());
+                                w.setDescription(websiteDto.getDescription());
+                            });
+                } else if (websiteDto.getUrl() != null && !websiteDto.getUrl().isBlank()) {
+                    // Add new
+                    CompanyWebsite newWebsite = new CompanyWebsite();
+                    newWebsite.setUrl(websiteDto.getUrl());
+                    newWebsite.setIsPrimary(websiteDto.getIsPrimary() != null ? websiteDto.getIsPrimary() : false);
+                    newWebsite.setDescription(websiteDto.getDescription());
+                    company.addWebsite(newWebsite);
+                }
+            }
+        }
     }
 
     private User getCurrentUser() {

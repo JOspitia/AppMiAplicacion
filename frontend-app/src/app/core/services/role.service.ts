@@ -8,6 +8,8 @@ export interface Role {
     description: string;
     active: boolean;
     isSystemRole: boolean;
+    isAdminRole?: boolean;
+    isRootRole?: boolean;
 }
 
 @Injectable({
