@@ -12,6 +12,7 @@ import { IconComponent } from '../../shared/components/icon.component';
 import { ToastComponent } from '../../shared/components/toast/toast.component';
 import { BrandingService } from '../services/branding.service';
 import { AuthService } from '../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 
 interface MenuItem extends ModuleDto {
@@ -384,7 +385,7 @@ export class MainLayoutComponent implements OnInit {
   }
 
   private loadCurrentCompany() {
-    this.http.get<Company>('/api/companies/current').subscribe({
+    this.http.get<Company>(`${environment.apiUrl}/companies/current`).subscribe({
       next: (company) => {
         if (company && company.id) {
           this.selectedCompany.set(company);
@@ -399,13 +400,13 @@ export class MainLayoutComponent implements OnInit {
       }
     });
 
-    this.http.get<Company[]>('/api/companies/available').subscribe({
+    this.http.get<Company[]>(`${environment.apiUrl}/companies/available`).subscribe({
       next: (companies) => this.companies.set(companies)
     });
   }
 
   private loadUserInfo() {
-    this.http.get<any>('/api/auth/me').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/auth/me`).subscribe({
       next: (user) => {
         if (user) {
           this.userInfo.set({
@@ -448,7 +449,7 @@ export class MainLayoutComponent implements OnInit {
 
   onCompanyChange(event: any) {
     const companyId = event.value;
-    this.http.post('/api/companies/select', { companyId }).subscribe({
+    this.http.post(`${environment.apiUrl}/companies/select`, { companyId }).subscribe({
       next: () => {
         const company = this.companies().find(c => c.id === companyId);
         if (company) {

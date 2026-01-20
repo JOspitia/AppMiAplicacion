@@ -87,18 +87,9 @@ export const routes: Routes = [
             { path: 'rrhh/contract-types/:id', loadComponent: () => import('./rrhh/contract-types/contract-type-form.component').then(m => m.ContractTypeFormComponent) },
 
             // Work Schedules
-            {
-                path: 'rrhh/work-schedules',
-                loadComponent: () => import('./rrhh/work-schedules/work-schedule-list.component').then(m => m.WorkScheduleListComponent)
-            },
-            {
-                path: 'rrhh/work-schedules/create',
-                loadComponent: () => import('./rrhh/work-schedules/work-schedule-form.component').then(m => m.WorkScheduleFormComponent)
-            },
-            {
-                path: 'rrhh/work-schedules/edit/:id',
-                loadComponent: () => import('./rrhh/work-schedules/work-schedule-form.component').then(m => m.WorkScheduleFormComponent)
-            },
+            { path: 'rrhh/work-schedules', loadComponent: () => import('./rrhh/work-schedules/work-schedule-list.component').then(m => m.WorkScheduleListComponent) },
+            { path: 'rrhh/work-schedules/create', loadComponent: () => import('./rrhh/work-schedules/work-schedule-form.component').then(m => m.WorkScheduleFormComponent) },
+            { path: 'rrhh/work-schedules/edit/:id', loadComponent: () => import('./rrhh/work-schedules/work-schedule-form.component').then(m => m.WorkScheduleFormComponent) },
 
             // Niveles Organizacionales
             { path: 'rrhh/organizational-levels', loadComponent: () => import('./rrhh/organizational-levels/org-level-list.component').then(m => m.OrganizationalLevelListComponent) },
@@ -109,6 +100,26 @@ export const routes: Routes = [
             { path: 'rrhh/departments', loadComponent: () => import('./rrhh/departments/department-list.component').then(m => m.DepartmentListComponent) },
             { path: 'rrhh/departments/create', loadComponent: () => import('./rrhh/departments/department-form.component').then(m => m.DepartmentFormComponent) },
             { path: 'rrhh/departments/edit/:id', loadComponent: () => import('./rrhh/departments/department-form.component').then(m => m.DepartmentFormComponent) },
+
+            // Tipos de Identificación
+            { path: 'rrhh/identification-types', loadComponent: () => import('./rrhh/identification-types/identification-type-list.component').then(m => m.IdentificationTypeListComponent) },
+            { path: 'rrhh/identification-types/create', loadComponent: () => import('./rrhh/identification-types/identification-type-form.component').then(m => m.IdentificationTypeFormComponent) },
+            { path: 'rrhh/identification-types/edit/:id', loadComponent: () => import('./rrhh/identification-types/identification-type-form.component').then(m => m.IdentificationTypeFormComponent) },
+
+            // Tipos de Soportes (Document Types)
+            { path: 'rrhh/document-types', loadComponent: () => import('./rrhh/document-types/document-type-list.component').then(m => m.DocumentTypeListComponent) },
+            { path: 'rrhh/document-types/create', loadComponent: () => import('./rrhh/document-types/document-type-form.component').then(m => m.DocumentTypeFormComponent) },
+            { path: 'rrhh/document-types/edit/:id', loadComponent: () => import('./rrhh/document-types/document-type-form.component').then(m => m.DocumentTypeFormComponent) },
+
+            // Tipos de Compensación (Bonos/Deducciones)
+            { path: 'rrhh/compensation-types', loadComponent: () => import('./rrhh/compensation-types/compensation-type-list.component').then(m => m.CompensationTypeListComponent) },
+            { path: 'rrhh/compensation-types/create', loadComponent: () => import('./rrhh/compensation-types/compensation-type-form.component').then(m => m.CompensationTypeFormComponent) },
+            { path: 'rrhh/compensation-types/edit/:id', loadComponent: () => import('./rrhh/compensation-types/compensation-type-form.component').then(m => m.CompensationTypeFormComponent) },
+
+            // Cargos (Positions)
+            { path: 'rrhh/positions', loadComponent: () => import('./rrhh/positions/position-list.component').then(m => m.PositionListComponent) },
+            { path: 'rrhh/positions/create', loadComponent: () => import('./rrhh/positions/position-form.component').then(m => m.PositionFormComponent) },
+            { path: 'rrhh/positions/edit/:id', loadComponent: () => import('./rrhh/positions/position-form.component').then(m => m.PositionFormComponent) },
 
             { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] }
         ]

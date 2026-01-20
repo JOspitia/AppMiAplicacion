@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { BrandingService } from '../../core/services/branding.service';
 
 @Component({
   selector: 'app-footer',
@@ -15,7 +16,7 @@ import { RouterModule } from '@angular/router';
           <div class="space-y-6">
             <a routerLink="/" class="flex items-center gap-3 group">
               <div class="w-10 h-10 bg-primary rounded-2xl grid place-items-center shadow-lg shadow-primary/20 transition-transform group-hover:scale-110 overflow-hidden border border-white/10">
-                <img src="/api/public/assets/images/logo.png" alt="Logo" class="w-7 h-7 object-contain brightness-0 invert">
+                <img [src]="logoUrl()" alt="Logo" class="w-7 h-7 object-contain brightness-0 invert">
               </div>
               <span class="text-xl font-black tracking-tighter text-slate-900 dark:text-white">
                 <span class="text-primary">Mi</span>Aplicación
@@ -74,4 +75,7 @@ import { RouterModule } from '@angular/router';
     </footer>
   `
 })
-export class FooterComponent { }
+export class FooterComponent {
+  private brandingService = inject(BrandingService);
+  logoUrl = this.brandingService.currentLogo;
+}

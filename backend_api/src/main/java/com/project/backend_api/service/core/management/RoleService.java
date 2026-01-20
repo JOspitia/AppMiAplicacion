@@ -99,10 +99,6 @@ public class RoleService {
                 .isSystemRole(false)
                 .isAdminRole(Boolean.TRUE.equals(isAdminRole))
                 .isRootRole(Boolean.TRUE.equals(isRootRole))
-                .createdBy(currentUserId)
-                .createdAt(java.time.LocalDateTime.now())
-                .updatedBy(currentUserId)
-                .updatedAt(java.time.LocalDateTime.now())
                 .build();
 
         // 4. Asignar Permisos
@@ -132,8 +128,6 @@ public class RoleService {
         role.setDescription(description);
         role.setIsAdminRole(Boolean.TRUE.equals(isAdminRole));
         role.setIsRootRole(Boolean.TRUE.equals(isRootRole));
-        role.setUpdatedBy(currentUserId);
-        role.setUpdatedAt(java.time.LocalDateTime.now());
 
         if (permissionIds != null) {
             assignPermissions(role, permissionIds);

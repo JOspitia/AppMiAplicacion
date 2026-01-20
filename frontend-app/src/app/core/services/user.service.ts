@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface UserManagement {
     id: string; // UserCompanyRole ID (primary assignment)
@@ -33,7 +34,7 @@ export interface CreateUserRequest {
 })
 export class UserService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/core/management/users';
+    private apiUrl = `${environment.apiUrl}/core/management/users`;
 
     getAll(): Observable<UserManagement[]> {
         return this.http.get<UserManagement[]>(this.apiUrl);

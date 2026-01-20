@@ -84,12 +84,6 @@ public class CompanyService {
         Company company = new Company();
         updateCompanyFromDto(company, dto, true);
 
-        // Set created_by from authenticated user
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            company.setCreatedBy(currentUser);
-        }
-
         Company saved = companyRepository.save(company);
         return toDto(saved);
     }
@@ -100,12 +94,6 @@ public class CompanyService {
 
         updateCompanyFromDto(company, dto, false);
 
-        // Set updated_by from authenticated user
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            company.setUpdatedBy(currentUser);
-        }
-
         Company updated = companyRepository.save(company);
         return toDto(updated);
     }
@@ -115,12 +103,6 @@ public class CompanyService {
                 .orElseThrow(() -> new IllegalArgumentException("Empresa no encontrada"));
 
         company.setStatus(status);
-
-        // Set updated_by
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            company.setUpdatedBy(currentUser);
-        }
 
         Company updated = companyRepository.save(company);
         return toDto(updated);

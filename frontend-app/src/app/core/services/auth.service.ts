@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface LoginRequest {
     username?: string;
@@ -39,8 +40,7 @@ export interface User {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private http = inject(HttpClient);
-    // Using relative URL which will be proxied
-    private apiUrl = '/api/auth';
+    private apiUrl = `${environment.apiUrl}/auth`;
 
     currentUser = signal<User | null>(null);
 
@@ -95,7 +95,7 @@ export class AuthService {
     }
 
     selectCompany(companyId: string): Observable<any> {
-        return this.http.post('/api/companies/select', { companyId });
+        return this.http.post(`${environment.apiUrl}/companies/select`, { companyId });
     }
 
     verify(token: string): Observable<any> {

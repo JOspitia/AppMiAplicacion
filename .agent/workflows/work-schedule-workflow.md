@@ -22,6 +22,7 @@ Entidad principal que define un horario laboral con su configuración.
     - `maxWeeklyHours` (Integer): Límite máximo de horas semanales.
     - `totalWeeklyHours` (Double): Total calculado automáticamente.
     - `active` (Boolean): Estado del horario.
+- **Auditoría Automática**: Esta entidad extiende `AuditableEntity`, por lo que gestiona automáticamente `createdAt`, `updatedAt`, `createdBy` y `updatedBy` mediante JPA Auditing.
 
 ### 1.2 Modelo `WorkScheduleDay`
 Entidad que define cada día dentro del horario.

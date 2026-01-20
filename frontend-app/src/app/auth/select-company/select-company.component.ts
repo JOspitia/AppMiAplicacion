@@ -4,6 +4,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ButtonModule } from 'primeng/button';
 import { BrandingService } from '../../core/services/branding.service';
+import { environment } from '../../../environments/environment';
 
 interface Company {
   id: string;
@@ -170,7 +171,7 @@ export class SelectCompanyComponent implements OnInit {
   }
 
   loadCompanies() {
-    this.http.get<Company[]>('/api/companies/available').subscribe({
+    this.http.get<Company[]>(`${environment.apiUrl}/companies/available`).subscribe({
       next: (data) => {
         if (data.length === 0) {
           this.error.set('No tienes acceso a ninguna empresa');
@@ -192,7 +193,7 @@ export class SelectCompanyComponent implements OnInit {
 
   selectCompany(companyId: string, companyData?: Company) {
     this.selecting.set(true);
-    this.http.post<any>('/api/companies/select', { companyId }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/companies/select`, { companyId }).subscribe({
       next: (response) => {
         // response.company should now contain the full branding info
         const targetCompany = response.company || companyData;

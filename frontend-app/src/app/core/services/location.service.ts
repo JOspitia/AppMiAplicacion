@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Location {
     id?: string;
@@ -18,7 +19,7 @@ export interface Location {
 })
 export class LocationService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/core/management/locations';
+    private apiUrl = `${environment.apiUrl}/core/management/locations`;
 
     getAll(): Observable<Location[]> {
         return this.http.get<Location[]>(this.apiUrl);

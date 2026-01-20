@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface WorkScheduleTimeSlot {
     id?: string;
@@ -43,7 +44,7 @@ export interface WorkSchedule {
 })
 export class WorkScheduleService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/rrhh/work-schedules';
+    private apiUrl = `${environment.apiUrl}/rrhh/work-schedules`;
 
     getAll(): Observable<WorkSchedule[]> {
         return this.http.get<WorkSchedule[]>(this.apiUrl);

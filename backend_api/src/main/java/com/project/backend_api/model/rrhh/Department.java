@@ -1,12 +1,11 @@
 package com.project.backend_api.model.rrhh;
 
+import com.project.backend_api.model.core.AuditableEntity;
 import com.project.backend_api.model.core.management.Company;
 import com.project.backend_api.model.core.management.Location;
-import com.project.backend_api.model.core.management.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -18,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Department {
+public class Department extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -61,21 +60,6 @@ public class Department {
     @JoinTable(name = "department_locations", schema = "business_rrhh", joinColumns = @JoinColumn(name = "department_id"), inverseJoinColumns = @JoinColumn(name = "location_id"))
     @Builder.Default
     private Set<Location> locations = new HashSet<>();
-
-    // Campos de auditoría
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", insertable = false, updatable = false)
-    private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", updatable = false)
-    private User createdBy;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by")
-    private User updatedBy;
 
     @PrePersist
     protected void onCreate() {

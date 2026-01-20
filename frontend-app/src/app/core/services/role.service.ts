@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Role {
     id: string;
@@ -17,7 +18,7 @@ export interface Role {
 })
 export class RoleService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/core/management/roles';
+    private apiUrl = `${environment.apiUrl}/core/management/roles`;
 
     getAll(): Observable<Role[]> {
         return this.http.get<Role[]>(this.apiUrl);

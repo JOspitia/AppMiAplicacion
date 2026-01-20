@@ -11,14 +11,15 @@ El módulo de Centros de Costos permite la segmentación financiera de los gasto
 ### 1.1 Modelo
 - **Entidad**: `CostCenter`.
 - **Relaciones Clave**:
-    - `Currency`: Moneda asociada para presupuestos.
+    - `Currency`: Moneda maestra. Las entidades vinculadas (como Bonos) heredan esta moneda para mantener consistencia financiera.
     - `Company`: Aislamiento multi-tenant.
 - **Validaciones**: El código del centro de costo (`code`) debe ser único por empresa.
 
-### 1.2 Funcionalidades
-- Gestión de presupuestos (`budget`).
-- Umbral de auxilio de transporte (`transportAidThreshold`).
-- Toggling de estado activo/inactivo controlado por permisos `RRHH_COST_CENTER_EDIT`.
+### 1.2 Funcionalidades y Parámetros de Control
+- **Gestión de presupuestos** (`budget`).
+- **Tope Salarial Transp. (Auxilio)** (`transportAidThreshold`): Salario máximo para otorgar auxilio de movilidad.
+- **Tope Legal de No-Salariales (%)** (`statutoryLimitPercentage`): Parámetro para el control de desalarización (Ej: 40% Ley 1393).
+- **Toggling de estado** activo/inactivo controlado por permisos `RRHH_COST_CENTER_EDIT`.
 
 ## 2. Experiencia de Usuario (Frontend)
 
@@ -30,7 +31,7 @@ El módulo de Centros de Costos permite la segmentación financiera de los gasto
 
 ### 2.2 Formulario de Gestión
 - **Validación en Tiempo Real**: El sistema debe validar que el código no esté duplicado antes de permitir el guardado.
-- **Inputs Especializados**: Uso de `p-inputNumber` para presupuestos y parámetros financieros, asegurando el cumplimiento del estándar de padding para iconos.
+- **Inputs Especializados**: Uso de `p-inputNumber` para presupuestos y parámetros financieros. Los selectores (ej: Moneda) deben usar `[filter]="true"` para búsqueda rápida y `[showClear]="false"`.
 
 ## 3. Estándares de Diseño
 - **Icono Representativo**: `calculator` o `chart-pie`.

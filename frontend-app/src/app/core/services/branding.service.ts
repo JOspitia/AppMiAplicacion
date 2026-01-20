@@ -1,4 +1,5 @@
 import { Injectable, signal, effect } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 export interface Branding {
     logoUrl: string | null;
@@ -9,7 +10,8 @@ export interface Branding {
     providedIn: 'root'
 })
 export class BrandingService {
-    private defaultLogo = 'assets/img/logo.png'; // Fallback logo
+    // Fallback static path as requested by USER
+    private defaultLogo = `${environment.apiUrl}/public/assets/images/logo.png`;
     private defaultColor = '#6366f1'; // Default Indigo-600
 
     // Public state
@@ -30,9 +32,9 @@ export class BrandingService {
     setBranding(branding: { logoUrl?: string | null, primaryColor?: string | null }) {
         if (branding.logoUrl) {
             let url = branding.logoUrl;
-            // Prepend /api/ if it's a private asset path
+            // Prepend apiUrl if it's a private asset path
             if (url.startsWith('private-assets/')) {
-                url = '/api/' + url;
+                url = `${environment.apiUrl}/${url}`;
             }
 
             // Pre-cargamos la imagen para que esté lista en caché antes de mostrarla

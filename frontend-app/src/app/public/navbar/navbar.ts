@@ -1,8 +1,9 @@
-import { Component, signal, OnInit, HostListener } from '@angular/core';
+import { Component, signal, OnInit, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
+import { BrandingService } from '../../core/services/branding.service';
 
 @Component({
   selector: 'app-navbar',
@@ -22,7 +23,7 @@ import { RippleModule } from 'primeng/ripple';
         <div class="flex items-center gap-3 flex-shrink-0">
           <a routerLink="/" class="flex items-center gap-3 group">
             <div class="relative w-10 h-10 bg-indigo-600 rounded-2xl grid place-items-center shadow-lg shadow-indigo-500/20 transition-transform group-hover:scale-110 overflow-hidden border border-white/10">
-              <img [src]="logoUrl" (error)="onLogoError($event)" alt="Logo" class="w-7 h-7 object-contain brightness-0 invert" />
+              <img [src]="logoUrl()" alt="Logo" class="w-7 h-7 object-contain brightness-0 invert" />
             </div>
             <span class="text-xl font-black tracking-tighter text-slate-900 dark:text-white hidden sm:block">
               <span class="text-indigo-600">Mi</span>Aplicación
@@ -103,28 +104,13 @@ import { RippleModule } from 'primeng/ripple';
   `
 })
 export class NavbarComponent implements OnInit {
+  private brandingService = inject(BrandingService);
+
   scrolled = signal(false);
   isDarkMode = signal(false);
   mobileMenuOpen = signal(false);
 
-  // probar varias rutas para logo en orden
-  logoCandidates = [
-    '/api/public/assets/images/logo.png',
-  ];
-  private currentLogoIndex = 0;
-  logoUrl = this.logoCandidates[this.currentLogoIndex];
-
-  onLogoError(event: Event) {
-    const img = event.target as HTMLImageElement;
-    this.currentLogoIndex++;
-    if (this.currentLogoIndex < this.logoCandidates.length) {
-      img.src = this.logoCandidates[this.currentLogoIndex];
-      this.logoUrl = this.logoCandidates[this.currentLogoIndex];
-      console.warn('Logo not found, trying:', this.logoUrl);
-    } else {
-      console.error('All logo candidates failed, leaving fallback.');
-    }
-  }
+  logoUrl = this.brandingService.currentLogo;
 
   @HostListener('window:scroll', [])
   onWindowScroll() {

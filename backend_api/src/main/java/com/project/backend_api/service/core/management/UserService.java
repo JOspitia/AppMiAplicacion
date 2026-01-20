@@ -354,7 +354,6 @@ public class UserService {
                                                         .company(company)
                                                         .isSystemRole(true)
                                                         .active(true)
-                                                        .createdAt(LocalDateTime.now())
                                                         .build();
                                         return roleRepository.save(newRole);
                                 });

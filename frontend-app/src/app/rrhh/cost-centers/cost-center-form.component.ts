@@ -82,7 +82,7 @@ import { SharedModule } from 'primeng/api';
                             <div class="flex flex-col gap-2">
                                 <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Moneda</label>
                                 <p-select [options]="currencies()" optionLabel="name" optionValue="id" formControlName="currencyId" 
-                                          [filter]="true" filterBy="name,code"
+                                          [filter]="true" filterBy="name,code" [showClear]="false"
                                           placeholder="Seleccionar Moneda..." class="w-full" styleClass="w-full" appendTo="body">
                                     <ng-template pTemplate="selectedItem" let-selectedOption>
                                         <div *ngIf="selectedOption" class="flex items-center gap-2">
@@ -116,7 +116,7 @@ import { SharedModule } from 'primeng/api';
 
                             <!-- Tope Legal Transporte -->
                             <div class="flex flex-col gap-2">
-                                <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Tope Legal Transporte (Auxilio)</label>
+                                <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Tope Salarial Transp. (Auxilio)</label>
                                 <div class="relative group">
                                     <app-icon name="money-bill" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors z-10" size="20"></app-icon>
                                     <p-inputNumber formControlName="transportAidThreshold" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2"
@@ -125,14 +125,28 @@ import { SharedModule } from 'primeng/api';
                                                    inputStyleClass="w-full pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl icon-padding-left">
                                     </p-inputNumber>
                                 </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 ml-1">Valor máximo de salario para aplicar auxilio de transporte.</p>
+                                <p class="text-[9px] text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-widest leading-relaxed">Salario máximo para otorgar auxilio de movilidad.</p>
+                            </div>
+
+                            <!-- Tope Legal No-Salariales (%) -->
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Tope Legal No-Salariales (%)</label>
+                                <div class="relative group">
+                                    <app-icon name="shield" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors z-10" size="20"></app-icon>
+                                    <p-inputNumber formControlName="statutoryLimitPercentage" suffix="%" [min]="0" [max]="100" [minFractionDigits]="2"
+                                                   placeholder="40.00%"
+                                                   styleClass="w-full"
+                                                   inputStyleClass="w-full pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl icon-padding-left">
+                                    </p-inputNumber>
+                                </div>
+                                <p class="text-[9px] text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-widest leading-relaxed">% máximo de pagos no salariales sobre el total.</p>
                             </div>
 
                             <!-- Estado -->
                             <div class="flex flex-col gap-2">
                                 <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Estado Operativo</label>
                                 <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 h-[52px]">
-                                    <span class="text-sm font-bold ml-1">{{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}</span>
+                                    <span class="text-xs font-bold ml-1">{{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}</span>
                                     <p-toggleSwitch formControlName="active"></p-toggleSwitch>
                                 </div>
                             </div>
@@ -194,6 +208,7 @@ export class CostCenterFormComponent implements OnInit {
             budget: [null],
             currencyId: [null],
             transportAidThreshold: [null],
+            statutoryLimitPercentage: [40.0],
             description: [''],
             active: [true]
         });

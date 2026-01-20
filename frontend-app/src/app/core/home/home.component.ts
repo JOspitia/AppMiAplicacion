@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DashboardService } from '../services/dashboard.service';
 import { IconComponent } from '../../shared/components/icon.component';
+import { environment } from '../../../environments/environment';
 
 
 interface UserProfile {
@@ -161,7 +162,7 @@ export class HomeComponent implements OnInit {
 
   private loadUserProfile() {
     // Load user info
-    this.http.get<any>('/api/auth/me').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/auth/me`).subscribe({
       next: (user) => {
         if (user && user.firstName) {
           this.userProfile.update(p => ({ ...p, firstName: user.firstName }));
@@ -170,7 +171,7 @@ export class HomeComponent implements OnInit {
     });
 
     // Load from company context
-    this.http.get<any>('/api/companies/current').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/companies/current`).subscribe({
       next: (company) => {
         if (company && company.name) {
           this.userProfile.update(p => ({ ...p, companyName: company.name }));

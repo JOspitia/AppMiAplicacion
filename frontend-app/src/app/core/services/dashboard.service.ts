@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface ModuleDto {
     id: string;
@@ -25,7 +26,7 @@ export class DashboardService {
 
     loadUserModules(): Observable<ModuleDto[]> {
         this.loading.set(true);
-        return this.http.get<ModuleDto[]>('/api/dashboard/modules').pipe(
+        return this.http.get<ModuleDto[]>(`${environment.apiUrl}/dashboard/modules`).pipe(
             tap(data => {
                 this.modules.set(data);
                 this.loading.set(false);

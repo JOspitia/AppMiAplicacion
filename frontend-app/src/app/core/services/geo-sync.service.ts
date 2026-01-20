@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface GeoStats {
     countries: number;
@@ -24,7 +25,7 @@ export interface SyncResult {
 @Injectable({ providedIn: 'root' })
 export class GeoSyncService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/core/administration/geo/sync';
+    private apiUrl = `${environment.apiUrl}/core/administration/geo/sync`;
 
     getStats(): Observable<GeoStats> {
         return this.http.get<GeoStats>(`${this.apiUrl}/stats`);

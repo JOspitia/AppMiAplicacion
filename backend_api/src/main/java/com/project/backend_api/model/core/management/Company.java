@@ -1,16 +1,13 @@
 package com.project.backend_api.model.core.management;
 
+import com.project.backend_api.model.core.AuditableEntity;
 import com.project.backend_api.model.core.administration.City;
 import com.project.backend_api.model.core.administration.State;
-
-
 import com.project.backend_api.model.core.administration.Country;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,7 +22,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class Company {
+public class Company extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -118,29 +115,13 @@ public class Company {
     @Builder.Default
     private Boolean status = true;
 
-    // Audit Fields
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private User createdBy;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by")
-    private User updatedBy;
-
+    // Soft Delete (separate from standard audit)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deleted_by")
     private User deletedBy;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @CreationTimestamp
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     // Helper methods for managing websites
     public void addWebsite(CompanyWebsite website) {
@@ -153,9 +134,3 @@ public class Company {
         website.setCompany(null);
     }
 }
-
-
-
-
-
-

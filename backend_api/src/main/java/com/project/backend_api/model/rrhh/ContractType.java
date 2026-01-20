@@ -1,12 +1,10 @@
 package com.project.backend_api.model.rrhh;
 
+import com.project.backend_api.model.core.AuditableEntity;
 import com.project.backend_api.model.core.management.Company;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -15,7 +13,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ContractType implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class ContractType extends AuditableEntity implements Serializable {
 
     @Id
     @GeneratedValue
@@ -45,18 +44,10 @@ public class ContractType implements Serializable {
     @Builder.Default
     private Boolean active = true;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     // Helper for validation or UI
     public String getFormattedDuration() {
         if (defaultDuration == null || durationUnit == null)
             return "-";
-        return defaultDuration + " " + durationUnit; // Can be enhanced with translation
+        return defaultDuration + " " + durationUnit;
     }
 }

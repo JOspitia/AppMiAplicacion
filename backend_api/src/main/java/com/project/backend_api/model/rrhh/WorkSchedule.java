@@ -1,13 +1,11 @@
 package com.project.backend_api.model.rrhh;
 
+import com.project.backend_api.model.core.AuditableEntity;
 import com.project.backend_api.model.core.management.Company;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +16,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WorkSchedule implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+@EntityListeners(org.springframework.data.jpa.domain.support.AuditingEntityListener.class)
+public class WorkSchedule extends AuditableEntity implements Serializable {
 
     @Id
     @GeneratedValue
@@ -59,16 +59,12 @@ public class WorkSchedule implements Serializable {
 
     /**
      * Reference date for cyclical schedules.
-     * Defines when Day 1 of the cycle starts (critical for 4x2, 6x1 rotations).
-     * For WEEKLY schedules, this can be null.
      */
     @Column(name = "reference_date")
     private java.time.LocalDate referenceDate;
 
     /**
      * First day of the week (1=Monday, 7=Sunday).
-     * Allows cultural adaptation (US=Sunday, ISO=Monday, Arab=Saturday).
-     * Default: 1 (Monday, ISO 8601 standard).
      */
     @Column(name = "first_day_of_week")
     @Builder.Default
@@ -80,20 +76,6 @@ public class WorkSchedule implements Serializable {
 
     @Builder.Default
     private Boolean active = true;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "created_by")
-    private UUID createdBy;
-
-    @Column(name = "updated_by")
-    private UUID updatedBy;
 
     // Helper methods
     public void addDay(WorkScheduleDay day) {

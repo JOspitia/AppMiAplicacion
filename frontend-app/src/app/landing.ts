@@ -6,6 +6,7 @@ import { RippleModule } from 'primeng/ripple';
 import { RouterModule } from '@angular/router';
 import { HeroCarouselComponent } from './public/hero-carousel/hero-carousel';
 import { ContactFormComponent } from './public/contact-form/contact-form';
+import { environment } from '../environments/environment';
 
 @Component({
     selector: 'app-landing',
@@ -185,7 +186,7 @@ export class LandingComponent implements OnInit {
             this.metaService.updateTag({ property: 'og:description', content: 'Centraliza tu equipo y automatiza procesos con total seguridad.' });
             this.metaService.updateTag({ property: 'og:type', content: 'website' });
             this.metaService.updateTag({ property: 'og:url', content: 'https://www.appmiaplicacion.com' });
-            this.metaService.updateTag({ property: 'og:image', content: '/api/public/assets/images/logo.png' });
+            this.metaService.updateTag({ property: 'og:image', content: `${environment.apiUrl}/public/assets/images/logo.png` });
         } catch (e) {
             const errMsg = (e as any)?.message ?? String(e);
             console.warn('Could not set meta tags on landing:', errMsg);

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Currency {
     id: string;
@@ -17,7 +18,7 @@ export interface Currency {
 })
 export class CurrencyService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/core/currencies';
+    private apiUrl = `${environment.apiUrl}/core/currencies`;
 
     getAll(active?: boolean): Observable<Currency[]> {
         let params: any = {};

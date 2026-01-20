@@ -106,9 +106,16 @@ export class IconComponent {
         'currency-dollar': 'dollar',
         'user-group': 'users',
         'document': 'file',
+        'file-text': 'file-edit',
+        'award': 'star',
         'list': 'list',
         'grid': 'th-large',
-        'bell': 'bell'
+        'bell': 'bell',
+        'shield-check': 'shield',
+        'sparkles': 'sparkles',
+        'trending-up': 'arrow-up',
+        'trending-down': 'arrow-down',
+        'check-circle': 'check-circle'
     };
 
     isSvg(): boolean {

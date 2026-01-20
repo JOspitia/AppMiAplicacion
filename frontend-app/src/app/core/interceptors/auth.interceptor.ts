@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { BehaviorSubject, throwError, filter, take, switchMap, catchError, finalize } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 // --- ESTADO GLOBAL DEL INTERCEPTOR (MUTEX) ---
 let isRefreshing = false;
@@ -10,11 +11,11 @@ const refreshTokenSubject = new BehaviorSubject<any>(null);
 
 // --- RUTAS PÚBLICAS (no requieren refresh token) ---
 const PUBLIC_ENDPOINTS = [
-    '/api/auth/login',
-    '/api/auth/register',
-    '/api/auth/refreshtoken',
-    '/api/auth/logout',
-    '/api/auth/me' // Importante para que guestGuard no dispare refresh al dar 401
+    `${environment.apiUrl}/auth/login`,
+    `${environment.apiUrl}/auth/register`,
+    `${environment.apiUrl}/auth/refreshtoken`,
+    `${environment.apiUrl}/auth/logout`,
+    `${environment.apiUrl}/auth/me` // Importante para que guestGuard no dispare refresh al dar 401
 ];
 
 /**
@@ -52,7 +53,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                 // CASO A: 403 Forbidden -> Renovar CSRF token
                 // SOLUCIÓN: Leer token directamente del JSON
                 // ============================================================
-                if (error.status === 403 && !req.url.includes('/api/auth/login')) {
+                if (error.status === 403 && !req.url.includes(`${environment.apiUrl}/auth/login`)) {
                     // Evitar loop infinito si ya reintentamos
                     if (req.headers.has('X-CSRF-Retry')) {
                         // console.error('[AuthInterceptor] 403: Ya se reintentó con CSRF. Abortando.');
@@ -62,7 +63,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                     // console.log('[AuthInterceptor] 403 detectado. Renovando CSRF con Solución Nuclear...');
 
                     // Llamar /api/auth/me que ahora retorna el token CSRF en JSON
-                    return http.get<any>('/api/auth/me', { withCredentials: true }).pipe(
+                    return http.get<any>(`${environment.apiUrl}/auth/me`, { withCredentials: true }).pipe(
                         switchMap((response) => {
                             // Leer CSRF token directamente del JSON (¡Infalible!)
                             const freshToken = response.csrfToken;

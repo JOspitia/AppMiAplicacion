@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface OperationalCenter {
     id?: string;
@@ -18,7 +19,7 @@ export interface OperationalCenter {
 })
 export class OperationalCenterService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/rrhh/operational-centers';
+    private apiUrl = `${environment.apiUrl}/rrhh/operational-centers`;
 
     getAll(active?: boolean): Observable<OperationalCenter[]> {
         let params: any = {};

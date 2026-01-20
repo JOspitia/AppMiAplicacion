@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface ModuleSubscription {
     id: string; // Module ID
@@ -15,7 +16,7 @@ export interface ModuleSubscription {
 })
 export class CompanySubscriptionService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/core/management/companies';
+    private apiUrl = `${environment.apiUrl}/core/management/companies`;
 
     listModules(companyId: string): Observable<ModuleSubscription[]> {
         return this.http.get<ModuleSubscription[]>(`${this.apiUrl}/${companyId}/subscriptions`);

@@ -38,6 +38,11 @@ Para evitar rupturas por cambios de texto en la base de datos, la navegación se
 - **Signals**: Utiliza Angular Signals para una reactividad eficiente en el estado de la UI (sidebar, tema, usuario).
 - **Cookies HttpOnly**: No intentes leer tokens JWT desde el frontend; confía en el manejo automático del navegador y el interceptor `withCredentials`.
 
+### 5.1 Estándar de API y Entornos
+- **Configuración Centralizada**: Todas las URLs de servicios deben construirse utilizando `${environment.apiUrl}`.
+- **Importación Única**: Siempre importar desde `src/environments/environment.ts`. Angular se encarga de reemplazarlo por `.prod.ts` durante el build.
+- **Rutas Relativas**: Los servicios deben usar rutas relativas al API base (ej: `/rrhh/employees`) y nunca hardcodear el dominio.
+
 ## 6. Rutas Futuras y Estructura de Navegación
 
 Se ha definido un mapa de rutas para la expansión de la aplicación, siguiendo una jerarquía lógica por módulos de negocio (Core, RRHH, Settings):
