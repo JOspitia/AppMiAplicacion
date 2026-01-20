@@ -239,6 +239,14 @@ public class PositionService {
                 experience.setArea(dto.getArea());
                 experience.setMinYears(dto.getMinYears() != null ? dto.getMinYears() : 0);
                 experience.setMaxYears(dto.getMaxYears());
+
+                // Validar años de experiencia
+                if (experience.getMaxYears() != null && experience.getMaxYears() < experience.getMinYears()) {
+                    throw new IllegalArgumentException(
+                            "Los años máximos no pueden ser menores a los años mínimos en el área: "
+                                    + experience.getArea());
+                }
+
                 experience.setIsMandatory(dto.getIsMandatory() != null ? dto.getIsMandatory() : true);
                 experience.setDescription(dto.getDescription());
                 experience.setDisplayOrder(i + 1);

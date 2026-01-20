@@ -360,10 +360,18 @@ export class PositionFormComponent implements OnInit {
     saveExperience() {
         if (this.experienceForm.invalid) return;
 
+        const minYears = this.experienceForm.value.minYears || 0;
+        const maxYears = this.experienceForm.value.maxYears;
+
+        if (maxYears !== null && maxYears !== undefined && maxYears < minYears) {
+            this.errorMessage.set('Los años máximos no pueden ser menores a los años mínimos.');
+            return;
+        }
+
         const expGroup = this.fb.group({
             area: [this.experienceForm.value.area],
-            minYears: [this.experienceForm.value.minYears],
-            maxYears: [this.experienceForm.value.maxYears],
+            minYears: [minYears],
+            maxYears: [maxYears],
             isMandatory: [this.experienceForm.value.isMandatory],
             description: [this.experienceForm.value.description],
             displayOrder: [this.experiences.length + 1]
@@ -371,6 +379,7 @@ export class PositionFormComponent implements OnInit {
 
         this.experiences.push(expGroup);
         this.showExperienceModal.set(false);
+        this.errorMessage.set(null);
     }
 
     addExperienceFromData(exp: PositionExperience) {

@@ -61,6 +61,7 @@ Entidad central que representa un cargo o puesto de trabajo.
 - **Herencia de Moneda**: La moneda se hereda automáticamente del centro de costos del departamento seleccionado.
 - **Validación de Relaciones**: Departamento y Nivel Organizacional deben pertenecer a la misma compañía.
 - **Gestión de Colecciones**: Las colecciones (functions, skills, requirements, experiences) se gestionan mediante cascade ALL y orphan removal.
+- **Validación de Experiencia**: Si se especifica rango de años, el máximo no puede ser menor al mínimo (Validador en UI y Service).
 
 ## 2. Interfaz de Usuario (Frontend)
 
@@ -80,6 +81,12 @@ Implementa el estándar de diseño **Premium Glassmorphism** unificado.
 
 ### 2.2 Position Form (`position-form.component`)
 Formulario reactivo complejo con **4 secciones de colecciones dinámicas** mediante modales.
+
+#### Patrones de Usabilidad (¡NUEVO!)
+- **Autocompletado Centralizado**: Todos los selectores (`p-select`) incluyen buscador interno (`filter="true"`).
+- **Sugerencias Inteligentes**: Uso de `p-autocomplete` en campos recurrentes:
+    - **Habilidades**: Catálogo de 15+ soft y hard skills sugeridas.
+    - **Áreas de Experiencia**: Catálogo de 12+ áreas funcionales sugeridas.
 
 #### Sección 1: Información Básica
 - **Inputs con Iconos**: Código y Nombre con iconos integrados.
@@ -108,7 +115,8 @@ Formulario reactivo complejo con **4 secciones de colecciones dinámicas** media
 #### Sección 6: Experiencia Requerida
 - **Patrón**: Lista dinámica con modal para agregar.
 - **Visualización**: Cards con área, rango de años (badge verde) y obligatoriedad.
-- **Modal**: Input de área, InputNumber de años mínimos y máximos, toggle de obligatoriedad.
+- **Modal**: Selector con autocompletado para área, InputNumber de años mínimos y máximos, toggle de obligatoriedad.
+- **Validación**: Feedback inmediato si los años máximos son menores a los mínimos.
 
 ## 3. Integración y Servicios
 - **PositionService**: Maneja el CRUD completo con gestión de colecciones anidadas.
