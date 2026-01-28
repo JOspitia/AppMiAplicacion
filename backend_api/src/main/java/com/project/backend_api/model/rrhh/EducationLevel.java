@@ -18,8 +18,20 @@ public class EducationLevel extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "company_id", nullable = false)
+    private UUID companyId;
+
+    @Column(nullable = false, length = 20)
+    private String code;
+
     @Column(nullable = false, length = 100)
-    private String name; // Bachiller, Profesional, Maestría...
+    private String name; // Primaria, Bachillerato, Profesional...
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "sort_order")
+    private Integer sortOrder;
 
     @Builder.Default
     private Boolean active = true;
