@@ -137,8 +137,20 @@ public class CompanyService {
             throw new IllegalArgumentException("El archivo debe ser una imagen válida (PNG, JPG, SVG)");
         }
 
-        // Use generic global service for standard processing
-        Map<String, String> result = minioService.uploadPrivateMultipartFile(companyId, "images", "logo", file);
+        // Use generic global service for standard processing with replacement and
+        // optimization
+        Map<String, String> result = minioService.uploadPrivateMultipartFile(
+                companyId,
+                "images",
+                "logo",
+                file,
+                true, // replaceExisting
+                com.project.backend_api.dto.core.FileOptionsDto.builder()
+                        .maxWidth(500)
+                        .maxHeight(500)
+                        .maxFileSize(5 * 1024 * 1024L) // 5MB
+                        .quality(0.9f)
+                        .build());
 
         String logoUrl = result.get("url");
 

@@ -121,6 +121,11 @@ export const routes: Routes = [
             { path: 'rrhh/positions/create', loadComponent: () => import('./rrhh/positions/position-form.component').then(m => m.PositionFormComponent) },
             { path: 'rrhh/positions/edit/:id', loadComponent: () => import('./rrhh/positions/position-form.component').then(m => m.PositionFormComponent) },
 
+            // Empleados (Wizard)
+            { path: 'rrhh/employees', loadComponent: () => import('./rrhh/employees/employee-list.component').then(m => m.EmployeeListComponent) },
+            { path: 'rrhh/employees/create', loadComponent: () => import('./rrhh/employees/wizard/employee-wizard.component').then(m => m.EmployeeWizardComponent) },
+            { path: 'rrhh/employees/edit/:id', loadComponent: () => import('./rrhh/employees/wizard/employee-wizard.component').then(m => m.EmployeeWizardComponent) },
+
             { path: 'dashboard', component: DashboardComponent, canActivate: [superAdminGuard] }
         ]
     },

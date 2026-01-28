@@ -26,7 +26,6 @@ Para mantener la consistencia, **siempre** utiliza el motor global de `MinioServ
 ### Paso 1: Implementación en el Service
 No construyas rutas manualmente. Usa el método universal:
 
-```java
 // En tu Service de Dominio
 public Map<String, String> uploadSomeFile(UUID companyId, MultipartFile file) {
     // 1. Llamar al servicio global (Maneja UUIDs, extensiones y rutas)
@@ -45,6 +44,37 @@ public Map<String, String> uploadSomeFile(UUID companyId, MultipartFile file) {
     return result;
 }
 ```
+
+### Estrategia de Reemplazo de Archivos
+
+**Nuevo Parámetro**: `replaceExisting` (disponible en métodos de upload)
+
+```java
+// Para archivos que NO requieren histórico y necesitan optimización (fotos de perfil)
+String photoUrl = minioService.uploadEmployeeFile(
+    companyId, employeeId, "photo", "profile", base64Data, 
+    true, // replaceExisting: elimina versiones anteriores
+    FileOptionsDto.profilePhoto() // Optimización: 200x200 + Límite 10MB
+);
+
+// Para archivos que SÍ requieren histórico (contratos, nóminas)
+String contractUrl = minioService.uploadEmployeeFile(
+    companyId, employeeId, "contracts", "contract", base64Data, 
+    false, // mantiene todas las versiones
+    null   // sin procesamiento de imagen
+);
+```
+
+**Casos de Uso**:
+| Tipo de Archivo | `replaceExisting` | Razón |
+|:---|:---:|:---|
+| Foto de Perfil | `true` | Solo debe existir una versión actual |
+| Logo de Empresa | `true` | Solo una versión activa |
+| Contratos | `false` | Histórico legal obligatorio |
+| Nóminas | `false` | Auditoría financiera |
+| Certificados | `false` | Trazabilidad requerida |
+
+Ver detalles completos en: `/workflows/minio-file-replacement-workflow.md`
 
 ### Paso 2: Exposición en el Controller
 El controlador debe validar los permisos antes de permitir la subida.

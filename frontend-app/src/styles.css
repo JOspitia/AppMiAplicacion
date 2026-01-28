@@ -104,7 +104,6 @@ html {
   }
 
   /* 5. Datepicker specific input fixes */
-  /* 5. Datepicker specific input fixes */
   .p-datepicker input,
   .p-calendar input {
     @apply h-full w-full border-none outline-none bg-transparent px-4 !important;
@@ -122,7 +121,7 @@ html {
 
   /* Master Input Class - Applies to all text inputs */
   .p-inputtext {
-    @apply h-11 text-sm rounded-2xl border-slate-200 dark:border-white/10 !important;
+    @apply h-11 text-sm rounded-2xl border border-slate-300 dark:border-white/10 !important;
     @apply bg-white dark:bg-white/5 !important;
     @apply font-bold transition-all duration-300 px-4 !important;
     @apply text-slate-800 dark:text-slate-100 !important;
@@ -139,11 +138,19 @@ html {
     @apply border-primary ring-4 ring-[var(--primary-ring)] !important;
   }
 
+  /* Invalid State Highlighting */
+  .p-inputtext.ng-invalid.ng-touched,
+  .p-select.ng-invalid.ng-touched,
+  .p-datepicker.ng-invalid.ng-touched,
+  .p-inputnumber.ng-invalid.ng-touched .p-inputnumber-input {
+    @apply border-rose-500 ring-4 ring-rose-500/10 !important;
+  }
+
   /* Dropdown/Select/MultiSelect Visuals */
   .p-select,
   .p-dropdown,
   .p-multiselect {
-    @apply rounded-2xl border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 !important;
+    @apply rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 !important;
     @apply transition-colors duration-200 !important;
   }
 
@@ -183,7 +190,7 @@ html {
   /* Datepicker Visuals */
   .p-datepicker,
   .p-calendar {
-    @apply rounded-2xl border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 !important;
+    @apply rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 !important;
     @apply transition-colors duration-200 !important;
   }
 
@@ -290,7 +297,7 @@ html {
   /* Password Input Standardization */
   .p-password input {
     /* Visuals are applied to the input inside p-password */
-    @apply border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 !important;
+    @apply border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-4 !important;
     @apply text-slate-800 dark:text-slate-100 !important;
   }
 
@@ -302,7 +309,7 @@ html {
   .p-inputnumber {
     @apply rounded-2xl overflow-hidden !important;
     @apply bg-white dark:bg-white/5 !important;
-    @apply border border-slate-200 dark:border-white/10 !important;
+    @apply border border-slate-300 dark:border-white/10 !important;
     @apply transition-all duration-300 !important;
   }
 
@@ -323,7 +330,7 @@ html {
   /* Textarea Standardization */
   .p-inputtextarea {
     @apply min-h-[88px] text-sm rounded-2xl px-4 py-3 !important;
-    @apply border-slate-200 dark:border-white/10 !important;
+    @apply border border-slate-300 dark:border-white/10 !important;
     @apply bg-white dark:bg-white/5 !important;
   }
 
@@ -385,6 +392,7 @@ html {
     background-color: rgba(var(--primary-rgb), 0.1) !important;
     color: var(--primary) !important;
     border-color: rgba(var(--primary-rgb), 0.2) !important;
+    @apply font-black !important;
   }
 
   .p-paginator {
@@ -394,6 +402,8 @@ html {
   .p-paginator button:not(.p-highlight):not(.p-disabled):hover {
     @apply bg-slate-100 dark:bg-white/5 !important;
   }
+
+
 }
 
 /* ========================================
@@ -417,8 +427,6 @@ body .tooltip-wide .p-tooltip-text {
   word-break: break-word !important;
 }
 
-
-
 /* Global Brand Utilities */
 .bg-brand-gradient {
   background: linear-gradient(135deg, var(--primary), var(--primary-stop)) !important;
@@ -434,7 +442,12 @@ body .tooltip-wide .p-tooltip-text {
   background-color: var(--p-select-option-focus-background) !important;
   color: var(--primary) !important;
   border: 1px solid var(--p-select-option-selected-background) !important;
-  @apply px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 9999px !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
 }
 
 /* Badge Utility */
@@ -457,4 +470,55 @@ body .tooltip-wide .p-tooltip-text {
   --p-datepicker-panel-background: #1e293b;
   --p-overlay-background: #1e293b;
   --p-content-background: transparent;
+}
+
+/* ========================================
+   PREMIUM UTILITY CLASSES
+   ======================================== */
+
+.glass-section {
+  @apply p-8 md:p-10 bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-slate-200/60 dark:border-white/5 shadow-xl shadow-slate-200/20 dark:shadow-none transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/40 dark:hover:border-white/10;
+}
+
+.premium-label {
+  @apply text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-2 mb-1;
+}
+
+.premium-input {
+  @apply w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 transition-all focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none !important;
+}
+
+
+.premium-select .p-select {
+  @apply bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl transition-all !important;
+}
+
+.premium-select .p-select:not(.p-disabled).p-focus {
+  @apply ring-4 ring-primary/10 border-primary !important;
+}
+
+.premium-select .p-select .p-select-label {
+  @apply text-sm font-medium text-slate-700 dark:text-slate-200 !important;
+}
+
+.border-input {
+  @apply relative rounded-xl transition-all duration-300;
+}
+
+.border-input:focus-within {
+  @apply ring-4 ring-primary/10;
+}
+
+.border-input:focus-within .premium-input {
+  @apply border-primary !important;
+}
+
+.section-indicator {
+  @apply w-1.5 h-6 bg-primary rounded-full;
+}
+
+/* Global Fix for Icons overlapping text */
+input.premium-input-with-icon,
+.premium-input-with-icon {
+  padding-left: 3.5rem !important;
 }

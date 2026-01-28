@@ -36,7 +36,7 @@ import { ProfileService } from '../../core/services/profile.service';
                         {{ isEditMode() ? 'Editar' : 'Nueva' }} <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">Sede</span>
                     </h1>
                 </div>
-                <button [routerLink]="['/rrhh/sedes']" class="p-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm">
+                <button [routerLink]="['/rrhh/sedes']" class="p-4 bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm">
                     <app-icon name="arrow-left" class="w-5 h-5 text-slate-400 group-hover:text-primary transition-colors"></app-icon>
                 </button>
             </div>
@@ -66,7 +66,7 @@ import { ProfileService } from '../../core/services/profile.service';
                                     <app-icon name="building" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors z-10"></app-icon>
                                     <input pInputText formControlName="name" placeholder="Ej: Sede Principal, Sucursal Norte..." 
                                            style="padding-left: 3.5rem !important;"
-                                           class="w-full pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm">
+                                           class="w-full pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm">
                                 </div>
                             </div>
 
@@ -74,7 +74,7 @@ import { ProfileService } from '../../core/services/profile.service';
                                 <!-- Es Sede Principal -->
                                 <div class="flex flex-col gap-2">
                                     <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Sede Principal</label>
-                                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 h-[52px]">
+                                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-300 dark:border-slate-700 h-[52px]">
                                         <div class="flex items-center gap-2 ml-1">
                                             <app-icon [name]="form.get('isMain')?.value ? 'check-circle' : 'circle'" 
                                                       [class]="form.get('isMain')?.value ? 'text-primary' : 'text-slate-300'"
@@ -89,7 +89,7 @@ import { ProfileService } from '../../core/services/profile.service';
                                 <!-- Estado Activo -->
                                 <div class="flex flex-col gap-2">
                                     <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Estado Operativo</label>
-                                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 h-[52px]">
+                                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-300 dark:border-slate-700 h-[52px]">
                                         <span class="text-sm font-bold ml-1">{{ form.get('active')?.value ? 'Activa' : 'Inactiva' }}</span>
                                         <p-toggleSwitch formControlName="active"></p-toggleSwitch>
                                     </div>
@@ -114,10 +114,10 @@ import { ProfileService } from '../../core/services/profile.service';
                                         <app-icon name="map-pin" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors z-10"></app-icon>
                                         <input pInputText formControlName="address" 
                                                style="padding-left: 3.5rem !important;"
-                                               class="w-full pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+                                               class="w-full pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
                                                readonly (click)="openAddressBuilder()" placeholder="Haz clic para construir la dirección...">
                                     </div>
-                                    <button type="button" (click)="openAddressBuilder()" class="p-3 bg-slate-100 dark:bg-white/5 rounded-xl text-slate-500 hover:text-primary transition-all active:scale-95 border border-slate-200 dark:border-white/10 flex items-center justify-center">
+                                    <button type="button" (click)="openAddressBuilder()" class="p-3 bg-slate-100 dark:bg-white/5 rounded-xl text-slate-500 hover:text-primary transition-all active:scale-95 border border-slate-300 dark:border-white/10 flex items-center justify-center">
                                         <app-icon name="edit" size="20"></app-icon>
                                     </button>
                                 </div>
@@ -152,7 +152,7 @@ import { ProfileService } from '../../core/services/profile.service';
                     </div>
 
                     <!-- Botones de Acción -->
-                    <div class="flex items-center justify-end gap-4 pt-8 border-t border-slate-200 dark:border-white/10">
+                    <div class="flex items-center justify-end gap-4 pt-8 border-t border-slate-300 dark:border-white/10">
                         <button type="button" [routerLink]="['/rrhh/sedes']" 
                                 class="px-8 py-3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-2xl hover:bg-slate-200 dark:hover:bg-white/10 transition-all font-bold">
                             Cancelar
@@ -173,7 +173,7 @@ import { ProfileService } from '../../core/services/profile.service';
         <!-- Address Builder Component -->
         <app-address-builder
             [(visible)]="showAddressBuilder"
-            (onConfirm)="handleAddressConfirm($event)">
+            (addressCompleted)="handleAddressConfirm($event)">
         </app-address-builder>
     </div>
     `

@@ -1,0 +1,14 @@
+package com.project.backend_api.dto.rrhh;
+
+import lombok.*;
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ExperienceRangeDto {
+    private UUID id;
+    private String code;
+    private String name;
+}

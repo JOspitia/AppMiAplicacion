@@ -407,7 +407,7 @@ import { AuthService } from '../services/auth.service';
         <!-- Address Builder Component -->
         <app-address-builder
             [(visible)]="showAddressBuilder"
-            (onConfirm)="handleAddressConfirm($event)">
+            (addressCompleted)="handleAddressConfirm($event)">
         </app-address-builder>
     </div>
     `

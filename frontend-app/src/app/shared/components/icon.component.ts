@@ -115,7 +115,12 @@ export class IconComponent {
         'sparkles': 'sparkles',
         'trending-up': 'arrow-up',
         'trending-down': 'arrow-down',
-        'check-circle': 'check-circle'
+        'check-circle': 'check-circle',
+        'academic-cap': 'graduation-cap',
+        'library': 'building',
+        'location-marker': 'map-marker',
+        'heart': 'heart',
+        'book-open': 'book'
     };
 
     isSvg(): boolean {

@@ -276,7 +276,7 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
         <!-- Address Builder Component -->
         <app-address-builder
             [(visible)]="showAddressBuilder"
-            (onConfirm)="handleAddressConfirm($event)">
+            (addressCompleted)="handleAddressConfirm($event)">
         </app-address-builder>
 
         <!-- Identity Verification Dialog -->

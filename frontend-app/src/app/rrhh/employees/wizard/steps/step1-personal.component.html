@@ -1,0 +1,892 @@
+<div [formGroup]="form" class="space-y-10 pb-20 animate-fade-in">
+    <!-- ALERTS SECTION -->
+    <div *ngIf="successMessage() || errorMessage()" class="w-full animate-fade-in space-y-4">
+        <app-alert *ngIf="successMessage()" type="success" [message]="successMessage()" [autoHide]="6000"
+            (closed)="successMessage.set(null)"></app-alert>
+        <app-alert *ngIf="errorMessage()" type="error" [message]="errorMessage()" [autoHide]="8000"
+            (closed)="errorMessage.set(null)"></app-alert>
+    </div>
+
+    <!-- SECTION 1: HEADER & PROFILE VISUAL -->
+    <div
+        class="relative overflow-hidden rounded-[3.5rem] bg-white/80 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-slate-800 shadow-2xl p-10 md:p-12">
+        <div class="absolute top-0 right-0 p-12 opacity-[0.03] dark:opacity-[0.07] pointer-events-none">
+            <app-icon name="user" size="180"></app-icon>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-center gap-12 relative z-10">
+            <!-- Photo Upload -->
+            <div class="flex flex-col items-center gap-5">
+                <div class="relative group">
+                    <div
+                        class="w-44 h-44 rounded-[2.5rem] overflow-hidden border-8 border-white dark:border-slate-800 shadow-2xl transition-all duration-500 group-hover:scale-[1.05] group-hover:rotate-2">
+                        <img *ngIf="photoPreview()" [src]="photoPreview()" class="w-full h-full object-cover" />
+                        <div *ngIf="!photoPreview()"
+                            class="w-full h-full bg-slate-100 dark:bg-slate-800/50 flex items-center justify-center">
+                            <app-icon name="user" size="80" class="text-slate-300 dark:text-slate-600"></app-icon>
+                        </div>
+                    </div>
+                    <label
+                        class="absolute -bottom-4 -right-4 w-14 h-14 bg-primary hover:bg-primary-600 text-white rounded-3xl flex items-center justify-center cursor-pointer shadow-xl shadow-primary/30 transition-all active:scale-90 hover:scale-110 z-20">
+                        <app-icon name="camera" size="24"></app-icon>
+                        <input type="file" class="hidden" (change)="onPhotoSelected($event)" accept="image/*" />
+                    </label>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Foto
+                    del Perfil</span>
+            </div>
+
+            <!-- Header Info -->
+            <div class="flex-1 text-center md:text-left space-y-5">
+                <div class="space-y-1">
+                    <span class="text-primary font-bold tracking-[0.4em] text-[10px] uppercase block mb-2">Datos del
+                        Colaborador</span>
+                    <h1
+                        class="text-4xl md:text-6xl font-black leading-tight flex flex-wrap justify-center md:justify-start gap-x-3">
+                        <span class="text-slate-900 dark:text-white">{{ firstNamePart }}</span>
+                        <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">{{
+                            lastNamePart }}</span>
+                    </h1>
+                </div>
+
+                <!-- Info Grid -->
+                <div class="flex flex-wrap justify-center md:justify-start gap-4 items-center">
+                    <!-- Status Badge -->
+                    <div
+                        [class]="form.get('active')?.value ? 'px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-3' : 'px-4 py-2 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3'">
+                        <div
+                            [class]="form.get('active')?.value ? 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse' : 'w-2 h-2 rounded-full bg-rose-500'">
+                        </div>
+                        <span
+                            [class]="form.get('active')?.value ? 'text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest' : 'text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest'">
+                            {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
+                        </span>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="hidden md:block w-px h-4 bg-slate-200 dark:bg-white/10 mx-2"></div>
+
+                    <!-- Contact Details Badges -->
+                    <div *ngIf="form.get('identificationNumber')?.value" class="group flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+                            <app-icon name="id-card" size="14"></app-icon>
+                        </div>
+                        <div class="flex flex-col text-left">
+                            <span
+                                class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Documento</span>
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-tight">{{
+                                form.get('identificationNumber')?.value }}</span>
+                        </div>
+                    </div>
+
+                    <div *ngIf="form.get('phoneMobile')?.value" class="group flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+                            <app-icon name="phone" size="14"></app-icon>
+                        </div>
+                        <div class="flex flex-col text-left">
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Móvil</span>
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-tight">{{
+                                form.get('phoneMobile')?.value }}</span>
+                        </div>
+                    </div>
+
+                    <div *ngIf="form.get('emailPersonal')?.value" class="group flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+                            <app-icon name="mail" size="14"></app-icon>
+                        </div>
+                        <div class="flex flex-col text-left">
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Email</span>
+                            <span
+                                class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-tight text-ellipsis overflow-hidden">{{
+                                form.get('emailPersonal')?.value }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- SEARCH BAR SECTION -->
+    <div class="relative w-full -mt-8 z-20">
+        <div
+            class="glass-section !p-4 !rounded-[2.5rem] shadow-2xl border-white/40 dark:border-white/10 flex items-center gap-5 transition-all duration-300 focus-within:ring-4 focus-within:ring-primary/20">
+            <div class="w-14 h-14 bg-primary/10 rounded-3xl flex items-center justify-center text-primary shrink-0">
+                <app-icon name="search" size="24"></app-icon>
+            </div>
+
+            <p-autoComplete [suggestions]="filteredSections()" (completeMethod)="searchSection($event)"
+                (onSelect)="sectionFilter.set($event.value)" [ngModel]="sectionFilter()"
+                (ngModelChange)="sectionFilter.set($event)" [ngModelOptions]="{standalone: true}"
+                placeholder="¿Qué información buscas? (Filtra por secciones: Contacto, Emergencia, Experiencia...)"
+                styleClass="w-full"
+                inputStyleClass="w-full bg-transparent border-none outline-none text-slate-700 dark:text-white font-semibold placeholder:text-slate-400 placeholder:font-normal text-lg"
+                [dropdown]="true" appendTo="body">
+            </p-autoComplete>
+
+            <div *ngIf="sectionFilter()" (click)="sectionFilter.set('')"
+                class="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer text-slate-400 transition-colors shrink-0">
+                <app-icon name="x" size="20"></app-icon>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: DATOS BÁSICOS E IDENTIDAD -->
+    <div *ngIf="shouldShowSection('Datos Básicos e Identidad')" class="glass-section space-y-8 animate-fade-in">
+        <div class="flex items-center gap-5">
+            <div class="section-indicator"></div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800 dark:text-white">Datos Básicos e Identidad</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Información legal y
+                    validación de identidad única del colaborador.</p>
+            </div>
+            <app-icon name="id-card" class="ml-auto text-slate-200 dark:text-white/5" size="40"></app-icon>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Tipo de Documento *</label>
+                <p-select formControlName="identificationTypeId" [options]="identificationTypes()" optionLabel="name"
+                    optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
+                    appendTo="body"></p-select>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Número de Documento *</label>
+                <div class="relative border-input">
+                    <app-icon name="hash"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500"></app-icon>
+                    <input pInputText formControlName="identificationNumber" placeholder="Ej. 1010..."
+                        style="padding-left: 3.5rem !important;" class="premium-input premium-input-with-icon" />
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Fecha Expedición</label>
+                <p-datePicker formControlName="identificationIssueDate" dateFormat="dd/mm/yy" [showIcon]="true"
+                    placeholder="DD/MM/YYYY" appendTo="body" styleClass="w-full"></p-datePicker>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">País Expedición</label>
+                <p-select formControlName="identificationIssueCountryId" [options]="countries()" optionLabel="name"
+                    optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
+                    appendTo="body"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Depto Expedición</label>
+                <p-select formControlName="identificationIssueStateId" [options]="idIssueStates()" optionLabel="name"
+                    optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
+                    appendTo="body"></p-select>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Ciudad Expedición</label>
+                <p-select formControlName="identificationIssuePlaceId" [options]="idIssueCities()" optionLabel="name"
+                    optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
+                    appendTo="body"></p-select>
+            </div>
+
+            <div class="lg:col-span-2"></div>
+
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Primer Nombre *</label>
+                <input pInputText formControlName="firstName" placeholder="Ej. Juan" class="premium-input" />
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Segundo Nombre</label>
+                <input pInputText formControlName="secondName" placeholder="Ej. Antonio" class="premium-input" />
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Primer Apellido *</label>
+                <input pInputText formControlName="firstLastName" placeholder="Ej. Pérez" class="premium-input" />
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Segundo Apellido</label>
+                <input pInputText formControlName="secondLastName" placeholder="Ej. Rodríguez" class="premium-input" />
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Nacionalidad</label>
+                <p-select formControlName="nationalityId" [options]="countries()" optionLabel="name" optionValue="id"
+                    [filter]="true" placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Género</label>
+                <p-select formControlName="genderId" [options]="genders()" optionLabel="name" optionValue="id"
+                    placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: INFORMACIÓN DEMOGRÁFICA Y NACIMIENTO -->
+    <div *ngIf="shouldShowSection('Información Demográfica y Nacimiento')"
+        class="glass-section space-y-8 animate-fade-in">
+        <div class="flex items-center gap-5">
+            <div class="section-indicator bg-indigo-500"></div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800 dark:text-white">Información Demográfica y Nacimiento</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Perfil sociodemográfico
+                    exigido por las normativas de SST.</p>
+            </div>
+            <app-icon name="map" class="ml-auto text-slate-200 dark:text-white/5" size="40"></app-icon>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Fecha Nacimiento *</label>
+                <p-datePicker formControlName="birthDate" dateFormat="dd/mm/yy" [showIcon]="true"
+                    placeholder="DD/MM/YYYY" appendTo="body" styleClass="w-full"></p-datePicker>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">País Nacimiento</label>
+                <p-select formControlName="birthCountryId" [options]="countries()" optionLabel="name" optionValue="id"
+                    [filter]="true" placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Depto Nacimiento</label>
+                <p-select formControlName="birthStateId" [options]="birthStates()" optionLabel="name" optionValue="id"
+                    [filter]="true" placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Ciudad Nacimiento</label>
+                <p-select formControlName="birthPlaceId" [options]="birthCities()" optionLabel="name" optionValue="id"
+                    [filter]="true" placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Estado Civil</label>
+                <p-select formControlName="maritalStatusId" [options]="maritalStatuses()" optionLabel="name"
+                    optionValue="id" placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Situación Militar</label>
+                <input pInputText formControlName="militaryStatus" placeholder="Ej. Clase 1..." class="premium-input" />
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 4: CONTACTO Y LOCALIZACIÓN -->
+    <div *ngIf="shouldShowSection('Contacto y Localización')" class="glass-section space-y-8 animate-fade-in">
+        <div class="flex items-center gap-5">
+            <div class="section-indicator bg-emerald-500"></div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800 dark:text-white">Contacto y Localización</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Canales de comunicación
+                    oficiales y ubicación física de residencia.</p>
+            </div>
+            <app-icon name="mail" class="ml-auto text-slate-200 dark:text-white/5" size="40"></app-icon>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Email Personal</label>
+                <div class="relative border-input">
+                    <app-icon name="mail"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500"></app-icon>
+                    <input pInputText formControlName="emailPersonal" placeholder="correo@gmail.com"
+                        style="padding-left: 3.5rem !important;" class="premium-input premium-input-with-icon" />
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Email Corporativo</label>
+                <div class="relative border-input">
+                    <app-icon name="mail"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500"></app-icon>
+                    <input pInputText formControlName="emailCorporate" placeholder="empresa@compañia.com"
+                        style="padding-left: 3.5rem !important;" class="premium-input premium-input-with-icon" />
+                </div>
+            </div>
+            <div class="lg:col-span-1"></div>
+
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Celular Movil *</label>
+                <div class="relative border-input">
+                    <app-icon name="phone"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500"></app-icon>
+                    <input pInputText formControlName="phoneMobile" placeholder="300..."
+                        style="padding-left: 3.5rem !important;" class="premium-input premium-input-with-icon" />
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Teléfono Fijo</label>
+                <div class="relative border-input">
+                    <app-icon name="phone"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500"></app-icon>
+                    <input pInputText formControlName="phoneHome" placeholder="601..."
+                        style="padding-left: 3.5rem !important;" class="premium-input premium-input-with-icon" />
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Teléfono Alterno</label>
+                <div class="relative border-input">
+                    <app-icon name="phone"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500"></app-icon>
+                    <input pInputText formControlName="phoneAlternate" placeholder="Ej. Oficina"
+                        style="padding-left: 3.5rem !important;" class="premium-input premium-input-with-icon" />
+                </div>
+            </div>
+
+            <div class="col-span-full space-y-8 pt-8 border-t border-slate-100 dark:border-white/5">
+                <div class="flex flex-col gap-3">
+                    <label class="premium-label">Dirección Física de Residencia *</label>
+                    <div class="flex gap-4">
+                        <div class="relative border-input flex-1">
+                            <app-icon name="map-pin"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500"></app-icon>
+                            <input pInputText formControlName="address" readonly (click)="showAddressBuilder.set(true)"
+                                placeholder="Haz clic para construir la dirección..."
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon cursor-pointer" />
+                        </div>
+                        <button type="button" (click)="showAddressBuilder.set(true)"
+                            class="p-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-2xl hover:text-primary transition-all active:scale-95 hover:bg-white dark:hover:bg-white/10 shadow-sm group">
+                            <app-icon name="edit" size="20"
+                                class="group-hover:scale-110 transition-transform"></app-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">País Residencia</label>
+                        <p-select formControlName="residenceCountryId" [options]="countries()" optionLabel="name"
+                            optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
+                            appendTo="body"></p-select>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Departamento</label>
+                        <p-select formControlName="residenceStateId" [options]="residenceStates()" optionLabel="name"
+                            optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
+                            appendTo="body"></p-select>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Ciudad de Residencia</label>
+                        <p-select formControlName="residenceCityId" [options]="residenceCities()" optionLabel="name"
+                            optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
+                            appendTo="body"></p-select>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Barrio</label>
+                        <input pInputText formControlName="residenceNeighborhood" placeholder="Ej. El Poblado"
+                            class="premium-input" />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Estrato Socioeconómico</label>
+                        <p-select formControlName="socioeconomicStratum" [options]="['1', '2', '3', '4', '5', '6']"
+                            placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 5: CONTACTOS DE EMERGENCIA -->
+    <div *ngIf="shouldShowSection('Contactos de Emergencia')" class="glass-section space-y-8 animate-fade-in">
+        <div class="flex items-center gap-5">
+            <div class="section-indicator bg-orange-500"></div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800 dark:text-white">Contactos de Emergencia</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Personas de respaldo en
+                    caso de urgencias médicas o laborales.</p>
+            </div>
+            <button type="button" (click)="addEmergencyContact()"
+                class="ml-auto flex items-center gap-3 px-6 py-3 bg-primary text-white hover:bg-primary-600 rounded-2xl transition-all font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95">
+                <app-icon name="plus" size="16"></app-icon>
+                Añadir Contacto
+            </button>
+            <app-icon name="shield-check" class="text-slate-200 dark:text-white/5" size="40"></app-icon>
+        </div>
+
+        <div formArrayName="emergencyContacts" class="space-y-8">
+            <div *ngFor="let contact of emergencyContactsArray.controls; let i = index" [formGroupName]="i"
+                class="relative p-8 bg-slate-50/50 dark:bg-white/5 rounded-[2.5rem] border border-slate-200 dark:border-white/10 animate-fade-in group">
+
+                <button type="button" (click)="removeEmergencyContact(i)"
+                    class="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all opacity-0 group-hover:opacity-100 z-30">
+                    <app-icon name="x" size="18"></app-icon>
+                </button>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Nombres Completos *</label>
+                        <div class="relative group">
+                            <app-icon name="user"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                            <input pInputText formControlName="firstName" placeholder="Ej. Juan Manuel"
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Apellidos *</label>
+                        <div class="relative group">
+                            <app-icon name="user"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                            <input pInputText formControlName="firstLastName" placeholder="Ej. Pérez García"
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Vínculo / Parentesco *</label>
+                        <p-select formControlName="relationshipId" [options]="relationships()" optionLabel="name"
+                            optionValue="id" placeholder="Seleccione..." class="premium-select"
+                            appendTo="body"></p-select>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Número Telefónico *</label>
+                        <div class="relative border-input">
+                            <app-icon name="phone"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500"></app-icon>
+                            <input pInputText formControlName="phone" placeholder="300..."
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="emergencyContactsArray.length === 0"
+                class="text-center py-16 border-2 border-dashed border-slate-200 dark:border-white/5 rounded-[3rem] bg-slate-50/30 dark:bg-transparent transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                <div
+                    class="w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-4 text-slate-300 dark:text-slate-600 shadow-inner">
+                    <app-icon name="users" size="32"></app-icon>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">Sin contactos
+                    asignados</p>
+                <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">Es vital contar con al menos un contacto para
+                    seguridad laboral.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 6: NÚCLEO FAMILIAR -->
+    <div *ngIf="shouldShowSection('Núcleo Familiar')" class="glass-section space-y-8 animate-fade-in">
+        <div class="flex items-center gap-5">
+            <div class="section-indicator"></div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800 dark:text-white">Núcleo Familiar</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Registro de
+                    dependientes y familiares directos para beneficios.</p>
+            </div>
+            <button type="button" (click)="addFamilyMember()"
+                class="ml-auto flex items-center gap-3 px-6 py-3 bg-primary text-white hover:bg-primary-600 rounded-2xl transition-all font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95">
+                <app-icon name="plus" size="16"></app-icon>
+                Añadir Familiar
+            </button>
+            <app-icon name="users" class="text-slate-200 dark:text-white/5" size="40"></app-icon>
+        </div>
+
+        <div formArrayName="familyNucleus" class="space-y-8">
+            <div *ngFor="let member of familyNucleusArray.controls; let i = index" [formGroupName]="i"
+                class="relative p-8 bg-slate-50/50 dark:bg-white/5 rounded-[2.5rem] border border-slate-200 dark:border-white/10 animate-fade-in group">
+
+                <button type="button" (click)="removeFamilyMember(i)"
+                    class="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all opacity-0 group-hover:opacity-100 z-30">
+                    <app-icon name="x" size="18"></app-icon>
+                </button>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Nombres *</label>
+                        <div class="relative group">
+                            <app-icon name="user"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                            <input pInputText formControlName="firstName" placeholder="Ej. María Fernanda"
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Apellidos *</label>
+                        <div class="relative group">
+                            <app-icon name="user"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                            <input pInputText formControlName="firstLastName" placeholder="Ej. Pérez López"
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Parentesco *</label>
+                        <p-select formControlName="relationshipId" [options]="familyRelationships()" optionLabel="name"
+                            optionValue="id" placeholder="Seleccione..." class="premium-select"
+                            appendTo="body"></p-select>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Fecha Nacimiento</label>
+                        <p-datePicker formControlName="birthDate" dateFormat="dd/mm/yy" [showIcon]="true"
+                            placeholder="DD/MM/YYYY" appendTo="body" styleClass="w-full"></p-datePicker>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Ocupación Actual</label>
+                        <p-select formControlName="occupationId" [options]="occupations()" optionLabel="name"
+                            optionValue="id" placeholder="Seleccione..." class="premium-select"
+                            appendTo="body"></p-select>
+                    </div>
+                    <div class="flex flex-col gap-2 justify-center pt-5">
+                        <div
+                            class="p-5 bg-slate-100 dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 flex items-center justify-between group-hover:border-primary/40 transition-all cursor-pointer shadow-inner">
+                            <div class="flex flex-col">
+                                <span
+                                    class="text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Dependiente</span>
+                                <span
+                                    class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Beneficiario
+                                    directo</span>
+                            </div>
+                            <p-toggleSwitch formControlName="isDependent"></p-toggleSwitch>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="familyNucleusArray.length === 0"
+                class="text-center py-16 border-2 border-dashed border-slate-200 dark:border-white/5 rounded-[3rem] bg-slate-50/30 dark:bg-transparent transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                <div
+                    class="w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-4 text-slate-300 dark:text-slate-600 shadow-inner">
+                    <app-icon name="heart" size="32"></app-icon>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">Sin núcleo
+                    familiar registrado</p>
+                <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">Registra a los familiares para fines de
+                    nómina y seguridad social.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 7: EXPERIENCIA LABORAL -->
+    <div *ngIf="shouldShowSection('Experiencia Laboral')" class="glass-section space-y-8 animate-fade-in">
+        <div class="flex items-center gap-5">
+            <div class="section-indicator"></div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800 dark:text-white">Experiencia Laboral</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Historial de empleos
+                    previos y trayectoria profesional.</p>
+            </div>
+            <button type="button" (click)="addWorkExperience()"
+                class="ml-auto flex items-center gap-3 px-6 py-3 bg-primary text-white hover:bg-primary-600 rounded-2xl transition-all font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95">
+                <app-icon name="plus" size="16"></app-icon>
+                Añadir Experiencia
+            </button>
+            <app-icon name="briefcase" class="text-slate-200 dark:text-white/5" size="40"></app-icon>
+        </div>
+
+        <div formArrayName="workExperiences" class="space-y-8">
+            <div *ngFor="let exp of workExperiencesArray.controls; let i = index" [formGroupName]="i"
+                class="relative p-8 bg-slate-50/50 dark:bg-white/5 rounded-[2.5rem] border border-slate-200 dark:border-white/10 animate-fade-in group">
+
+                <button type="button" (click)="removeWorkExperience(i)"
+                    class="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all opacity-0 group-hover:opacity-100 z-30">
+                    <app-icon name="x" size="18"></app-icon>
+                </button>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Empresa Donde Laboró *</label>
+                        <div class="relative group">
+                            <app-icon name="building"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                            <input pInputText formControlName="companyName" placeholder="Ej. Tech Solutions Inc."
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Cargo Desempeñado *</label>
+                        <div class="relative group">
+                            <app-icon name="briefcase"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                            <input pInputText formControlName="positionHeld" placeholder="Ej. Director de Operaciones"
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Jefe Inmediato *</label>
+                        <div class="relative group">
+                            <app-icon name="user"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                            <input pInputText formControlName="immediateSupervisor" placeholder="Ej. Juan Pérez"
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">No. Telefono Empresa</label>
+                        <div class="relative group">
+                            <app-icon name="phone"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                            <input pInputText formControlName="companyPhone" placeholder="Ej. +57 601..."
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Fecha de ingreso *</label>
+                        <p-datePicker formControlName="startDate" dateFormat="dd/mm/yy" [showIcon]="true"
+                            placeholder="DD/MM/YYYY" appendTo="body" styleClass="w-full"></p-datePicker>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Fecha de retiro</label>
+                        <p-datePicker formControlName="endDate" dateFormat="dd/mm/yy" [showIcon]="true"
+                            placeholder="DD/MM/YYYY" appendTo="body" styleClass="w-full"></p-datePicker>
+                    </div>
+                    <div class="lg:col-span-2 flex flex-col gap-2">
+                        <label class="premium-label">Funciones</label>
+                        <textarea pInputTextarea formControlName="functions" rows="3"
+                            placeholder="Descripción de responsabilidades y logros..."
+                            class="premium-input min-h-[100px] py-4"></textarea>
+                    </div>
+                    <div class="lg:col-span-2 flex flex-col gap-2">
+                        <label class="premium-label text-primary">Adjuntar Archivo PDF (Certificación)</label>
+                        <div class="flex items-center gap-4">
+                            <p-fileUpload #fubauto mode="basic" name="demo[]" accept="application/pdf"
+                                maxFileSize="5000000" [auto]="false" (onSelect)="onWorkExpFileSelected($event, i)"
+                                chooseLabel="Elegir Archivo PDF"
+                                styleClass="p-button-outlined p-button-primary rounded-xl text-xs"></p-fileUpload>
+
+                            <div *ngIf="exp.get('attachmentUrl')?.value"
+                                class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-fade-in">
+                                <app-icon name="check-circle" size="14" class="text-emerald-500"></app-icon>
+                                <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Archivo
+                                    Listo</span>
+                            </div>
+
+                            <span class="text-[10px] text-slate-400 italic">Máximo 1 archivo (PDF)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="workExperiencesArray.length === 0"
+                class="text-center py-16 border-2 border-dashed border-slate-200 dark:border-white/5 rounded-[3rem] bg-slate-50/30 dark:bg-transparent transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                <div
+                    class="w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-4 text-slate-300 dark:text-slate-600 shadow-inner">
+                    <app-icon name="briefcase" size="32"></app-icon>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">Sin
+                    experiencia laboral</p>
+                <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">Registra la trayectoria laboral previa del
+                    colaborador.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: FORMACIÓN ACADÉMICA (INLINE FORM) -->
+    <div *ngIf="shouldShowSection('Formación Académica')" class="glass-section space-y-8 animate-fade-in">
+        <div class="flex items-center gap-5">
+            <div class="section-indicator bg-blue-500"></div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800 dark:text-white">Formación Académica</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Registro de títulos y
+                    certificaciones académicas.</p>
+            </div>
+            <button type="button" (click)="addEducation()"
+                class="ml-auto flex items-center gap-3 px-6 py-3 bg-primary text-white hover:bg-primary-600 rounded-2xl transition-all font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95">
+                <app-icon name="plus" size="16"></app-icon>
+                Añadir Formación
+            </button>
+            <app-icon name="academic-cap" class="text-slate-200 dark:text-white/5" size="40"></app-icon>
+        </div>
+
+        <div formArrayName="educations" class="space-y-8">
+            <div *ngFor="let edu of educationsArray.controls; let i = index" [formGroupName]="i"
+                class="relative p-8 bg-slate-50/50 dark:bg-white/5 rounded-[2.5rem] border border-slate-200 dark:border-white/10 animate-fade-in group">
+
+                <button type="button" (click)="removeEducation(i)"
+                    class="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all opacity-0 group-hover:opacity-100 z-30">
+                    <app-icon name="x" size="18"></app-icon>
+                </button>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Nivel Educativo *</label>
+                        <p-select formControlName="educationLevelId" [options]="educationLevels()" optionLabel="name"
+                            optionValue="id" placeholder="Seleccione..." class="premium-select"
+                            appendTo="body"></p-select>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Entidad Educativa *</label>
+                        <div class="relative group">
+                            <app-icon name="library"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                            <input pInputText formControlName="institution" placeholder="Ej. Universidad Nacional"
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Título Obtenido *</label>
+                        <div class="relative group">
+                            <app-icon name="academic-cap"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                            <input pInputText formControlName="titleObtained" placeholder="Ej. Ingeniero de Sistemas"
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Semestre Actual</label>
+                        <p-inputNumber formControlName="currentSemester" placeholder="Ej. 8"
+                            class="premium-input-number" [min]="1" [max]="12"></p-inputNumber>
+                    </div>
+
+                    <!-- Geography Row -->
+                    <div
+                        class="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-4 gap-4 p-6 bg-slate-100/50 dark:bg-white/5 rounded-3xl border border-slate-200/50 dark:border-white/5">
+                        <div class="flex flex-col gap-2">
+                            <label class="premium-label">País</label>
+                            <p-select formControlName="countryId" [options]="countries()" optionLabel="name"
+                                optionValue="id" placeholder="Seleccione..." class="premium-select" appendTo="body"
+                                [filter]="true"></p-select>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="premium-label">Departamento</label>
+                            <p-select formControlName="stateId" [options]="educationRowOptions()[i]?.states || []"
+                                optionLabel="name" optionValue="id" placeholder="Seleccione..." class="premium-select"
+                                appendTo="body" [filter]="true"></p-select>
+                        </div>
+                        <div class="flex flex-col gap-2 text-primary">
+                            <label class="premium-label text-primary font-bold">Ciudad</label>
+                            <p-select formControlName="cityId" [options]="educationRowOptions()[i]?.cities || []"
+                                optionLabel="name" optionValue="id" placeholder="Seleccione..." class="premium-select"
+                                appendTo="body" [filter]="true"></p-select>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="premium-label">Teléfono</label>
+                            <div class="relative group">
+                                <app-icon name="phone"
+                                    class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10"></app-icon>
+                                <input pInputText formControlName="phone" placeholder="Ej. 601..."
+                                    style="padding-left: 3.5rem !important;"
+                                    class="premium-input premium-input-with-icon" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Año de Inicio</label>
+                        <p-inputNumber formControlName="startYear" placeholder="Ej. 2018" class="premium-input-number"
+                            [useGrouping]="false" [min]="1950" [max]="2030"></p-inputNumber>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Año de Fin</label>
+                        <p-inputNumber formControlName="endYear" placeholder="Ej. 2023" class="premium-input-number"
+                            [useGrouping]="false" [min]="1951" [max]="2030"></p-inputNumber>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Horas (Intensidad)</label>
+                        <p-inputNumber formControlName="hours" placeholder="Ej. 120"
+                            class="premium-input-number"></p-inputNumber>
+                    </div>
+
+                    <div class="lg:col-span-2 flex flex-col gap-2">
+                        <label class="premium-label text-primary">Adjuntar Archivo PDF (Certificación)</label>
+                        <div class="flex items-center gap-4">
+                            <p-fileUpload mode="basic" name="edu[]" accept="application/pdf" maxFileSize="5000000"
+                                [auto]="false" (onSelect)="onEducationFileSelected($event, i)"
+                                chooseLabel="Elegir Archivo PDF"
+                                styleClass="p-button-outlined p-button-primary rounded-xl text-xs"></p-fileUpload>
+
+                            <div *ngIf="edu.get('attachmentUrl')?.value"
+                                class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-fade-in">
+                                <app-icon name="check-circle" size="14" class="text-emerald-500"></app-icon>
+                                <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Archivo
+                                    Listo</span>
+                            </div>
+
+                            <span class="text-[10px] text-slate-400 italic">Máximo 1 archivo (PDF)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="educationsArray.length === 0"
+                class="text-center py-16 border-2 border-dashed border-slate-200 dark:border-white/5 rounded-[3rem] bg-slate-50/30 dark:bg-transparent transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                <div
+                    class="w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-4 text-slate-300 dark:text-slate-600 shadow-inner">
+                    <app-icon name="academic-cap" size="32"></app-icon>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">Sin
+                    formación registrada</p>
+                <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">Añade los estudios y certificaciones
+                    del colaborador.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- DIALOG EDUCACION REMOVED -->
+
+    <!-- SECTION 8: COMPLEMENTARIA Y SALUD -->
+    <div *ngIf="shouldShowSection('Información Complementaria y Salud')"
+        class="glass-section space-y-8 animate-fade-in">
+        <div class="flex items-center gap-5">
+            <div class="section-indicator bg-rose-500"></div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800 dark:text-white">Información Complementaria y Salud
+                </h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Datos clínicos
+                    preventivos y declaraciones de cumplimiento legal.</p>
+            </div>
+            <app-icon name="heart" class="ml-auto text-slate-200 dark:text-white/5" size="40"></app-icon>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Grupo Sanguíneo</label>
+                <p-select formControlName="bloodTypeId" [options]="bloodGroups()" optionLabel="name" optionValue="id"
+                    placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Factor RH</label>
+                <p-select formControlName="rhFactorId" [options]="rhFactors()" optionLabel="name" optionValue="id"
+                    placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Máximo Nivel Educativo</label>
+                <p-select formControlName="educationLevelId" [options]="educationLevels()" optionLabel="name"
+                    optionValue="id" placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2 justify-center pt-5">
+                <div
+                    class="p-5 bg-slate-100 dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 flex items-center justify-between group hover:border-primary/40 transition-all cursor-pointer shadow-inner">
+                    <div class="flex flex-col">
+                        <span
+                            class="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-[0.2em]">Persona
+                            PEP</span>
+                        <span class="text-[9px] text-slate-400 font-bold uppercase">Expuesta
+                            Políticamente</span>
+                    </div>
+                    <p-toggleSwitch formControlName="isPep"></p-toggleSwitch>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div
+        class="flex items-center justify-end gap-6 p-10 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/20 dark:border-slate-800 rounded-[3.5rem] shadow-2xl">
+        <button type="button" (click)="cancel.emit()"
+            class="px-10 py-4 text-slate-500 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest text-xs hover:bg-slate-100 dark:hover:bg-white/5 rounded-2xl transition-all active:scale-95">
+            Cancelar
+        </button>
+        <button type="button" (click)="onSubmit()" [disabled]="loading()"
+            class="px-12 py-5 bg-primary hover:bg-primary-600 text-white font-black uppercase tracking-widest text-xs shadow-[0_20px_40px_-15px_rgba(var(--primary-rgb),0.4)] rounded-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center gap-4 hover:scale-105">
+            <app-icon *ngIf="loading()" name="loader" class="animate-spin"></app-icon>
+            <span *ngIf="!loading()">{{ employeeId ? 'Actualizar Datos' : 'Guardar y Continuar' }}</span>
+            <span *ngIf="loading()">Procesando...</span>
+            <app-icon *ngIf="!loading()" name="arrow-right" size="16" class="animate-pulse"></app-icon>
+        </button>
+    </div>
+</div>
+
+<!-- Address Builder Component -->
+<app-address-builder [visible]="showAddressBuilder()" (visibleChange)="showAddressBuilder.set($event)"
+    (addressCompleted)="onAddressCompleted($event)" (addressClosed)="showAddressBuilder.set(false)">
+</app-address-builder>

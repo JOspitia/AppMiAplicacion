@@ -70,12 +70,14 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                                                 .requestMatchers("/api/auth/**", "/api/public/**", "/api/assets/**",
-                                                                "/api/companies/current", "/error", "/v3/api-docs/**",
+                                                                "/api/companies/current", "/api/rrhh/catalogs/**",
+                                                                "/error", "/v3/api-docs/**",
                                                                 "/swagger-ui/**", "/swagger-ui.html")
                                                 .permitAll()
                                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 .requestMatchers(org.springframework.http.HttpMethod.GET,
-                                                                "/api/private/assets/*/images/**")
+                                                                "/api/private/assets/company/*/images/**",
+                                                                "/api/private/assets/company/*/employees/*/photo/**")
                                                 .permitAll()
                                                 .anyRequest().authenticated())
                                 .headers(headers -> {
