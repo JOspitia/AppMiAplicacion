@@ -18,11 +18,17 @@ public class ClothingSize extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false, length = 10)
+    private String code;
+
     @Column(nullable = false, length = 50)
     private String name; // S, M, L, XL...
 
-    @Column(length = 20)
-    private String type; // SHIRT, PANTS, SHOES
+    @Column(nullable = false, length = 50)
+    private String category; // SHIRT, PANTS, SHOES
+
+    @Column(name = "sort_order")
+    private Integer sortOrder;
 
     @Builder.Default
     private Boolean active = true;

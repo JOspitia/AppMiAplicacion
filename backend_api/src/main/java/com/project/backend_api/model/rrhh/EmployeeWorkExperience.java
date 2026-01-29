@@ -44,6 +44,9 @@ public class EmployeeWorkExperience extends AuditableEntity {
     @Column(columnDefinition = "TEXT")
     private String functions;
 
+    @Column(name = "is_current")
+    private Boolean isCurrent;
+
     @Column(name = "attachment_url", length = 500)
     private String attachmentUrl;
 }

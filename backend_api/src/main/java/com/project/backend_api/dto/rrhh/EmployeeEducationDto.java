@@ -17,10 +17,13 @@ public class EmployeeEducationDto {
     private String titleObtained;
     private Integer currentSemester;
     private String phone;
+    private UUID countryId;
+    private UUID stateId;
     private UUID cityId;
     private String cityName;
     private Integer startYear;
     private Integer endYear;
     private Integer hours;
+    private Boolean isFinished;
     private String attachmentUrl;
 }

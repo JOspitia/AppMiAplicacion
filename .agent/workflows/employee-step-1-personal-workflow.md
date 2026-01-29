@@ -17,12 +17,13 @@ On initialization, the following catalogs are fetched from the backend:
 - **Genders**: `GenderService.getAll()`
 - **Relationships**: `CatalogService.getRelationships()` (Filtered by `isFamily` for Family Nucleus).
 - **Occupations**: `CatalogService.getOccupations()`
-- **Dynamic Catalogs** (New):
+- **Dynamic Catalogs** (Global/Standard):
     - **Marital Status**: `CatalogService.getMaritalStatuses()`
     - **Blood Types**: `CatalogService.getBloodTypes()`
     - **RH Factors**: `CatalogService.getRhFactors()`
     - **Experience Ranges**: `CatalogService.getExperienceRanges()`
-    - **Education Levels**: `CatalogService.getEducationLevels()`
+    - **Education Levels**: `CatalogService.getEducationLevels()` (Global - `public` schema)
+    - **Clothing Sizes**: `CatalogService.getActiveClothingSizes()` (Global - `public` schema)
 
 ### 2. Fields and Validations
 
@@ -52,11 +53,11 @@ On initialization, the following catalogs are fetched from the backend:
 | **Family** | `familyNucleus` | Array | Items: Name, Relationship, BirthDate, Occupation, Dependent. |
 | **Work Experience** | `workExperiences` | Array | Company, Position, Supervisor, Dates, **PDF Upload**. |
 | **Education** | `educations` | Array | **Inline Cards**: Level, Institution, Title, Year, **Location (Cascade)**, Phone, Hours, PDF. |
-| **Sizes** | `shirtSizeId`, `pantsSizeId`, `shoeSizeId` | Select | Optional |
+| **Sizes** | `shirtSizeId`, `pantsSizeId`, `shoeSizeId` | Select | Optional (Global Catalog) |
 | **Legal/Health** | `bloodTypeId`, `rhFactorId` | Select | Optional |
-| | `educationLevelId` | Select | Optional (Max Level) |
+| | `educationLevelId` | Select | Optional (Max Level - Global Catalog) |
 | | `isPep` | Boolean | Default False |
-| | `socioeconomicStratum` | Text | Optional |
+| | `socioeconomicStratum` | Select | Optional (Fijo: 1-6) |
 | | `militaryStatus` | Text | Optional |
 | | `experienceRangeId` | Select | Optional |
 | | `positionApplied` | Text | Optional |
@@ -74,7 +75,12 @@ On initialization, the following catalogs are fetched from the backend:
 - **Photo Upload**: Handled via `FileUploadModule`.
     - **MinIO**: Uploads to `companies/{cid}/employees/{eid}/photo/profile`.
     - **Optimization**: Backend resizes to 200x200px.
-- **Address Builder**: Uses `AddressBuilderComponent` for standardized formatting.
+- **UI Grid Structure**:
+    - Uses a 12-column grid system (`grid-cols-12`) to eliminate gaps.
+    - Fields are grouped logically (e.g., Identity row, Contact row, Location row) to ensure a balanced, premium appearance.
+- **Address Builder**: 
+    - Uses `AddressBuilderComponent` for standardized formatting.
+    - **UI Fix**: Edit button height perfectly matched to the input (`h-[52px]`) with centered icons.
 - **PDF Uploads**:
     - **Work Experience**: `companies/{cid}/employees/{eid}/work_experience/certification_{timestamp}.pdf`
     - **Education**: `companies/{cid}/employees/{eid}/education/education_{timestamp}.pdf`

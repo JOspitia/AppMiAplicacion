@@ -169,6 +169,11 @@ public class Employee extends AuditableEntity {
     @Builder.Default
     private List<EmployeeEducation> educations = new ArrayList<>();
 
+    // --- References ---
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<EmployeeReference> references = new ArrayList<>();
+
     // --- Additional / Dotation ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shirt_size_id")
@@ -255,6 +260,16 @@ public class Employee extends AuditableEntity {
     public void removeEducation(EmployeeEducation education) {
         educations.remove(education);
         education.setEmployee(null);
+    }
+
+    public void addReference(EmployeeReference reference) {
+        references.add(reference);
+        reference.setEmployee(this);
+    }
+
+    public void removeReference(EmployeeReference reference) {
+        references.remove(reference);
+        reference.setEmployee(null);
     }
 
     @PrePersist

@@ -91,10 +91,9 @@ public class EmployeeService {
         updateFamilyNucleus(saved, dto.getFamilyNucleus());
         updateWorkExperiences(saved, dto.getWorkExperiences());
         updateEducations(saved, dto.getEducations());
+        updateReferences(saved, dto.getReferences());
 
-        saved = employeeRepository.save(saved);
-
-        return toPersonalStepDto(saved);
+        return toPersonalStepDto(employeeRepository.save(saved));
     }
 
     @Transactional
@@ -109,6 +108,7 @@ public class EmployeeService {
         updateFamilyNucleus(employee, dto.getFamilyNucleus());
         updateWorkExperiences(employee, dto.getWorkExperiences());
         updateEducations(employee, dto.getEducations());
+        updateReferences(employee, dto.getReferences());
 
         Employee saved = employeeRepository.save(employee);
         return toPersonalStepDto(saved);
@@ -324,6 +324,7 @@ public class EmployeeService {
                 exp.setStartDate(dto.getStartDate());
                 exp.setEndDate(dto.getEndDate());
                 exp.setFunctions(dto.getFunctions());
+                exp.setIsCurrent(dto.getIsCurrent() != null ? dto.getIsCurrent() : false);
 
                 String attachmentUrl = dto.getAttachmentUrl();
                 if (attachmentUrl != null && attachmentUrl.startsWith("data:application/pdf")) {
@@ -373,9 +374,10 @@ public class EmployeeService {
                 edu.setStartYear(dto.getStartYear());
                 edu.setEndYear(dto.getEndYear());
                 edu.setHours(dto.getHours());
+                edu.setIsFinished(dto.getIsFinished() != null ? dto.getIsFinished() : true);
 
                 String attachmentUrl = dto.getAttachmentUrl();
-                if (attachmentUrl != null && attachmentUrl.startsWith("data:application/pdf")) {
+                if (attachmentUrl != null && attachmentUrl.startsWith("data:")) {
                     String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
                     String fileNamePrefix = "education_" + timestamp + "_idx" + i;
 
@@ -497,6 +499,7 @@ public class EmployeeService {
                         .endDate(w.getEndDate())
                         .functions(w.getFunctions())
                         .attachmentUrl(w.getAttachmentUrl())
+                        .isCurrent(w.getIsCurrent())
                         .build()).collect(Collectors.toList()))
                 .educations(e.getEducations().stream().map(edu -> EmployeeEducationDto.builder()
                         .id(edu.getId())
@@ -507,14 +510,69 @@ public class EmployeeService {
                         .titleObtained(edu.getTitleObtained())
                         .currentSemester(edu.getCurrentSemester())
                         .phone(edu.getPhone())
+                        .countryId(edu.getCity() != null && edu.getCity().getState() != null
+                                && edu.getCity().getState().getCountry() != null
+                                        ? edu.getCity().getState().getCountry().getId()
+                                        : null)
+                        .stateId(edu.getCity() != null && edu.getCity().getState() != null
+                                ? edu.getCity().getState().getId()
+                                : null)
                         .cityId(edu.getCity() != null ? edu.getCity().getId() : null)
                         .cityName(edu.getCity() != null ? edu.getCity().getName() : null)
                         .startYear(edu.getStartYear())
                         .endYear(edu.getEndYear())
                         .hours(edu.getHours())
+                        .isFinished(edu.getIsFinished())
                         .attachmentUrl(edu.getAttachmentUrl())
+                        .build()).collect(Collectors.toList()))
+                .references(e.getReferences().stream().map(ref -> EmployeeReferenceDto.builder()
+                        .id(ref.getId())
+                        .employeeId(e.getId())
+                        .referenceType(ref.getReferenceType())
+                        .name(ref.getName())
+                        .occupation(ref.getOccupation())
+                        .company(ref.getCompany())
+                        .phone(ref.getPhone())
+                        .mobile(ref.getMobile())
+                        .attachmentUrl(ref.getAttachmentUrl())
                         .build()).collect(Collectors.toList()))
                 .active(e.getActive())
                 .build();
+    }
+
+    private void updateReferences(Employee employee, List<EmployeeReferenceDto> dtos) {
+        employee.getReferences().clear();
+        if (dtos != null) {
+            for (int i = 0; i < dtos.size(); i++) {
+                EmployeeReferenceDto dto = dtos.get(i);
+                EmployeeReference ref = new EmployeeReference();
+
+                ref.setReferenceType(dto.getReferenceType());
+                ref.setName(dto.getName());
+                ref.setOccupation(dto.getOccupation());
+                ref.setCompany(dto.getCompany());
+                ref.setPhone(dto.getPhone());
+                ref.setMobile(dto.getMobile());
+
+                String attachmentUrl = dto.getAttachmentUrl();
+                if (attachmentUrl != null && attachmentUrl.startsWith("data:")) {
+                    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                    String fileNamePrefix = "reference_" + timestamp + "_idx" + i;
+
+                    String newUrl = minioService.uploadEmployeeFile(
+                            employee.getCompany().getId(),
+                            employee.getId(),
+                            "reference",
+                            fileNamePrefix,
+                            attachmentUrl,
+                            false);
+                    ref.setAttachmentUrl(newUrl);
+                } else {
+                    ref.setAttachmentUrl(attachmentUrl);
+                }
+
+                employee.addReference(ref);
+            }
+        }
     }
 }

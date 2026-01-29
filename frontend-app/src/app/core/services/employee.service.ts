@@ -49,6 +49,7 @@ export interface EmployeePersonalStepDto {
     familyNucleus?: any[];
     workExperiences?: any[];
     educations?: any[];
+    references?: any[];
     bankName?: string;
     bankAccountType?: string;
     bankAccountNumber?: string;

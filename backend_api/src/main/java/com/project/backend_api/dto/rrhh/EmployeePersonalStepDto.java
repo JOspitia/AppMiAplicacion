@@ -83,5 +83,8 @@ public class EmployeePersonalStepDto {
     // Education
     private List<EmployeeEducationDto> educations;
 
+    // References
+    private List<EmployeeReferenceDto> references;
+
     private Boolean active;
 }

@@ -18,5 +18,6 @@ public class EmployeeWorkExperienceDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private String functions;
+    private Boolean isCurrent;
     private String attachmentUrl;
 }

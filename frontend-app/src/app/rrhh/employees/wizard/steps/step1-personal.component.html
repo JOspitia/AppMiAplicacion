@@ -276,8 +276,9 @@
             <app-icon name="mail" class="ml-auto text-slate-200 dark:text-white/5" size="40"></app-icon>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="flex flex-col gap-2">
+        <div class="grid grid-cols-12 gap-8">
+            <!-- Emails Row (6+6) -->
+            <div class="col-span-12 md:col-span-6 flex flex-col gap-2">
                 <label class="premium-label">Email Personal</label>
                 <div class="relative border-input">
                     <app-icon name="mail"
@@ -286,7 +287,7 @@
                         style="padding-left: 3.5rem !important;" class="premium-input premium-input-with-icon" />
                 </div>
             </div>
-            <div class="flex flex-col gap-2">
+            <div class="col-span-12 md:col-span-6 flex flex-col gap-2">
                 <label class="premium-label">Email Corporativo</label>
                 <div class="relative border-input">
                     <app-icon name="mail"
@@ -295,9 +296,9 @@
                         style="padding-left: 3.5rem !important;" class="premium-input premium-input-with-icon" />
                 </div>
             </div>
-            <div class="lg:col-span-1"></div>
 
-            <div class="flex flex-col gap-2">
+            <!-- Phones Row (4+4+4) -->
+            <div class="col-span-12 md:col-span-4 flex flex-col gap-2">
                 <label class="premium-label">Celular Movil *</label>
                 <div class="relative border-input">
                     <app-icon name="phone"
@@ -306,7 +307,7 @@
                         style="padding-left: 3.5rem !important;" class="premium-input premium-input-with-icon" />
                 </div>
             </div>
-            <div class="flex flex-col gap-2">
+            <div class="col-span-12 md:col-span-4 flex flex-col gap-2">
                 <label class="premium-label">Teléfono Fijo</label>
                 <div class="relative border-input">
                     <app-icon name="phone"
@@ -315,7 +316,7 @@
                         style="padding-left: 3.5rem !important;" class="premium-input premium-input-with-icon" />
                 </div>
             </div>
-            <div class="flex flex-col gap-2">
+            <div class="col-span-12 md:col-span-4 flex flex-col gap-2">
                 <label class="premium-label">Teléfono Alterno</label>
                 <div class="relative border-input">
                     <app-icon name="phone"
@@ -325,56 +326,55 @@
                 </div>
             </div>
 
-            <div class="col-span-full space-y-8 pt-8 border-t border-slate-100 dark:border-white/5">
-                <div class="flex flex-col gap-3">
-                    <label class="premium-label">Dirección Física de Residencia *</label>
-                    <div class="flex gap-4">
-                        <div class="relative border-input flex-1">
-                            <app-icon name="map-pin"
-                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500"></app-icon>
-                            <input pInputText formControlName="address" readonly (click)="showAddressBuilder.set(true)"
-                                placeholder="Haz clic para construir la dirección..."
-                                style="padding-left: 3.5rem !important;"
-                                class="premium-input premium-input-with-icon cursor-pointer" />
-                        </div>
-                        <button type="button" (click)="showAddressBuilder.set(true)"
-                            class="p-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-2xl hover:text-primary transition-all active:scale-95 hover:bg-white dark:hover:bg-white/10 shadow-sm group">
-                            <app-icon name="edit" size="20"
-                                class="group-hover:scale-110 transition-transform"></app-icon>
-                        </button>
+            <!-- Address Builder (Full Width) -->
+            <div class="col-span-12 flex flex-col gap-2">
+                <label class="premium-label">Dirección Física de Residencia *</label>
+                <div class="flex gap-3 items-stretch h-[52px]">
+                    <div class="relative flex-1 h-full">
+                        <app-icon name="map-pin"
+                            class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 z-10"></app-icon>
+                        <input pInputText formControlName="address" readonly (click)="showAddressBuilder.set(true)"
+                            placeholder="Haz clic para construir la dirección..."
+                            style="padding-left: 3.5rem !important;"
+                            class="premium-input premium-input-with-icon cursor-pointer w-full h-full" />
                     </div>
+                    <button type="button" (click)="showAddressBuilder.set(true)"
+                        class="px-5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-2xl hover:text-primary transition-all active:scale-95 hover:bg-white dark:hover:bg-white/10 shadow-sm group flex items-center justify-center h-full">
+                        <app-icon name="edit" size="18" class="group-hover:scale-110 transition-transform"></app-icon>
+                    </button>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div class="flex flex-col gap-2">
-                        <label class="premium-label">País Residencia</label>
-                        <p-select formControlName="residenceCountryId" [options]="countries()" optionLabel="name"
-                            optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
-                            appendTo="body"></p-select>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="premium-label">Departamento</label>
-                        <p-select formControlName="residenceStateId" [options]="residenceStates()" optionLabel="name"
-                            optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
-                            appendTo="body"></p-select>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="premium-label">Ciudad de Residencia</label>
-                        <p-select formControlName="residenceCityId" [options]="residenceCities()" optionLabel="name"
-                            optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
-                            appendTo="body"></p-select>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="premium-label">Barrio</label>
-                        <input pInputText formControlName="residenceNeighborhood" placeholder="Ej. El Poblado"
-                            class="premium-input" />
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="premium-label">Estrato Socioeconómico</label>
-                        <p-select formControlName="socioeconomicStratum" [options]="['1', '2', '3', '4', '5', '6']"
-                            placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
-                    </div>
-                </div>
+            <!-- Location Details Row (3+3+3+3) -->
+            <div class="col-span-12 md:col-span-3 lg:col-span-3 flex flex-col gap-2">
+                <label class="premium-label">País Residencia</label>
+                <p-select formControlName="residenceCountryId" [options]="countries()" optionLabel="name"
+                    optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
+                    appendTo="body"></p-select>
+            </div>
+            <div class="col-span-12 md:col-span-3 lg:col-span-3 flex flex-col gap-2">
+                <label class="premium-label">Departamento</label>
+                <p-select formControlName="residenceStateId" [options]="residenceStates()" optionLabel="name"
+                    optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
+                    appendTo="body"></p-select>
+            </div>
+            <div class="col-span-12 md:col-span-3 lg:col-span-3 flex flex-col gap-2">
+                <label class="premium-label">Ciudad de Residencia</label>
+                <p-select formControlName="residenceCityId" [options]="residenceCities()" optionLabel="name"
+                    optionValue="id" [filter]="true" placeholder="Seleccione..." class="premium-select"
+                    appendTo="body"></p-select>
+            </div>
+            <div class="col-span-12 md:col-span-3 lg:col-span-3 flex flex-col gap-2">
+                <label class="premium-label">Barrio</label>
+                <input pInputText formControlName="residenceNeighborhood" placeholder="Ej. El Poblado"
+                    class="premium-input" />
+            </div>
+
+            <!-- Extra Row for Stratum -->
+            <div class="col-span-12 md:col-span-3 flex flex-col gap-2">
+                <label class="premium-label">Estrato Socioeconómico</label>
+                <p-select formControlName="socioeconomicStratum" [options]="['1', '2', '3', '4', '5', '6']"
+                    placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
             </div>
         </div>
     </div>
@@ -523,17 +523,24 @@
                             optionValue="id" placeholder="Seleccione..." class="premium-select"
                             appendTo="body"></p-select>
                     </div>
-                    <div class="flex flex-col gap-2 justify-center pt-5">
-                        <div
-                            class="p-5 bg-slate-100 dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 flex items-center justify-between group-hover:border-primary/40 transition-all cursor-pointer shadow-inner">
-                            <div class="flex flex-col">
-                                <span
-                                    class="text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Dependiente</span>
-                                <span
-                                    class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Beneficiario
-                                    directo</span>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Dependiente</label>
+                        <div class="h-11 w-full rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 flex items-center justify-between px-4 cursor-pointer hover:border-primary transition-all duration-300 group"
+                            (click)="toggleFamilyDependent(i)">
+
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold uppercase tracking-wide transition-colors"
+                                    [ngClass]="member.get('isDependent')?.value ? 'text-emerald-500' : 'text-slate-400 dark:text-slate-500'">
+                                    {{ member.get('isDependent')?.value ? 'SÍ' : 'NO' }}
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter ml-2"
+                                    *ngIf="member.get('isDependent')?.value">
+                                    Beneficiario directo
+                                </span>
                             </div>
-                            <p-toggleSwitch formControlName="isDependent"></p-toggleSwitch>
+
+                            <p-toggleSwitch formControlName="isDependent" styleClass="scale-75"
+                                (click)="$event.stopPropagation()"></p-toggleSwitch>
                         </div>
                     </div>
                 </div>
@@ -630,6 +637,26 @@
                         <p-datePicker formControlName="endDate" dateFormat="dd/mm/yy" [showIcon]="true"
                             placeholder="DD/MM/YYYY" appendTo="body" styleClass="w-full"></p-datePicker>
                     </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Trabaja Actualmente</label>
+                        <div class="h-11 w-full rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 flex items-center justify-between px-4 cursor-pointer hover:border-primary transition-all duration-300 group"
+                            (click)="toggleWorkExpCurrent(i)">
+
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold uppercase tracking-wide transition-colors"
+                                    [ngClass]="exp.get('isCurrent')?.value ? 'text-primary' : 'text-slate-400 dark:text-slate-500'">
+                                    {{ exp.get('isCurrent')?.value ? 'SÍ' : 'NO' }}
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter ml-2"
+                                    *ngIf="exp.get('isCurrent')?.value">
+                                    Empleo Actual
+                                </span>
+                            </div>
+
+                            <p-toggleSwitch formControlName="isCurrent" styleClass="scale-75"
+                                (click)="$event.stopPropagation()"></p-toggleSwitch>
+                        </div>
+                    </div>
                     <div class="lg:col-span-2 flex flex-col gap-2">
                         <label class="premium-label">Funciones</label>
                         <textarea pInputTextarea formControlName="functions" rows="3"
@@ -645,10 +672,20 @@
                                 styleClass="p-button-outlined p-button-primary rounded-xl text-xs"></p-fileUpload>
 
                             <div *ngIf="exp.get('attachmentUrl')?.value"
-                                class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-fade-in">
-                                <app-icon name="check-circle" size="14" class="text-emerald-500"></app-icon>
-                                <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Archivo
-                                    Listo</span>
+                                class="flex items-center gap-2 animate-fade-in">
+                                <div
+                                    class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                                    <app-icon name="check-circle" size="14" class="text-emerald-500"></app-icon>
+                                    <span
+                                        class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Archivo
+                                        Listo</span>
+                                </div>
+
+                                <button type="button" (click)="viewFile(exp.get('attachmentUrl')?.value)"
+                                    pTooltip="Ver documento" tooltipPosition="top"
+                                    class="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-500 dark:text-slate-400 rounded-lg transition-colors">
+                                    <app-icon name="eye" size="14"></app-icon>
+                                </button>
                             </div>
 
                             <span class="text-[10px] text-slate-400 italic">Máximo 1 archivo (PDF)</span>
@@ -733,6 +770,7 @@
                             class="premium-input-number" [min]="1" [max]="12"></p-inputNumber>
                     </div>
 
+
                     <!-- Geography Row -->
                     <div
                         class="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-4 gap-4 p-6 bg-slate-100/50 dark:bg-white/5 rounded-3xl border border-slate-200/50 dark:border-white/5">
@@ -778,10 +816,28 @@
                             [useGrouping]="false" [min]="1951" [max]="2030"></p-inputNumber>
                     </div>
 
-                    <div class="flex flex-col gap-2">
+                    <div class="flex flex-col gap-2 ">
                         <label class="premium-label">Horas (Intensidad)</label>
                         <p-inputNumber formControlName="hours" placeholder="Ej. 120"
                             class="premium-input-number"></p-inputNumber>
+                    </div>
+
+
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Estado</label>
+                        <div class="h-11 w-full rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 flex items-center justify-between px-4 cursor-pointer hover:border-primary transition-all duration-300 group"
+                            (click)="toggleEducationFinished(i)">
+
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold uppercase tracking-wide transition-colors"
+                                    [ngClass]="edu.get('isFinished')?.value ? 'text-emerald-500' : 'text-slate-400 dark:text-slate-500'">
+                                    {{ edu.get('isFinished')?.value ? 'FINALIZADO' : 'EN CURSO' }}
+                                </span>
+                            </div>
+
+                            <p-toggleSwitch formControlName="isFinished" styleClass="scale-75"
+                                (click)="$event.stopPropagation()"></p-toggleSwitch>
+                        </div>
                     </div>
 
                     <div class="lg:col-span-2 flex flex-col gap-2">
@@ -793,10 +849,20 @@
                                 styleClass="p-button-outlined p-button-primary rounded-xl text-xs"></p-fileUpload>
 
                             <div *ngIf="edu.get('attachmentUrl')?.value"
-                                class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-fade-in">
-                                <app-icon name="check-circle" size="14" class="text-emerald-500"></app-icon>
-                                <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Archivo
-                                    Listo</span>
+                                class="flex items-center gap-2 animate-fade-in">
+                                <div
+                                    class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                                    <app-icon name="check-circle" size="14" class="text-emerald-500"></app-icon>
+                                    <span
+                                        class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Archivo
+                                        Listo</span>
+                                </div>
+
+                                <button type="button" (click)="viewFile(edu.get('attachmentUrl')?.value)"
+                                    pTooltip="Ver documento" tooltipPosition="top"
+                                    class="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-500 dark:text-slate-400 rounded-lg transition-colors">
+                                    <app-icon name="eye" size="14"></app-icon>
+                                </button>
                             </div>
 
                             <span class="text-[10px] text-slate-400 italic">Máximo 1 archivo (PDF)</span>
@@ -821,6 +887,140 @@
 
 
     <!-- DIALOG EDUCACION REMOVED -->
+
+    <!-- SECTION 7: REFERENCIAS -->
+    <div *ngIf="shouldShowSection('Referencias')" class="glass-section space-y-8 animate-fade-in">
+        <div class="flex items-center gap-5">
+            <div class="section-indicator bg-purple-500"></div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800 dark:text-white">Referencias</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Registro de contactos
+                    de
+                    referencia personal, laboral y familiar.</p>
+            </div>
+            <button type="button" (click)="addReference()"
+                class="ml-auto flex items-center gap-3 px-6 py-3 bg-primary text-white hover:bg-primary-600 rounded-2xl transition-all font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95">
+                <app-icon name="plus" size="16"></app-icon>
+                Añadir Referencia
+            </button>
+            <app-icon name="user-group" class="text-slate-200 dark:text-white/5" size="40"></app-icon>
+        </div>
+
+        <div formArrayName="references" class="space-y-8">
+            <div *ngFor="let ref of referencesArray.controls; let i = index" [formGroupName]="i"
+                class="relative p-8 bg-slate-50/50 dark:bg-white/5 rounded-[2.5rem] border border-slate-200 dark:border-white/10 animate-fade-in group">
+
+                <button type="button" (click)="removeReference(i)"
+                    class="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all opacity-0 group-hover:opacity-100 z-30">
+                    <app-icon name="x" size="18"></app-icon>
+                </button>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Tipo de Referencia *</label>
+                        <p-select formControlName="referenceType" [options]="referenceTypes()" optionLabel="label"
+                            optionValue="value" placeholder="Seleccione..." class="premium-select" appendTo="body">
+                        </p-select>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Nombre Completo *</label>
+                        <div class="relative group">
+                            <app-icon name="user"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10">
+                            </app-icon>
+                            <input pInputText formControlName="name" placeholder="Ej. Juan Pérez"
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Cargo / Título</label>
+                        <div class="relative group">
+                            <app-icon name="briefcase"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10">
+                            </app-icon>
+                            <input pInputText formControlName="occupation" placeholder="Ej. Gerente de Ventas"
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Empresa / Institución</label>
+                        <div class="relative group">
+                            <app-icon name="building"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10">
+                            </app-icon>
+                            <input pInputText formControlName="company" placeholder="Ej. Tech Solutions S.A."
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Teléfono Fijo</label>
+                        <div class="relative group">
+                            <app-icon name="phone"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10">
+                            </app-icon>
+                            <input pInputText formControlName="phone" placeholder="Ej. +57 601..."
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Celular *</label>
+                        <div class="relative group">
+                            <app-icon name="pi-mobile"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors z-10">
+                            </app-icon>
+                            <input pInputText formControlName="mobile" placeholder="Ej. +57 300..."
+                                style="padding-left: 3.5rem !important;"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 flex flex-col gap-2">
+                        <label class="premium-label text-primary">Adjuntar Archivo PDF (Carta de Referencia)</label>
+                        <div class="flex items-center gap-4">
+                            <p-fileUpload #fubauto mode="basic" name="demo[]" accept="application/pdf"
+                                maxFileSize="5000000" [auto]="false" (onSelect)="onReferenceFileSelected($event, i)"
+                                chooseLabel="Elegir Archivo PDF"
+                                styleClass="p-button-outlined p-button-primary rounded-xl text-xs"></p-fileUpload>
+
+                            <div *ngIf="ref.get('attachmentUrl')?.value"
+                                class="flex items-center gap-2 animate-fade-in">
+                                <div
+                                    class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                                    <app-icon name="check-circle" size="14" class="text-emerald-500"></app-icon>
+                                    <span
+                                        class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Archivo
+                                        Listo</span>
+                                </div>
+
+                                <button type="button" (click)="viewFile(ref.get('attachmentUrl')?.value)"
+                                    pTooltip="Ver documento" tooltipPosition="top"
+                                    class="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-500 dark:text-slate-400 rounded-lg transition-colors">
+                                    <app-icon name="eye" size="14"></app-icon>
+                                </button>
+                            </div>
+
+                            <span class="text-[10px] text-slate-400 italic">Máximo 1 archivo (PDF)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="referencesArray.length === 0"
+                class="text-center py-16 border-2 border-dashed border-slate-200 dark:border-white/5 rounded-[3rem] bg-slate-50/30 dark:bg-transparent transition-colors hover:bg-slate-50 dark:hover:bg-white/5">
+                <div
+                    class="w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-4 text-slate-300 dark:text-slate-600 shadow-inner">
+                    <app-icon name="user-group" size="32"></app-icon>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">Sin
+                    referencias registradas</p>
+                <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">Añade contactos de referencia personal,
+                    laboral o familiar.</p>
+            </div>
+        </div>
+    </div>
 
     <!-- SECTION 8: COMPLEMENTARIA Y SALUD -->
     <div *ngIf="shouldShowSection('Información Complementaria y Salud')"
@@ -853,17 +1053,24 @@
                     optionValue="id" placeholder="Seleccione..." class="premium-select" appendTo="body"></p-select>
             </div>
 
-            <div class="flex flex-col gap-2 justify-center pt-5">
-                <div
-                    class="p-5 bg-slate-100 dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 flex items-center justify-between group hover:border-primary/40 transition-all cursor-pointer shadow-inner">
-                    <div class="flex flex-col">
-                        <span
-                            class="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-[0.2em]">Persona
-                            PEP</span>
-                        <span class="text-[9px] text-slate-400 font-bold uppercase">Expuesta
-                            Políticamente</span>
+            <div class="flex flex-col gap-2">
+                <label class="premium-label">Persona PEP</label>
+                <div class="h-11 w-full rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 flex items-center justify-between px-4 cursor-pointer hover:border-primary transition-all duration-300 group"
+                    (click)="toggleIsPep()">
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold uppercase tracking-wide transition-colors"
+                            [ngClass]="form.get('isPep')?.value ? 'text-primary' : 'text-slate-400 dark:text-slate-500'">
+                            {{ form.get('isPep')?.value ? 'SÍ' : 'NO' }}
+                        </span>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter ml-2"
+                            *ngIf="form.get('isPep')?.value">
+                            Expuesta Políticamente
+                        </span>
                     </div>
-                    <p-toggleSwitch formControlName="isPep"></p-toggleSwitch>
+
+                    <p-toggleSwitch formControlName="isPep" styleClass="scale-75"
+                        (click)="$event.stopPropagation()"></p-toggleSwitch>
                 </div>
             </div>
         </div>

@@ -79,6 +79,7 @@ export class EmployeePersonalFormComponent implements OnInit {
         'Núcleo Familiar',
         'Experiencia Laboral',
         'Formación Académica',
+        'Referencias',
         'Información Complementaria y Salud'
     ];
 
@@ -99,6 +100,11 @@ export class EmployeePersonalFormComponent implements OnInit {
     familyRelationships = signal<Relationship[]>([]);
     occupations = signal<Occupation[]>([]);
     educationLevels = signal<EducationLevel[]>([]);
+    referenceTypes = signal<{ label: string, value: string }[]>([
+        { label: 'Laboral', value: 'LABORAL' },
+        { label: 'Personal', value: 'PERSONAL' },
+        { label: 'Familiar', value: 'FAMILIAR' }
+    ]);
 
     // Dependent Catalogs
     idIssueStates = signal<State[]>([]);
@@ -180,6 +186,9 @@ export class EmployeePersonalFormComponent implements OnInit {
             // Work Experience
             workExperiences: this.fb.array([]),
 
+            // References
+            references: this.fb.array([]),
+
             // Bank
             bankName: [''],
             bankAccountType: [''],
@@ -201,6 +210,7 @@ export class EmployeePersonalFormComponent implements OnInit {
     }
 
     get educationsArray() { return this.form.get('educations') as FormArray; }
+    get referencesArray() { return this.form.get('references') as FormArray; }
 
     // Row-specific options for cascades. simple map index -> {states, cities}
     educationRowOptions = signal<{ states: State[], cities: City[] }[]>([]);
@@ -219,6 +229,7 @@ export class EmployeePersonalFormComponent implements OnInit {
             endYear: [data.endYear || null],
             titleObtained: [data.titleObtained || '', Validators.required],
             hours: [data.hours || null],
+            isFinished: [data.isFinished !== undefined ? data.isFinished : true],
             attachmentUrl: [data.attachmentUrl || '']
         });
 
@@ -301,6 +312,30 @@ export class EmployeePersonalFormComponent implements OnInit {
         this.educationRowOptions.update(opts => opts.filter((_, i) => i !== index));
     }
 
+    toggleEducationFinished(index: number) {
+        const control = this.educationsArray.at(index).get('isFinished');
+        if (control) {
+            control.setValue(!control.value);
+            control.markAsDirty();
+        }
+    }
+
+    toggleFamilyDependent(index: number) {
+        const control = this.familyNucleusArray.at(index).get('isDependent');
+        if (control) {
+            control.setValue(!control.value);
+            control.markAsDirty();
+        }
+    }
+
+    toggleIsPep() {
+        const control = this.form.get('isPep');
+        if (control) {
+            control.setValue(!control.value);
+            control.markAsDirty();
+        }
+    }
+
     onEducationFileSelected(event: any, index: number) {
         const file = event.files ? event.files[0] : null;
         if (file) {
@@ -315,6 +350,51 @@ export class EmployeePersonalFormComponent implements OnInit {
                 });
             };
             reader.readAsDataURL(file);
+        }
+    }
+
+    // References Management
+    addReference(data: any = {}) {
+        const refGroup = this.fb.group({
+            id: [data.id || null],
+            referenceType: [data.referenceType || 'LABORAL', Validators.required],
+            name: [data.name || '', Validators.required],
+            occupation: [data.occupation || ''],
+            company: [data.company || ''],
+            phone: [data.phone || ''],
+            mobile: [data.mobile || '', Validators.required],
+            attachmentUrl: [data.attachmentUrl || '']
+        });
+
+        this.referencesArray.push(refGroup);
+    }
+
+    removeReference(index: number) {
+        this.referencesArray.removeAt(index);
+    }
+
+    onReferenceFileSelected(event: any, index: number) {
+        const file = event.files ? event.files[0] : null;
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e: any) => {
+                this.referencesArray.at(index).get('attachmentUrl')?.setValue(e.target.result);
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'PDF Cargado',
+                    detail: 'El archivo se procesará al guardar el formulario.',
+                    life: 3000
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    toggleWorkExpCurrent(index: number) {
+        const control = this.workExperiencesArray.at(index).get('isCurrent');
+        if (control) {
+            control.setValue(!control.value);
+            control.markAsDirty();
         }
     }
 
@@ -429,7 +509,8 @@ export class EmployeePersonalFormComponent implements OnInit {
                 data.emergencyContacts?.forEach((c: any) => this.addEmergencyContact(c));
                 data.familyNucleus?.forEach((f: any) => this.addFamilyMember(f));
                 data.workExperiences?.forEach((w: any) => this.addWorkExperience(w));
-                data.educations?.forEach((e: any) => this.educationsArray.push(this.fb.group(e)));
+                data.educations?.forEach((e: any) => this.addEducation(e));
+                data.references?.forEach((r: any) => this.addReference(r));
             },
             complete: () => this.loading.set(false)
         });
@@ -479,6 +560,7 @@ export class EmployeePersonalFormComponent implements OnInit {
             startDate: [data.startDate ? new Date(data.startDate) : null, Validators.required],
             endDate: [data.endDate ? new Date(data.endDate) : null],
             functions: [data.functions || ''],
+            isCurrent: [data.isCurrent || false],
             attachmentUrl: [data.attachmentUrl || '']
         }));
     }
@@ -540,7 +622,8 @@ export class EmployeePersonalFormComponent implements OnInit {
             emergencyContacts: this.emergencyContactsArray.value,
             familyNucleus: this.familyNucleusArray.value,
             workExperiences: this.workExperiencesArray.value,
-            educations: this.educationsArray.value
+            educations: this.educationsArray.value,
+            references: this.referencesArray.value
         };
 
         const req = this.employeeId
@@ -564,5 +647,11 @@ export class EmployeePersonalFormComponent implements OnInit {
     onAddressCompleted(addr: string) {
         this.form.get('address')?.setValue(addr);
         this.showAddressBuilder.set(false);
+    }
+
+    viewFile(url: string | null) {
+        if (url) {
+            window.open(url, '_blank');
+        }
     }
 }

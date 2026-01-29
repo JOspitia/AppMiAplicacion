@@ -11,6 +11,11 @@ Este workflow define los estándares para mantener una base de datos robusta y u
 - **Idempotencia**: Garantiza que el comando `docker-compose up --build` pueda ejecutarse n veces sin fallos de migración.
 - **Constraints**: Define restricciones únicas (`UNIQUE`) necesarias para las cláusulas `ON CONFLICT` en inserciones de datos maestros.
 
+## 1.1 Catálogos Globales (Estrategia de Esquema)
+- **Public Schema**: Los catálogos que no son específicos por empresa (Ej: Niveles Educativos, Tallas, Factores RH) deben residir en el esquema `public`.
+- **Simplificación**: Estos catálogos no requieren `company_id`. Esto permite estandarizar la data base del sistema y simplifica las llaves foráneas globales.
+- **Migración**: Al mover catálogos de esquemas privados a `public`, asegurar que los IDs huérfanos en tablas transaccionales (como `employees`) sean limpiados o mapeados correctamente antes de recrear los `Constraints`.
+
 ## 2. Core Multi-Tenant
 - **Relaciones**: Mantener la integridad referencial en la tabla `security.user_company_roles`.
 - **Contexto**: Las peticiones de negocio deben estar filtradas por la cookie `companyContext`. El `JwtTokenFilter` extrae este valor en cada request.

@@ -7,7 +7,7 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "education_levels", schema = "business_rrhh")
+@Table(name = "education_levels", schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,9 +17,6 @@ public class EducationLevel extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "company_id", nullable = false)
-    private UUID companyId;
 
     @Column(nullable = false, length = 20)
     private String code;

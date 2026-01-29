@@ -52,6 +52,10 @@ public class EmployeeEducation extends AuditableEntity {
 
     private Integer hours;
 
+    @Column(name = "is_finished")
+    @Builder.Default
+    private Boolean isFinished = true;
+
     @Column(name = "attachment_url", length = 500)
     private String attachmentUrl;
 }
