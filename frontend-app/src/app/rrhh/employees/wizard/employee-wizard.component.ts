@@ -5,11 +5,15 @@ import { StepsModule } from 'primeng/steps';
 import { ToastModule } from 'primeng/toast';
 import { MenuItem, MessageService } from 'primeng/api';
 import { EmployeePersonalFormComponent } from './steps/step1-personal.component';
+import { EmployeeContractFormComponent } from './steps/step2-contract.component';
 
 @Component({
     selector: 'app-employee-wizard',
     standalone: true,
-    imports: [CommonModule, StepsModule, ToastModule, EmployeePersonalFormComponent],
+    imports: [
+        CommonModule, StepsModule, ToastModule,
+        EmployeePersonalFormComponent, EmployeeContractFormComponent
+    ],
     providers: [MessageService],
     template: `
     <div class="min-h-screen bg-slate-50/50 dark:bg-transparent pb-20">
@@ -32,11 +36,27 @@ import { EmployeePersonalFormComponent } from './steps/step1-personal.component'
            </app-employee-personal-form>
         </div>
 
-        <!-- Step 2: Contract (Placeholder) -->
-        <div *ngIf="activeIndex === 1" class="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700">
-            <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Paso 2: Contratación</h2>
-            <p class="text-slate-500 mt-2">Próximamente...</p>
-            <button (click)="activeIndex = 0" class="mt-4 text-primary font-bold hover:underline">Volver</button>
+        <!-- Step 2: Contract -->
+        <div *ngIf="activeIndex === 1">
+            <app-employee-contract-form
+                *ngIf="employeeId()"
+                [employeeId]="employeeId()!"
+                (next)="onContractSaved()"
+                (back)="activeIndex = 0">
+            </app-employee-contract-form>
+            <div *ngIf="!employeeId()" class="glass p-12 text-center rounded-3xl border border-white/10 shadow-xl">
+                <p class="text-slate-400">Debe completar la información personal antes de continuar.</p>
+                <button (click)="activeIndex = 0" class="mt-4 text-primary font-bold hover:underline flex items-center gap-2 mx-auto transition-all hover:scale-105 active:scale-95">
+                    <span class="pi pi-arrow-left"></span> Volver al Paso 1
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Jobs (Placeholder) -->
+        <div *ngIf="activeIndex === 2" class="glass p-20 text-center rounded-3xl border border-white/10 shadow-xl">
+            <h2 class="text-2xl font-bold text-white">Paso 3: Información Corporativa</h2>
+            <p class="text-slate-400 mt-2">Próximamente...</p>
+            <button (click)="activeIndex = 1" class="mt-4 text-primary font-bold hover:underline transition-all hover:scale-105 active:scale-95">Volver</button>
         </div>
       </div>
     </div>
@@ -62,17 +82,17 @@ export class EmployeeWizardComponent implements OnInit {
                 this.employeeId.set(id);
             }
         });
-
-        // Handle query params for step navigation if needed
     }
 
     onNext(createdId: string) {
         if (!this.employeeId()) {
             this.employeeId.set(createdId);
-            // Update URL without reload logic? Or just move to next step
-            // Ideally router.navigate to edit/id
         }
         this.activeIndex = 1;
+    }
+
+    onContractSaved() {
+        this.activeIndex = 2;
     }
 
     onCancel() {

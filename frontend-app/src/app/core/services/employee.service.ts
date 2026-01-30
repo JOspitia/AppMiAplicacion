@@ -64,6 +64,26 @@ export interface EmployeePersonalStepDto {
     active?: boolean;
 }
 
+export interface EmployeeContractStepDto {
+    employeeId?: string;
+    contractTypeId: string;
+    contractNumber: string;
+    startDate: string;
+    endDate?: string;
+    probationEndDate?: string;
+    workScheduleId: string;
+    comments?: string;
+}
+
+export interface EmployeeDocumentDto {
+    id: string;
+    documentTypeId: string;
+    documentTypeName: string;
+    fileName: string;
+    expirationDate?: string;
+    isUnified: boolean;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -89,5 +109,32 @@ export class EmployeeService {
 
     toggleActive(id: string): Observable<void> {
         return this.http.put<void>(`${this.apiUrl}/${id}/toggle-active`, {});
+    }
+
+    getContractData(id: string): Observable<EmployeeContractStepDto> {
+        return this.http.get<EmployeeContractStepDto>(`${this.apiUrl}/${id}/contract`);
+    }
+
+    getEmployeeDocuments(id: string): Observable<EmployeeDocumentDto[]> {
+        return this.http.get<EmployeeDocumentDto[]>(`${this.apiUrl}/${id}/documents`);
+    }
+
+    updateStep2(id: string, data: EmployeeContractStepDto, files: Map<string, File>, expiries: Map<string, string>, unifiedFile?: File): Observable<void> {
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(data));
+
+        files.forEach((file, typeId) => {
+            formData.append(`documents[${typeId}]`, file);
+            const expiry = expiries.get(typeId);
+            if (expiry) {
+                formData.append(`documentExpiry[${typeId}]`, expiry);
+            }
+        });
+
+        if (unifiedFile) {
+            formData.append('unifiedDocument', unifiedFile);
+        }
+
+        return this.http.post<void>(`${this.apiUrl}/${id}/step2`, formData);
     }
 }

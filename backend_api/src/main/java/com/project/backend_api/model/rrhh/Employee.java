@@ -208,6 +208,30 @@ public class Employee extends AuditableEntity {
     @Column(name = "position_applied", length = 150)
     private String positionApplied;
 
+    // --- Contract Information ---
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_type_id")
+    private ContractType contractType;
+
+    @Column(name = "contract_number", length = 100)
+    private String contractNumber;
+
+    @Column(name = "contract_start_date")
+    private LocalDate contractStartDate;
+
+    @Column(name = "contract_end_date")
+    private LocalDate contractEndDate;
+
+    @Column(name = "probation_end_date")
+    private LocalDate probationEndDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "work_schedule_id")
+    private WorkSchedule workSchedule;
+
+    @Column(name = "contract_comments", columnDefinition = "TEXT")
+    private String contractComments;
+
     // --- Financial ---
     @Column(name = "bank_name", length = 100)
     private String bankName;

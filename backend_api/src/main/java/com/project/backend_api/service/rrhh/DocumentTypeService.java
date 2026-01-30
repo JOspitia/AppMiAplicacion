@@ -94,7 +94,7 @@ public class DocumentTypeService {
         entity.setActive(dto.getActive());
 
         // Asignación automática de categoría 'RRHH'
-        categoryRepository.findByCodeAndCompanyId("RRHH", getCurrentCompanyId())
+        categoryRepository.findByCodeAndCompanyId("RRHH_DOCUMENT", getCurrentCompanyId())
                 .ifPresent(entity::setCategory);
     }
 

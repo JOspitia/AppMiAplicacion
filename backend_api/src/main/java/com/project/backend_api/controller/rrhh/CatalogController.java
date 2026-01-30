@@ -55,4 +55,19 @@ public class CatalogController {
     public ResponseEntity<List<ExperienceRangeDto>> getExperienceRanges() {
         return ResponseEntity.ok(catalogService.getActiveExperienceRanges());
     }
+
+    @GetMapping("/contract-types")
+    public ResponseEntity<List<ContractTypeDto>> getContractTypes() {
+        return ResponseEntity.ok(catalogService.getActiveContractTypes());
+    }
+
+    @GetMapping("/work-schedules")
+    public ResponseEntity<List<WorkScheduleDto>> getWorkSchedules() {
+        return ResponseEntity.ok(catalogService.getActiveWorkSchedules());
+    }
+
+    @GetMapping("/document-types/hr")
+    public ResponseEntity<List<DocumentTypeDto>> getHRDocumentTypes() {
+        return ResponseEntity.ok(catalogService.getHRDocumentTypes());
+    }
 }

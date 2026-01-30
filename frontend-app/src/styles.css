@@ -522,3 +522,46 @@ input.premium-input-with-icon,
 .premium-input-with-icon {
   padding-left: 3.5rem !important;
 }
+
+/* Premium Upload Button Fixes */
+.p-fileupload-basic .p-fileupload-filename,
+.p-fileupload-basic .p-fileupload-files,
+.p-fileupload-basic span:not(.p-button-label):not(.p-button-icon),
+.p-fileupload-basic-contents span:not(.p-button-label),
+.p-fileupload-row div:nth-child(2),
+.p-fileupload-choose~span,
+input[type="file"]::-webkit-file-upload-button {
+  display: none !important;
+}
+
+.p-fileupload-basic {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+
+
+.premium-upload-btn .p-button {
+  background: transparent !important;
+  border: none !important;
+  color: var(--primary-color) !important;
+  font-weight: 800 !important;
+  font-size: 0.75rem !important;
+  padding: 0 !important;
+  height: auto !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  transition: all 0.3s ease !important;
+}
+
+.premium-upload-btn .p-fileupload-choose {
+  padding: 0 !important;
+}
+
+.premium-upload-btn .p-fileupload-choose:hover {
+  background: transparent !important;
+  opacity: 0.8;
+}

@@ -48,6 +48,27 @@ export interface Occupation {
     active: boolean;
 }
 
+export interface ContractType {
+    id: string;
+    name: string;
+    hasEndDate: boolean;
+    defaultDuration?: number;
+    durationUnit?: string;
+}
+
+export interface WorkSchedule {
+    id: string;
+    name: string;
+}
+
+export interface DocumentType {
+    id: string;
+    name: string;
+    code: string;
+    isRequired: boolean;
+    requiresExpiration: boolean;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -89,5 +110,17 @@ export class CatalogService {
 
     getOccupationsGrouped(): Observable<Record<string, Occupation[]>> {
         return this.http.get<Record<string, Occupation[]>>(`${this.apiUrl}/occupations/grouped`);
+    }
+
+    getContractTypes(): Observable<ContractType[]> {
+        return this.http.get<ContractType[]>(`${this.apiUrl}/contract-types`);
+    }
+
+    getWorkSchedules(): Observable<WorkSchedule[]> {
+        return this.http.get<WorkSchedule[]>(`${this.apiUrl}/work-schedules`);
+    }
+
+    getHRDocumentTypes(): Observable<DocumentType[]> {
+        return this.http.get<DocumentType[]>(`${this.apiUrl}/document-types/hr`);
     }
 }

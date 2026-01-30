@@ -1,0 +1,307 @@
+<div class="space-y-10 pb-20 animate-fade-in">
+    <!-- Header Section -->
+    <div
+        class="relative overflow-hidden rounded-[3.5rem] bg-white/80 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-slate-800 shadow-2xl p-10 md:p-12 mb-8">
+        <div class="absolute top-0 right-0 p-12 opacity-[0.03] dark:opacity-[0.07] pointer-events-none">
+            <app-icon name="file-text" size="180"></app-icon>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+            <div
+                class="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center text-primary shadow-inner">
+                <app-icon name="file-text" size="40"></app-icon>
+            </div>
+            <div class="flex-1 text-center md:text-left space-y-2">
+                <span class="text-primary font-bold tracking-[0.4em] text-[10px] uppercase block">Fase 2 de la
+                    Vinculación</span>
+                <h1 class="text-4xl font-black text-slate-900 dark:text-white">Información del Contrato</h1>
+                <p class="text-slate-500 dark:text-slate-400 font-medium max-w-2xl">Define los términos legales, fechas
+                    y soportes del vínculo laboral. Estos datos son críticos para la liquidación de nómina y
+                    cumplimiento legal.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div *ngIf="successMessage() || errorMessage()" class="w-full animate-fade-in space-y-4">
+        <app-alert *ngIf="successMessage()" type="success" [message]="successMessage()" [autoHide]="6000"
+            (closed)="successMessage.set(null)"></app-alert>
+        <app-alert *ngIf="errorMessage()" type="error" [message]="errorMessage()" [autoHide]="8000"
+            (closed)="errorMessage.set(null)"></app-alert>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+        <!-- SECTION 1: TÉRMINOS Y CONDICIONES (Card 1) -->
+        <div class="lg:col-span-12">
+            <div class="glass-section space-y-10 h-full">
+                <div class="flex items-center gap-5">
+                    <div class="section-indicator"></div>
+                    <div>
+                        <h2 class="text-xl font-black text-slate-800 dark:text-white">Términos y Condiciones</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Estructura
+                            contractual y vigencia del empleo.</p>
+                    </div>
+                    <app-icon name="briefcase" class="ml-auto text-slate-200 dark:text-white/5" size="40"></app-icon>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Tipo de Contrato -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Tipo de Contrato *</label>
+                        <p-select [options]="contractTypes()" formControlName="contractTypeId" optionLabel="name"
+                            optionValue="id" placeholder="Seleccione un tipo" class="premium-select" appendTo="body">
+                        </p-select>
+                    </div>
+
+                    <!-- Número de Contrato -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Número de Contrato *</label>
+                        <div class="relative border-input">
+                            <app-icon name="hash"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500"></app-icon>
+                            <input pInputText formControlName="contractNumber" placeholder="Ej: CT-2024-001"
+                                class="premium-input premium-input-with-icon" />
+                        </div>
+                    </div>
+
+                    <!-- Fecha de Inicio -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Fecha de Inicio *</label>
+                        <p-datePicker formControlName="startDate" dateFormat="dd/mm/yy" [showIcon]="true"
+                            placeholder="DD/MM/YYYY" appendTo="body" styleClass="w-full"></p-datePicker>
+                    </div>
+
+                    <!-- Fecha de Fin -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Fecha de Fin</label>
+                        <p-datePicker formControlName="endDate" dateFormat="dd/mm/yy" [showIcon]="true"
+                            placeholder="Fecha de término" appendTo="body" styleClass="w-full"></p-datePicker>
+                    </div>
+
+                    <!-- Fin Periodo Prueba -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Fin de Periodo de Prueba</label>
+                        <p-datePicker formControlName="probationEndDate" dateFormat="dd/mm/yy" [showIcon]="true"
+                            placeholder="Fecha de evaluación" appendTo="body" styleClass="w-full"></p-datePicker>
+                    </div>
+
+                    <!-- Horario Laboral -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Horario Laboral *</label>
+                        <p-select [options]="workSchedules()" formControlName="workScheduleId" optionLabel="name"
+                            optionValue="id" placeholder="Asigna un horario" class="premium-select" appendTo="body">
+                        </p-select>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="md:col-span-2 flex flex-col gap-2">
+                        <label class="premium-label">Observaciones del Contrato</label>
+                        <textarea pInputTextarea formControlName="comments" rows="4" class="premium-input min-h-[120px]"
+                            placeholder="Detalles adicionales, cláusulas especiales, pactos extralegales..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: SOPORTES DOCUMENTALES (Card 2) -->
+        <div class="lg:col-span-12">
+            <div class="glass-section space-y-8 h-full flex flex-col">
+                <div class="flex items-center gap-5">
+                    <div class="section-indicator bg-pink-500"></div>
+                    <div>
+                        <h2 class="text-xl font-black text-slate-800 dark:text-white">Soportes Documentales</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Carga de
+                            archivos obligatorios.</p>
+                    </div>
+                    <app-icon name="upload-cloud" class="ml-auto text-pink-500/10" size="40"></app-icon>
+                </div>
+
+                <!-- Toggle Unified -->
+                <div class="p-6 rounded-3xl bg-primary/5 border border-primary/10 shadow-inner">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <p class="text-sm font-black text-slate-700 dark:text-white uppercase tracking-wider">
+                                Documento Unificado</p>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Un solo PDF con todos
+                                los soportes del contrato.</p>
+                        </div>
+                        <p-toggleSwitch [ngModel]="isUnified()" (ngModelChange)="toggleUnified()"
+                            [ngModelOptions]="{standalone: true}" styleClass="scale-90"></p-toggleSwitch>
+                    </div>
+                </div>
+
+                <!-- Unified Mode UI -->
+                <div *ngIf="isUnified()" class="flex-1 animate-fade-in flex flex-col justify-center gap-6">
+                    <!-- Warning Alert -->
+                    <div
+                        class="p-5 bg-amber-500/10 border border-amber-500/20 rounded-[2rem] flex items-start gap-4 animate-fade-in">
+                        <div
+                            class="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-500 shrink-0">
+                            <app-icon name="alert-triangle" size="20"></app-icon>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-amber-500 font-bold text-[10px] uppercase tracking-wider">Aviso de Proceso
+                                Unificado</h4>
+                            <p
+                                class="text-amber-600/80 dark:text-amber-400/80 text-[11px] leading-relaxed mt-1 font-medium">
+                                Al seleccionar este proceso, el sistema <b>no tomará en cuenta las fechas de
+                                    expiración</b> individuales. Verifique que el PDF contenga todos los soportes
+                                vigentes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div [ngClass]="{'!border-rose-500 ring-4 ring-rose-500/10': isUnifiedInvalid()}"
+                        class="relative group p-12 border-4 border-dashed border-slate-200 dark:border-white/5 rounded-[3rem] hover:border-primary/50 hover:bg-primary/5 transition-all duration-500 flex flex-col items-center justify-center text-center gap-6">
+                        <div
+                            class="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-[2rem] flex items-center justify-center text-slate-400 group-hover:text-primary group-hover:scale-110 transition-all duration-500">
+                            <app-icon name="file" size="40"></app-icon>
+                        </div>
+                        <div class="space-y-2">
+                            <h4 class="text-lg font-black text-slate-800 dark:text-white">Archivo PDF Unificado</h4>
+                            <p class="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em]">Formatos
+                                sugeridos: .pdf (Máx 20MB)</p>
+                        </div>
+
+                        <p-fileUpload #fubautoUnified mode="basic" name="unified[]" accept="application/pdf"
+                            maxFileSize="20000000" [auto]="false" (onSelect)="onUnifiedFileSelected($event)"
+                            chooseLabel="Cargar PDF Unificado" chooseIcon="pi pi-upload"
+                            styleClass="p-button-rounded p-button-primary px-8 py-4 shadow-xl shadow-primary/20 transition-all active:scale-95"></p-fileUpload>
+
+                        <!-- File Feedback -->
+                        <div *ngIf="unifiedFile() || getUnifiedDoc()"
+                            class="absolute -bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 bg-emerald-500 text-white rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in border-4 border-white dark:border-slate-900">
+                            <app-icon name="check-circle" size="16"></app-icon>
+                            <span class="text-xs font-black uppercase tracking-widest truncate max-w-[150px]">
+                                {{ unifiedFile()?.name || getUnifiedDoc()?.fileName }}
+                            </span>
+                            <button type="button" (click)="viewFile(unifiedFile() || getUnifiedDoc()?.fileName)"
+                                class="w-6 h-6 flex items-center justify-center hover:scale-125 transition-transform">
+                                <app-icon name="eye" size="14"></app-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Individual Mode UI -->
+                <div *ngIf="!isUnified()"
+                    class="flex-1 space-y-4 max-h-[550px] overflow-y-auto pr-4 custom-scrollbar lg:pr-2 animate-fade-in">
+
+                    <div *ngFor="let docType of documentTypes()"
+                        [ngClass]="{'!border-rose-500 ring-4 ring-rose-500/10': isDocTypeInvalid(docType.id)}"
+                        class="group p-5 bg-slate-50/50 dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 hover:border-primary/30 hover:bg-white dark:hover:bg-white/10 transition-all duration-300">
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-black text-slate-800 dark:text-white">{{ docType.name
+                                            }}</span>
+                                        <span *ngIf="docType.isRequired" class="text-rose-500 animate-pulse">*</span>
+                                    </div>
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{{
+                                        docType.code }}</span>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <p-fileUpload #fubautoIndividual mode="basic" name="individual[]"
+                                        accept="application/pdf" maxFileSize="5000000" [auto]="false"
+                                        (onSelect)="onIndividualFileSelected($event, docType.id)" chooseLabel="Cargar"
+                                        chooseIcon="pi pi-plus" styleClass="premium-upload-btn"></p-fileUpload>
+
+                                    <!-- Selected/Existing File Info -->
+                                    <div *ngIf="individualFiles.has(docType.id) || getExistingDoc(docType.id)"
+                                        class="flex flex-col items-end gap-2 animate-fade-in">
+                                        <div class="flex items-center gap-2">
+                                            <div
+                                                class="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                                                <app-icon name="check-circle" size="14"
+                                                    class="text-emerald-500"></app-icon>
+                                                <span
+                                                    class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest truncate max-w-[120px]">
+                                                    {{ individualFiles.get(docType.id)?.name ||
+                                                    getExistingDoc(docType.id)?.fileName }}
+                                                </span>
+                                            </div>
+
+                                            <button type="button"
+                                                (click)="viewFile(individualFiles.get(docType.id) || getExistingDoc(docType.id)?.fileName)"
+                                                pTooltip="Ver documento" tooltipPosition="top"
+                                                class="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-500 dark:text-slate-400 rounded-lg transition-colors">
+                                                <app-icon name="eye" size="14"></app-icon>
+                                            </button>
+                                        </div>
+
+                                        <!-- Expiration Warning Alert -->
+                                        <div *ngIf="getExistingDoc(docType.id)?.expirationDate && isExpired(getExistingDoc(docType.id)?.expirationDate)"
+                                            class="p-2 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2 animate-pulse-slow">
+                                            <app-icon name="alert-triangle" size="12" class="text-amber-600"></app-icon>
+                                            <span
+                                                class="text-[9px] text-amber-700 dark:text-amber-400 font-black uppercase tracking-wider">
+                                                Este documento está actualmente vencido
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Expiry Row -->
+                            <div *ngIf="docType.requiresExpiration || getExistingDoc(docType.id)"
+                                class="pt-4 border-t border-slate-200 dark:border-white/5 flex flex-wrap items-center gap-4">
+                                <div *ngIf="docType.requiresExpiration" class="flex-1 min-w-[200px]">
+                                    <label class="premium-label !ml-0">Vencimiento del Documento</label>
+                                    <p-datePicker [ngModel]="getExpiry(docType.id)"
+                                        (ngModelChange)="onExpirationChange(docType.id, $event)"
+                                        [ngModelOptions]="{standalone: true}" appendTo="body" dateFormat="dd/mm/yy"
+                                        [showIcon]="true" placeholder="Fecha expiración"
+                                        styleClass="w-full"></p-datePicker>
+                                </div>
+
+                                <button *ngIf="getExistingDoc(docType.id)" type="button"
+                                    (click)="viewFile(getExistingDoc(docType.id)?.fileName)"
+                                    class="px-4 py-2 bg-slate-100 dark:bg-white/5 hover:bg-primary/10 hover:text-primary rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 mt-auto">
+                                    <app-icon name="eye" size="12"></app-icon> Ver Actual
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Disclaimer -->
+                <div class="mt-auto pt-6 border-t border-slate-100 dark:border-white/5">
+                    <div class="flex items-start gap-4 p-5 bg-amber-500/5 border border-amber-500/10 rounded-3xl">
+                        <div
+                            class="w-10 h-10 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 shrink-0">
+                            <app-icon name="info" size="20"></app-icon>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                            <strong class="text-amber-600 dark:text-amber-400 block mb-1">Recomendaciones de
+                                Carga:</strong>
+                            Asegúrese de que los archivos sean legibles. Los documentos marcados con <span
+                                class="text-rose-500 font-bold">*</span> son requisito legal para formalizar la
+                            contratación y activar la afiliación a seguridad social.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div
+            class="lg:col-span-12 flex items-center justify-between pt-10 border-t border-slate-200 dark:border-white/5">
+            <button type="button" (click)="back.emit()"
+                class="flex items-center gap-3 px-10 py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/10 rounded-3xl transition-all font-black text-xs uppercase tracking-widest active:scale-95 border border-slate-200 dark:border-white/10">
+                <app-icon name="arrow-left" size="16"></app-icon>
+                Regresar
+            </button>
+
+            <button type="submit"
+                class="flex items-center gap-3 px-10 py-4 bg-primary text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-3xl transition-all font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/30 active:scale-95">
+                <span *ngIf="!loading()">Guardar y Continuar</span>
+                <span *ngIf="loading()" class="animate-pulse">Procesando...</span>
+                <app-icon *ngIf="!loading()" name="arrow-right" size="16"></app-icon>
+                <i *ngIf="loading()" class="pi pi-spin pi-spinner ml-2"></i>
+            </button>
+        </div>
+    </form>
+</div>

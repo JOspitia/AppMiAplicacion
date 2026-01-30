@@ -3,9 +3,7 @@ package com.project.backend_api.service.rrhh;
 import com.project.backend_api.dto.rrhh.*;
 import com.project.backend_api.model.core.management.Company;
 import com.project.backend_api.model.rrhh.*;
-
 import com.project.backend_api.repository.rrhh.*;
-
 import com.project.backend_api.repository.core.administration.*;
 import com.project.backend_api.service.core.AuthService;
 import com.project.backend_api.service.core.MinioService;
@@ -26,15 +24,10 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final ClothingSizeRepository clothingSizeRepository;
-
     private final EducationLevelRepository educationLevelRepository;
     private final GenderRepository genderRepository;
     private final IdentificationTypeRepository identificationTypeRepository;
     private final AuthService authService;
-
-    // Repositories for referencing entities - assuming they exist in
-    // core/administration
-    // If not, we might need to use simple referencing or add them
     private final CountryRepository countryRepository;
     private final StateRepository stateRepository;
     private final CityRepository cityRepository;
@@ -45,6 +38,10 @@ public class EmployeeService {
     private final BloodTypeRepository bloodTypeRepository;
     private final RhFactorRepository rhFactorRepository;
     private final ExperienceRangeRepository experienceRangeRepository;
+    private final ContractTypeRepository contractTypeRepository;
+    private final WorkScheduleRepository workScheduleRepository;
+    private final DocumentTypeRepository documentTypeRepository;
+    private final EmployeeDocumentRepository employeeDocumentRepository;
 
     private UUID getCurrentCompanyId() {
         return authService.getSelectedCompanyId();
@@ -61,16 +58,25 @@ public class EmployeeService {
         return toPersonalStepDto(employee);
     }
 
+    public EmployeeContractStepDto getContractData(UUID id) {
+        Employee employee = findByIdAndCompany(id);
+        return toContractStepDto(employee);
+    }
+
+    public List<EmployeeDocumentDto> getEmployeeDocuments(UUID employeeId) {
+        return employeeDocumentRepository.findByEmployeeId(employeeId).stream()
+                .map(this::toDocumentDto)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public EmployeePersonalStepDto createStep1(EmployeePersonalStepDto dto) {
         UUID companyId = getCurrentCompanyId();
 
-        // Validate unique identification
         if (employeeRepository.existsByCompanyIdAndIdentificationNumber(companyId, dto.getIdentificationNumber())) {
             throw new IllegalArgumentException("Ya existe un empleado con este número de identificación.");
         }
 
-        // Validate unique corporate email if present
         if (dto.getEmailCorporate() != null && !dto.getEmailCorporate().isEmpty()) {
             if (employeeRepository.existsByCompanyIdAndEmailCorporate(companyId, dto.getEmailCorporate())) {
                 throw new IllegalArgumentException("Ya existe un empleado con este correo corporativo.");
@@ -85,7 +91,6 @@ public class EmployeeService {
 
         Employee saved = employeeRepository.save(employee);
 
-        // Second pass: now we have the ID, handle photo and collections
         updatePersonalDataFromDto(saved, dto);
         updateEmergencyContacts(saved, dto.getEmergencyContacts());
         updateFamilyNucleus(saved, dto.getFamilyNucleus());
@@ -97,13 +102,86 @@ public class EmployeeService {
     }
 
     @Transactional
-    public EmployeePersonalStepDto updateStep1(UUID id, EmployeePersonalStepDto dto) {
+    public void updateStep2(UUID id, EmployeeContractStepDto dto, List<DocumentFileDto> files) {
         Employee employee = findByIdAndCompany(id);
 
-        // Update basic info
-        updatePersonalDataFromDto(employee, dto);
+        if (dto.getContractTypeId() != null) {
+            employee.setContractType(contractTypeRepository.findById(dto.getContractTypeId())
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de contrato no encontrado")));
+        }
 
-        // Update collections
+        employee.setContractNumber(dto.getContractNumber());
+        employee.setContractStartDate(dto.getStartDate());
+        employee.setContractEndDate(dto.getEndDate());
+        employee.setProbationEndDate(dto.getProbationEndDate());
+
+        if (dto.getWorkScheduleId() != null) {
+            employee.setWorkSchedule(workScheduleRepository.findById(dto.getWorkScheduleId())
+                    .orElseThrow(() -> new IllegalArgumentException("Horario laboral no encontrado")));
+        }
+
+        employee.setContractComments(dto.getComments());
+
+        employeeRepository.save(employee);
+
+        if (files != null && !files.isEmpty()) {
+            for (DocumentFileDto fileDto : files) {
+                if (fileDto.isUnified()) {
+                    saveDocument(employee, null, fileDto, true);
+                } else if (fileDto.getDocumentTypeId() != null) {
+                    saveDocument(employee, fileDto.getDocumentTypeId(), fileDto, false);
+                }
+            }
+        }
+    }
+
+    private void saveDocument(Employee employee, UUID documentTypeId, DocumentFileDto fileDto, boolean isUnified) {
+        String fileName = fileDto.getFile().getOriginalFilename();
+        String companyId = employee.getCompany().getId().toString();
+        String employeeId = employee.getId().toString();
+        String folder = isUnified ? "unified" : documentTypeId.toString();
+
+        String path = String.format("companies/%s/employees/%s/documents/%s/%s",
+                companyId, employeeId, folder, fileName);
+
+        try {
+            minioService.uploadPrivateFile(path, fileDto.getFile().getInputStream(), fileDto.getFile().getSize(),
+                    fileDto.getFile().getContentType());
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Error reading file stream", e);
+        }
+
+        EmployeeDocument doc;
+        if (isUnified) {
+            doc = employeeDocumentRepository.findByEmployeeId(employee.getId()).stream()
+                    .filter(EmployeeDocument::getIsUnified)
+                    .findFirst()
+                    .orElse(new EmployeeDocument());
+            doc.setIsUnified(true);
+            doc.setDocumentType(null);
+        } else {
+            doc = employeeDocumentRepository.findByEmployeeId(employee.getId()).stream()
+                    .filter(d -> d.getDocumentType() != null && d.getDocumentType().getId().equals(documentTypeId))
+                    .findFirst()
+                    .orElse(new EmployeeDocument());
+            doc.setIsUnified(false);
+            doc.setDocumentType(documentTypeRepository.findById(documentTypeId).orElse(null));
+        }
+
+        doc.setEmployee(employee);
+        doc.setFileName(fileName);
+        doc.setFilePath(path);
+        doc.setFileSize(fileDto.getFile().getSize());
+        doc.setMimeType(fileDto.getFile().getContentType());
+        doc.setExpirationDate(fileDto.getExpirationDate());
+
+        employeeDocumentRepository.save(doc);
+    }
+
+    @Transactional
+    public EmployeePersonalStepDto updateStep1(UUID id, EmployeePersonalStepDto dto) {
+        Employee employee = findByIdAndCompany(id);
+        updatePersonalDataFromDto(employee, dto);
         updateEmergencyContacts(employee, dto.getEmergencyContacts());
         updateFamilyNucleus(employee, dto.getFamilyNucleus());
         updateWorkExperiences(employee, dto.getWorkExperiences());
@@ -130,8 +208,6 @@ public class EmployeeService {
         employee.setFirstName(dto.getFirstName());
         employee.setSecondName(dto.getSecondName());
 
-        // Map legacy/frontend 'lastName' to firstLastName if explicit firstLastName is
-        // missing
         String fLastName = dto.getFirstLastName();
         if (fLastName == null || fLastName.trim().isEmpty()) {
             fLastName = dto.getLastName();
@@ -177,25 +253,17 @@ public class EmployeeService {
             MaritalStatus ms = maritalStatusRepository.findById(dto.getMaritalStatusId()).orElse(null);
             employee.setMaritalStatusEntity(ms);
         }
-
         if (dto.getBloodTypeId() != null) {
             BloodType bt = bloodTypeRepository.findById(dto.getBloodTypeId()).orElse(null);
             employee.setBloodTypeEntity(bt);
         }
-
         if (dto.getRhFactorId() != null) {
             RhFactor rf = rhFactorRepository.findById(dto.getRhFactorId()).orElse(null);
             employee.setRhFactorEntity(rf);
         }
 
-        // Photo Handling: If base64, upload to MinIO in employee-specific folder
         if (dto.getPhotoUrl() != null && dto.getPhotoUrl().startsWith("data:image")) {
-            // We only upload if employee already has an ID (update or second-pass in
-            // create)
             if (employee.getId() != null) {
-                // replaceExisting = true: elimina fotos anteriores (profile.jpg, profile.png,
-                // etc.)
-                // FileOptionsDto.profilePhoto(): redimensiona a 200x200 y limita a 10MB
                 String newPhotoUrl = minioService.uploadEmployeeFile(
                         employee.getCompany().getId(),
                         employee.getId(),
@@ -206,13 +274,10 @@ public class EmployeeService {
                         com.project.backend_api.dto.core.FileOptionsDto.profilePhoto());
                 employee.setPhotoUrl(newPhotoUrl);
             }
-            // else: photoUrl remains as base64 temporarily (will be handled in createStep1
-            // second pass)
         } else {
             employee.setPhotoUrl(dto.getPhotoUrl());
         }
 
-        // Contact
         employee.setEmailPersonal(dto.getEmailPersonal());
         employee.setEmailCorporate(dto.getEmailCorporate());
         employee.setPhoneMobile(dto.getPhoneMobile());
@@ -221,7 +286,6 @@ public class EmployeeService {
         employee.setAddress(dto.getAddress());
         employee.setResidenceNeighborhood(dto.getResidenceNeighborhood());
 
-        // Residence
         if (dto.getResidenceCountryId() != null)
             employee.setResidenceCountry(countryRepository.findById(dto.getResidenceCountryId()).orElse(null));
         if (dto.getResidenceStateId() != null)
@@ -229,7 +293,6 @@ public class EmployeeService {
         if (dto.getResidenceCityId() != null)
             employee.setResidenceCity(cityRepository.findById(dto.getResidenceCityId()).orElse(null));
 
-        // Additional
         if (dto.getShirtSizeId() != null)
             employee.setShirtSize(clothingSizeRepository.findById(dto.getShirtSizeId()).orElse(null));
         if (dto.getPantsSizeId() != null)
@@ -248,7 +311,6 @@ public class EmployeeService {
         }
         employee.setPositionApplied(dto.getPositionApplied());
 
-        // Bank
         employee.setBankName(dto.getBankName());
         employee.setBankAccountType(dto.getBankAccountType());
         employee.setBankAccountNumber(dto.getBankAccountNumber());
@@ -267,8 +329,7 @@ public class EmployeeService {
                     Relationship rel = relationshipRepository.findById(dto.getRelationshipId()).orElse(null);
                     contact.setRelationshipEntity(rel);
                     if (rel != null) {
-                        contact.setRelationship(rel.getName()); // Sincronizar para evitar nulos y mantener datos
-                                                                // coherentes
+                        contact.setRelationship(rel.getName());
                     }
                 }
                 contact.setPhone(dto.getPhone());
@@ -308,10 +369,6 @@ public class EmployeeService {
     }
 
     private void updateWorkExperiences(Employee employee, List<EmployeeWorkExperienceDto> dtos) {
-        // We need to keep track of existing URLs if we want to avoid re-uploading the
-        // same ones
-        // but since we clear and re-add, we should check if the new attachmentUrl is
-        // base64
         employee.getWorkExperiences().clear();
         if (dtos != null) {
             for (int i = 0; i < dtos.size(); i++) {
@@ -328,24 +385,19 @@ public class EmployeeService {
 
                 String attachmentUrl = dto.getAttachmentUrl();
                 if (attachmentUrl != null && attachmentUrl.startsWith("data:application/pdf")) {
-                    // Carga de archivo con versionamiento por fecha y hora
                     String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-                    // Use a more unique file name
                     String fileNamePrefix = "work_exp_" + timestamp + "_idx" + i;
-
                     String newUrl = minioService.uploadEmployeeFile(
                             employee.getCompany().getId(),
                             employee.getId(),
                             "work_experience",
                             fileNamePrefix,
                             attachmentUrl,
-                            false // Mantiene histórico (no reemplaza)
-                    );
+                            false);
                     exp.setAttachmentUrl(newUrl);
                 } else {
                     exp.setAttachmentUrl(attachmentUrl);
                 }
-
                 employee.addWorkExperience(exp);
             }
         }
@@ -357,20 +409,16 @@ public class EmployeeService {
             for (int i = 0; i < dtos.size(); i++) {
                 EmployeeEducationDto dto = dtos.get(i);
                 EmployeeEducation edu = new EmployeeEducation();
-
                 if (dto.getEducationLevelId() != null) {
                     edu.setEducationLevel(educationLevelRepository.findById(dto.getEducationLevelId()).orElse(null));
                 }
-
                 edu.setInstitution(dto.getInstitution());
                 edu.setTitleObtained(dto.getTitleObtained());
                 edu.setCurrentSemester(dto.getCurrentSemester());
-                edu.setPhone(dto.getPhone());
-
+                edu.setPhone(edu.getPhone());
                 if (dto.getCityId() != null) {
                     edu.setCity(cityRepository.findById(dto.getCityId()).orElse(null));
                 }
-
                 edu.setStartYear(dto.getStartYear());
                 edu.setEndYear(dto.getEndYear());
                 edu.setHours(dto.getHours());
@@ -380,7 +428,6 @@ public class EmployeeService {
                 if (attachmentUrl != null && attachmentUrl.startsWith("data:")) {
                     String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
                     String fileNamePrefix = "education_" + timestamp + "_idx" + i;
-
                     String newUrl = minioService.uploadEmployeeFile(
                             employee.getCompany().getId(),
                             employee.getId(),
@@ -392,8 +439,40 @@ public class EmployeeService {
                 } else {
                     edu.setAttachmentUrl(attachmentUrl);
                 }
-
                 employee.addEducation(edu);
+            }
+        }
+    }
+
+    private void updateReferences(Employee employee, List<EmployeeReferenceDto> dtos) {
+        employee.getReferences().clear();
+        if (dtos != null) {
+            for (int i = 0; i < dtos.size(); i++) {
+                EmployeeReferenceDto dto = dtos.get(i);
+                EmployeeReference ref = new EmployeeReference();
+                ref.setReferenceType(dto.getReferenceType());
+                ref.setName(dto.getName());
+                ref.setOccupation(dto.getOccupation());
+                ref.setCompany(dto.getCompany());
+                ref.setPhone(dto.getPhone());
+                ref.setMobile(dto.getMobile());
+
+                String attachmentUrl = dto.getAttachmentUrl();
+                if (attachmentUrl != null && attachmentUrl.startsWith("data:")) {
+                    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                    String fileNamePrefix = "reference_" + timestamp + "_idx" + i;
+                    String newUrl = minioService.uploadEmployeeFile(
+                            employee.getCompany().getId(),
+                            employee.getId(),
+                            "reference",
+                            fileNamePrefix,
+                            attachmentUrl,
+                            false);
+                    ref.setAttachmentUrl(newUrl);
+                } else {
+                    ref.setAttachmentUrl(attachmentUrl);
+                }
+                employee.addReference(ref);
             }
         }
     }
@@ -407,8 +486,6 @@ public class EmployeeService {
                 .emailCorporate(e.getEmailCorporate())
                 .active(e.getActive())
                 .photoUrl(e.getPhotoUrl())
-                // Position/Dept are in Step 3 / JobHistory. Left blank for now or fetched if
-                // needed.
                 .build();
     }
 
@@ -450,7 +527,6 @@ public class EmployeeService {
                 .residenceCountryId(e.getResidenceCountry() != null ? e.getResidenceCountry().getId() : null)
                 .residenceStateId(e.getResidenceState() != null ? e.getResidenceState().getId() : null)
                 .residenceCityId(e.getResidenceCity() != null ? e.getResidenceCity().getId() : null)
-
                 .emergencyContacts(e.getEmergencyContacts().stream().map(c -> EmployeeEmergencyContactDto.builder()
                         .id(c.getId())
                         .firstName(c.getFirstName())
@@ -461,7 +537,6 @@ public class EmployeeService {
                         .relationshipId(c.getRelationshipEntity() != null ? c.getRelationshipEntity().getId() : null)
                         .phone(c.getPhone())
                         .build()).collect(Collectors.toList()))
-
                 .familyNucleus(e.getFamilyNucleus().stream().map(f -> EmployeeFamilyMemberDto.builder()
                         .id(f.getId())
                         .firstName(f.getFirstName())
@@ -475,11 +550,9 @@ public class EmployeeService {
                         .occupationId(f.getOccupationEntity() != null ? f.getOccupationEntity().getId() : null)
                         .isDependent(f.getIsDependent())
                         .build()).collect(Collectors.toList()))
-
                 .bankName(e.getBankName())
                 .bankAccountType(e.getBankAccountType())
                 .bankAccountNumber(e.getBankAccountNumber())
-
                 .shirtSizeId(e.getShirtSize() != null ? e.getShirtSize().getId() : null)
                 .pantsSizeId(e.getPantsSize() != null ? e.getPantsSize().getId() : null)
                 .shoeSizeId(e.getShoeSize() != null ? e.getShoeSize().getId() : null)
@@ -540,39 +613,29 @@ public class EmployeeService {
                 .build();
     }
 
-    private void updateReferences(Employee employee, List<EmployeeReferenceDto> dtos) {
-        employee.getReferences().clear();
-        if (dtos != null) {
-            for (int i = 0; i < dtos.size(); i++) {
-                EmployeeReferenceDto dto = dtos.get(i);
-                EmployeeReference ref = new EmployeeReference();
+    private EmployeeContractStepDto toContractStepDto(Employee employee) {
+        return EmployeeContractStepDto.builder()
+                .employeeId(employee.getId())
+                .contractTypeId(employee.getContractType() != null ? employee.getContractType().getId() : null)
+                .contractNumber(employee.getContractNumber())
+                .startDate(employee.getContractStartDate())
+                .endDate(employee.getContractEndDate())
+                .probationEndDate(employee.getProbationEndDate())
+                .workScheduleId(employee.getWorkSchedule() != null ? employee.getWorkSchedule().getId() : null)
+                .comments(employee.getContractComments())
+                .build();
+    }
 
-                ref.setReferenceType(dto.getReferenceType());
-                ref.setName(dto.getName());
-                ref.setOccupation(dto.getOccupation());
-                ref.setCompany(dto.getCompany());
-                ref.setPhone(dto.getPhone());
-                ref.setMobile(dto.getMobile());
-
-                String attachmentUrl = dto.getAttachmentUrl();
-                if (attachmentUrl != null && attachmentUrl.startsWith("data:")) {
-                    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-                    String fileNamePrefix = "reference_" + timestamp + "_idx" + i;
-
-                    String newUrl = minioService.uploadEmployeeFile(
-                            employee.getCompany().getId(),
-                            employee.getId(),
-                            "reference",
-                            fileNamePrefix,
-                            attachmentUrl,
-                            false);
-                    ref.setAttachmentUrl(newUrl);
-                } else {
-                    ref.setAttachmentUrl(attachmentUrl);
-                }
-
-                employee.addReference(ref);
-            }
-        }
+    private EmployeeDocumentDto toDocumentDto(EmployeeDocument doc) {
+        if (doc == null)
+            return null;
+        return EmployeeDocumentDto.builder()
+                .id(doc.getId())
+                .documentTypeId(doc.getDocumentType() != null ? doc.getDocumentType().getId() : null)
+                .documentTypeName(doc.getDocumentType() != null ? doc.getDocumentType().getName() : "Unificado")
+                .fileName(doc.getFileName())
+                .expirationDate(doc.getExpirationDate())
+                .isUnified(doc.getIsUnified())
+                .build();
     }
 }

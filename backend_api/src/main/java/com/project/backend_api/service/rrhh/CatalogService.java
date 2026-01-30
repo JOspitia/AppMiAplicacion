@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import com.project.backend_api.service.core.AuthService;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,10 @@ public class CatalogService {
     private final BloodTypeRepository bloodTypeRepository;
     private final RhFactorRepository rhFactorRepository;
     private final ExperienceRangeRepository experienceRangeRepository;
+    private final ContractTypeRepository contractTypeRepository;
+    private final WorkScheduleRepository workScheduleRepository;
+    private final DocumentTypeRepository documentTypeRepository;
+    private final AuthService authService;
 
     @Transactional(readOnly = true)
     public List<RelationshipDto> getActiveRelationships(Boolean isFamily) {
@@ -33,7 +39,7 @@ public class CatalogService {
         }
 
         return entities.stream()
-                .map(this::mapToRelationshipDto)
+                .map(this::toRelationshipDto)
                 .collect(Collectors.toList());
     }
 
@@ -47,7 +53,7 @@ public class CatalogService {
         }
 
         return entities.stream()
-                .map(this::mapToOccupationDto)
+                .map(this::toOccupationDto)
                 .collect(Collectors.toList());
     }
 
@@ -55,46 +61,79 @@ public class CatalogService {
     public Map<String, List<OccupationDto>> getOccupationsGroupedByCategory() {
         return occupationRepository.findByActiveTrueOrderByDisplayOrderAsc().stream()
                 .collect(Collectors.groupingBy(Occupation::getCategory,
-                        Collectors.mapping(this::mapToOccupationDto, Collectors.toList())));
+                        Collectors.mapping(this::toOccupationDto, Collectors.toList())));
     }
 
     @Transactional(readOnly = true)
     public List<EducationLevelDto> getActiveEducationLevels() {
         return educationLevelRepository.findByActiveTrue().stream()
-                .map(this::mapToEducationLevelDto)
+                .map(this::toEducationLevelDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<MaritalStatusDto> getActiveMaritalStatuses() {
         return maritalStatusRepository.findByActiveTrueOrderByDisplayOrderAsc().stream()
-                .map(this::mapToMaritalStatusDto)
+                .map(this::toMaritalStatusDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<BloodTypeDto> getActiveBloodTypes() {
         return bloodTypeRepository.findByActiveTrueOrderByDisplayOrderAsc().stream()
-                .map(this::mapToBloodTypeDto)
+                .map(this::toBloodTypeDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<RhFactorDto> getActiveRhFactors() {
         return rhFactorRepository.findByActiveTrueOrderByDisplayOrderAsc().stream()
-                .map(this::mapToRhFactorDto)
+                .map(this::toRhFactorDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<ExperienceRangeDto> getActiveExperienceRanges() {
-        return experienceRangeRepository.findByActiveTrueOrderByDisplayOrderAsc().stream()
-                .map(this::mapToExperienceRangeDto)
+        return experienceRangeRepository.findAll().stream()
+                .map(this::toExperienceRangeDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ContractTypeDto> getActiveContractTypes() {
+        return contractTypeRepository.findAll().stream()
+                .map(this::toContractTypeDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkScheduleDto> getActiveWorkSchedules() {
+        return workScheduleRepository.findAll().stream()
+                .map(this::toWorkScheduleDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<DocumentTypeDto> getHRDocumentTypes() {
+        UUID companyId = authService.getSelectedCompanyId();
+        // First try to find by specific RRHH category
+        List<DocumentType> docs = documentTypeRepository.findByCompanyIdAndCategoryCodeOrderByNameAsc(companyId,
+                "RRHH_DOCUMENT");
+
+        // If empty, fallback to all active documents for the company (to avoid empty
+        // screens due to migration issues)
+        if (docs.isEmpty()) {
+            docs = documentTypeRepository.findByCompanyIdAndActiveTrueOrderByNameAsc(companyId);
+        }
+
+        return docs.stream()
+                .filter(DocumentType::getActive)
+                .map(this::toDocumentTypeDto)
                 .collect(Collectors.toList());
     }
 
     // Mappers
-    private RelationshipDto mapToRelationshipDto(Relationship entity) {
+    private RelationshipDto toRelationshipDto(Relationship entity) {
         return RelationshipDto.builder()
                 .id(entity.getId())
                 .code(entity.getCode())
@@ -106,7 +145,7 @@ public class CatalogService {
                 .build();
     }
 
-    private OccupationDto mapToOccupationDto(Occupation entity) {
+    private OccupationDto toOccupationDto(Occupation entity) {
         return OccupationDto.builder()
                 .id(entity.getId())
                 .code(entity.getCode())
@@ -118,14 +157,14 @@ public class CatalogService {
                 .build();
     }
 
-    private EducationLevelDto mapToEducationLevelDto(EducationLevel entity) {
+    private EducationLevelDto toEducationLevelDto(EducationLevel entity) {
         return EducationLevelDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .build();
     }
 
-    private MaritalStatusDto mapToMaritalStatusDto(MaritalStatus entity) {
+    private MaritalStatusDto toMaritalStatusDto(MaritalStatus entity) {
         return MaritalStatusDto.builder()
                 .id(entity.getId())
                 .code(entity.getCode())
@@ -133,25 +172,52 @@ public class CatalogService {
                 .build();
     }
 
-    private BloodTypeDto mapToBloodTypeDto(BloodType entity) {
+    private BloodTypeDto toBloodTypeDto(BloodType entity) {
         return BloodTypeDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .build();
     }
 
-    private RhFactorDto mapToRhFactorDto(RhFactor entity) {
+    private RhFactorDto toRhFactorDto(RhFactor entity) {
         return RhFactorDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .build();
     }
 
-    private ExperienceRangeDto mapToExperienceRangeDto(ExperienceRange entity) {
+    private ExperienceRangeDto toExperienceRangeDto(ExperienceRange er) {
         return ExperienceRangeDto.builder()
-                .id(entity.getId())
-                .code(entity.getCode())
-                .name(entity.getName())
+                .id(er.getId())
+                .code(er.getCode())
+                .name(er.getName())
+                .build();
+    }
+
+    private ContractTypeDto toContractTypeDto(ContractType ct) {
+        return ContractTypeDto.builder()
+                .id(ct.getId())
+                .name(ct.getName())
+                .hasEndDate(ct.getHasEndDate())
+                .defaultDuration(ct.getDefaultDuration())
+                .durationUnit(ct.getDurationUnit())
+                .build();
+    }
+
+    private WorkScheduleDto toWorkScheduleDto(WorkSchedule ws) {
+        return WorkScheduleDto.builder()
+                .id(ws.getId())
+                .name(ws.getName())
+                .build();
+    }
+
+    private DocumentTypeDto toDocumentTypeDto(DocumentType dt) {
+        return DocumentTypeDto.builder()
+                .id(dt.getId())
+                .name(dt.getName())
+                .code(dt.getCode())
+                .isRequired(dt.getIsRequired())
+                .requiresExpiration(dt.getRequiresExpiration())
                 .build();
     }
 }
