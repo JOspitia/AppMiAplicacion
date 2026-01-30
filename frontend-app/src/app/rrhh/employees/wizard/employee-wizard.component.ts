@@ -6,13 +6,14 @@ import { ToastModule } from 'primeng/toast';
 import { MenuItem, MessageService } from 'primeng/api';
 import { EmployeePersonalFormComponent } from './steps/step1-personal.component';
 import { EmployeeContractFormComponent } from './steps/step2-contract.component';
+import { EmployeeJobFormComponent } from './steps/step3-job.component';
 
 @Component({
     selector: 'app-employee-wizard',
     standalone: true,
     imports: [
         CommonModule, StepsModule, ToastModule,
-        EmployeePersonalFormComponent, EmployeeContractFormComponent
+        EmployeePersonalFormComponent, EmployeeContractFormComponent, EmployeeJobFormComponent
     ],
     providers: [MessageService],
     template: `
@@ -52,11 +53,20 @@ import { EmployeeContractFormComponent } from './steps/step2-contract.component'
             </div>
         </div>
 
-        <!-- Step 3: Jobs (Placeholder) -->
-        <div *ngIf="activeIndex === 2" class="glass p-20 text-center rounded-3xl border border-white/10 shadow-xl">
-            <h2 class="text-2xl font-bold text-white">Paso 3: Información Corporativa</h2>
-            <p class="text-slate-400 mt-2">Próximamente...</p>
-            <button (click)="activeIndex = 1" class="mt-4 text-primary font-bold hover:underline transition-all hover:scale-105 active:scale-95">Volver</button>
+        <!-- Step 3: Jobs -->
+        <div *ngIf="activeIndex === 2">
+            <app-employee-job-form
+                *ngIf="employeeId()"
+                [employeeId]="employeeId()!"
+                (next)="onJobSaved()"
+                (back)="activeIndex = 1">
+            </app-employee-job-form>
+            <div *ngIf="!employeeId()" class="glass p-12 text-center rounded-3xl border border-white/10 shadow-xl">
+                <p class="text-slate-400">Debe completar la información personal antes de continuar.</p>
+                <button (click)="activeIndex = 0" class="mt-4 text-primary font-bold hover:underline flex items-center gap-2 mx-auto transition-all hover:scale-105 active:scale-95">
+                    <span class="pi pi-arrow-left"></span> Volver al Paso 1
+                </button>
+            </div>
         </div>
       </div>
     </div>
@@ -93,6 +103,11 @@ export class EmployeeWizardComponent implements OnInit {
 
     onContractSaved() {
         this.activeIndex = 2;
+    }
+
+    onJobSaved() {
+        // Wizard finalizado
+        this.router.navigate(['/rrhh/employees']);
     }
 
     onCancel() {

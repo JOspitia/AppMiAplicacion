@@ -70,4 +70,29 @@ public class CatalogController {
     public ResponseEntity<List<DocumentTypeDto>> getHRDocumentTypes() {
         return ResponseEntity.ok(catalogService.getHRDocumentTypes());
     }
+
+    @GetMapping("/cost-centers")
+    public ResponseEntity<List<CostCenterDto>> getCostCenters() {
+        return ResponseEntity.ok(catalogService.getActiveCostCenters());
+    }
+
+    @GetMapping("/departments")
+    public ResponseEntity<List<DepartmentDto>> getDepartments() {
+        return ResponseEntity.ok(catalogService.getActiveDepartments());
+    }
+
+    @GetMapping("/locations")
+    public ResponseEntity<List<com.project.backend_api.dto.core.management.LocationDto>> getLocations() {
+        return ResponseEntity.ok(catalogService.getActiveLocations());
+    }
+
+    @GetMapping("/operational-centers")
+    public ResponseEntity<List<OperationalCenterDto>> getOperationalCenters() {
+        return ResponseEntity.ok(catalogService.getActiveOperationalCenters());
+    }
+
+    @GetMapping("/positions")
+    public ResponseEntity<List<PositionDto>> getPositions() {
+        return ResponseEntity.ok(catalogService.getActivePositions());
+    }
 }

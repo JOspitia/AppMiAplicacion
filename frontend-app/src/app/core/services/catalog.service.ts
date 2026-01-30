@@ -69,6 +69,53 @@ export interface DocumentType {
     requiresExpiration: boolean;
 }
 
+export interface CostCenter {
+    id: string;
+    code: string;
+    name: string;
+    description?: string;
+    currencyId?: string;
+    currencyCode?: string;
+    transportAidThreshold?: number;
+    active: boolean;
+}
+
+export interface Department {
+    id: string;
+    code: string;
+    name: string;
+    costCenterId?: string;
+    locationIds?: string[];
+    active: boolean;
+}
+
+export interface Location {
+    id: string;
+    name: string;
+    address?: string;
+    city?: string;
+    department?: string;
+    country?: string;
+    isMain: boolean;
+    active: boolean;
+}
+
+export interface OperationalCenter {
+    id: string;
+    code: string;
+    name: string;
+    locationId?: string;
+    active: boolean;
+}
+
+export interface Position {
+    id: string;
+    code: string;
+    name: string;
+    departmentId: string;
+    active: boolean;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -122,5 +169,25 @@ export class CatalogService {
 
     getHRDocumentTypes(): Observable<DocumentType[]> {
         return this.http.get<DocumentType[]>(`${this.apiUrl}/document-types/hr`);
+    }
+
+    getCostCenters(): Observable<CostCenter[]> {
+        return this.http.get<CostCenter[]>(`${this.apiUrl}/cost-centers`);
+    }
+
+    getDepartments(): Observable<Department[]> {
+        return this.http.get<Department[]>(`${this.apiUrl}/departments`);
+    }
+
+    getLocations(): Observable<Location[]> {
+        return this.http.get<Location[]>(`${this.apiUrl}/locations`);
+    }
+
+    getOperationalCenters(): Observable<OperationalCenter[]> {
+        return this.http.get<OperationalCenter[]>(`${this.apiUrl}/operational-centers`);
+    }
+
+    getPositions(): Observable<Position[]> {
+        return this.http.get<Position[]>(`${this.apiUrl}/positions`);
     }
 }

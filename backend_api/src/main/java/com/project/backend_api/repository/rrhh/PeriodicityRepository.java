@@ -15,4 +15,6 @@ public interface PeriodicityRepository extends JpaRepository<Periodicity, UUID> 
     List<Periodicity> findAllActive();
 
     boolean existsByCode(String code);
+
+    java.util.Optional<Periodicity> findByCode(String code);
 }

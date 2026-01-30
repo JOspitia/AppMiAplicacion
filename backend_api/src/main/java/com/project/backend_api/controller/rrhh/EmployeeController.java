@@ -96,4 +96,20 @@ public class EmployeeController {
         employeeService.updateStep2(id, dto, files);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{id}/job")
+    public ResponseEntity<EmployeeJobStepDto> getJobData(@PathVariable UUID id) {
+        return ResponseEntity.ok(employeeService.getJobData(id));
+    }
+
+    @GetMapping("/{id}/suggest-email")
+    public ResponseEntity<String> suggestEmail(@PathVariable UUID id) {
+        return ResponseEntity.ok(employeeService.suggestCorporateEmail(id));
+    }
+
+    @PostMapping("/{id}/step3")
+    public ResponseEntity<Void> updateStep3(@PathVariable UUID id, @RequestBody EmployeeJobStepDto dto) {
+        employeeService.updateStep3(id, dto);
+        return ResponseEntity.ok().build();
+    }
 }

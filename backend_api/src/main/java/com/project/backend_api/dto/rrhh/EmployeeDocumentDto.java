@@ -13,6 +13,9 @@ public class EmployeeDocumentDto {
     private UUID documentTypeId;
     private String documentTypeName;
     private String fileName;
+    private String filePath;
     private LocalDate expirationDate;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("isUnified")
     private boolean isUnified;
 }

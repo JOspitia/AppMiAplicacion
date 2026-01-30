@@ -5,6 +5,7 @@ import com.project.backend_api.model.core.management.Company;
 import com.project.backend_api.model.rrhh.*;
 import com.project.backend_api.repository.rrhh.*;
 import com.project.backend_api.repository.core.administration.*;
+import com.project.backend_api.repository.core.management.LocationRepository;
 import com.project.backend_api.service.core.AuthService;
 import com.project.backend_api.service.core.MinioService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,6 +45,16 @@ public class EmployeeService {
     private final WorkScheduleRepository workScheduleRepository;
     private final DocumentTypeRepository documentTypeRepository;
     private final EmployeeDocumentRepository employeeDocumentRepository;
+    private final CostCenterRepository costCenterRepository;
+    private final DepartmentRepository departmentRepository;
+    private final PositionRepository positionRepository;
+    private final OperationalCenterRepository operationalCenterRepository;
+    private final CompensationTypeRepository compensationTypeRepository;
+    private final EmployeeJobHistoryRepository employeeJobHistoryRepository;
+    private final LocationRepository locationRepository;
+    private final EmployeeBonusRepository employeeBonusRepository;
+    private final CurrencyRepository currencyRepository;
+    private final PeriodicityRepository periodicityRepository;
 
     private UUID getCurrentCompanyId() {
         return authService.getSelectedCompanyId();
@@ -197,6 +210,226 @@ public class EmployeeService {
         Employee employee = findByIdAndCompany(id);
         employee.setActive(!employee.getActive());
         employeeRepository.save(employee);
+    }
+
+    public EmployeeJobStepDto getJobData(UUID id) {
+        Employee employee = findByIdAndCompany(id);
+        return toJobStepDto(employee);
+    }
+
+    public String suggestCorporateEmail(UUID employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado"));
+
+        String firstName = employee.getFirstName().toLowerCase().trim();
+        String firstLastName = employee.getFirstLastName().toLowerCase().trim();
+        String companyDomain = (employee.getCompany() != null && employee.getCompany().getAllowedDomain() != null)
+                ? employee.getCompany().getAllowedDomain().replace("@", "")
+                : "domain.com";
+
+        // Clean names: remove accents, spaces, special chars
+        firstName = cleanString(firstName);
+        firstLastName = cleanString(firstLastName);
+
+        // List of patterns to try in order of preference
+        List<String> suggestions = new ArrayList<>();
+
+        // Pattern 1: Initial + First Last Name (e.g. jospitia)
+        if (firstName.length() > 0) {
+            suggestions.add(firstName.substring(0, 1) + firstLastName);
+        }
+
+        // Pattern 2: First Name + Initial Of Last Name (e.g. johano)
+        if (firstLastName.length() > 0) {
+            suggestions.add(firstName + firstLastName.substring(0, 1));
+        }
+
+        // Pattern 3: First Name + . + First Last Name (e.g. johan.ospitia)
+        suggestions.add(firstName + "." + firstLastName);
+
+        // Pattern 4: Initial + . + First Last Name (e.g. j.ospitia)
+        if (firstName.length() > 0) {
+            suggestions.add(firstName.substring(0, 1) + "." + firstLastName);
+        }
+
+        UUID companyId = employee.getCompany().getId();
+
+        for (String base : suggestions) {
+            String email = base + "@" + companyDomain;
+            // Check if this email is already used by ANOTHER employee
+            Optional<Employee> existing = employeeRepository.findAll().stream()
+                    .filter(e -> e.getCompany().getId().equals(companyId)
+                            && email.equalsIgnoreCase(e.getEmailCorporate()))
+                    .findFirst();
+
+            if (existing.isEmpty() || existing.get().getId().equals(employeeId)) {
+                return email;
+            }
+        }
+
+        // If all patterns are taken, start adding numbers to the first pattern
+        String basePattern = suggestions.get(0);
+        int i = 1;
+        while (i <= 100) {
+            String email = basePattern + i + "@" + companyDomain;
+            Optional<Employee> existing = employeeRepository.findAll().stream()
+                    .filter(e -> e.getCompany().getId().equals(companyId)
+                            && email.equalsIgnoreCase(e.getEmailCorporate()))
+                    .findFirst();
+
+            if (existing.isEmpty() || existing.get().getId().equals(employeeId)) {
+                return email;
+            }
+            i++;
+        }
+
+        return basePattern + "@" + companyDomain;
+    }
+
+    private String cleanString(String input) {
+        if (input == null)
+            return "";
+        return java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD)
+                .replaceAll("[\\u0300-\\u036f]", "")
+                .replaceAll("[\\s.]+", "")
+                .replaceAll("[^a-z0-9]", "");
+    }
+
+    @Transactional
+    public void updateStep3(UUID id, EmployeeJobStepDto dto) {
+        Employee employee = findByIdAndCompany(id);
+
+        // Update corporate email
+        if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
+            if (!dto.getEmail().equals(employee.getEmailCorporate())) {
+                if (employeeRepository.existsByCompanyIdAndEmailCorporate(getCurrentCompanyId(), dto.getEmail())) {
+                    throw new IllegalArgumentException("Ya existe un empleado con este correo corporativo.");
+                }
+            }
+            employee.setEmailCorporate(dto.getEmail());
+            employeeRepository.save(employee);
+        }
+
+        // Get or create active job history record
+        EmployeeJobHistory jobHistory = employeeJobHistoryRepository
+                .findByEmployeeIdAndActiveTrue(id)
+                .orElse(EmployeeJobHistory.builder()
+                        .employee(employee)
+                        .active(true)
+                        .startDate(employee.getContractStartDate() != null ? employee.getContractStartDate()
+                                : java.time.LocalDate.now())
+                        .build());
+
+        // Update organizational structure
+        if (dto.getCostCenterId() != null) {
+            jobHistory.setCostCenter(costCenterRepository.findById(dto.getCostCenterId())
+                    .orElseThrow(() -> new IllegalArgumentException("Centro de costos no encontrado")));
+        }
+
+        if (dto.getDepartmentId() != null) {
+            jobHistory.setDepartment(departmentRepository.findById(dto.getDepartmentId())
+                    .orElseThrow(() -> new IllegalArgumentException("Departamento no encontrado")));
+        }
+
+        if (dto.getPositionId() != null) {
+            jobHistory.setPosition(positionRepository.findById(dto.getPositionId())
+                    .orElseThrow(() -> new IllegalArgumentException("Cargo no encontrado")));
+        }
+
+        if (dto.getLocationId() != null) {
+            jobHistory.setLocation(locationRepository.findById(dto.getLocationId())
+                    .orElse(null));
+        }
+
+        if (dto.getOperationalCenterId() != null) {
+            jobHistory.setOperationalCenter(operationalCenterRepository.findById(dto.getOperationalCenterId())
+                    .orElse(null));
+        }
+
+        if (dto.getManagerId() != null) {
+            jobHistory.setSupervisor(employeeRepository.findById(dto.getManagerId())
+                    .orElse(null));
+        }
+
+        // Update compensation
+        if (dto.getSalary() != null) {
+            jobHistory.setSalary(dto.getSalary());
+        }
+
+        if (dto.getCurrencyCode() != null) {
+            jobHistory.setCurrency(dto.getCurrencyCode());
+        }
+
+        jobHistory.setTransportAid(dto.getTransportAid() != null ? dto.getTransportAid() : false);
+
+        employeeJobHistoryRepository.save(jobHistory);
+
+        // Handle bonuses
+        updateEmployeeBonuses(employee, dto.getBonuses());
+    }
+
+    @Transactional
+    public void updateEmployeeBonuses(Employee employee, List<EmployeeJobStepDto.EmployeeBonusDto> bonusDtos) {
+        // Deactivate old bonuses (Simple sync strategy: delete/deactivate and recreate
+        // OR update)
+        // For simplicity in a wizard, we can clear and recreate if they are not too
+        // many,
+        // or update matchings. Let's do a soft delete for the ones not in the list.
+        List<EmployeeBonus> currentBonuses = employeeBonusRepository.findByEmployeeId(employee.getId());
+
+        if (bonusDtos == null || bonusDtos.isEmpty()) {
+            currentBonuses.forEach(b -> {
+                b.setActive(false);
+                employeeBonusRepository.save(b);
+            });
+            return;
+        }
+
+        // Deactivate all first (or match by ID)
+        currentBonuses.forEach(b -> b.setActive(false));
+
+        for (EmployeeJobStepDto.EmployeeBonusDto dto : bonusDtos) {
+            EmployeeBonus bonus;
+            if (dto.getId() != null) {
+                bonus = employeeBonusRepository.findById(dto.getId()).orElse(new EmployeeBonus());
+            } else {
+                bonus = new EmployeeBonus();
+            }
+
+            bonus.setEmployee(employee);
+            bonus.setCompensationType(compensationTypeRepository.findById(dto.getCompensationTypeId())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Tipo de compensación no encontrado: " + dto.getCompensationTypeId())));
+
+            bonus.setAmount(dto.getAmount());
+            bonus.setPercentage(dto.getPercentage());
+
+            // Handle Periodicity relationship
+            if (dto.getPeriodicityId() != null) {
+                bonus.setPeriodicity(periodicityRepository.findById(dto.getPeriodicityId())
+                        .orElseThrow(() -> new IllegalArgumentException("Periodicidad no encontrada")));
+            } else if (dto.getPeriodicity() != null) {
+                bonus.setPeriodicity(periodicityRepository.findByCode(dto.getPeriodicity())
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Periodicidad no encontrada: " + dto.getPeriodicity())));
+            } else {
+                throw new IllegalArgumentException("La periodicidad es requerida");
+            }
+
+            if (dto.getCurrencyId() != null) {
+                bonus.setCurrency(currencyRepository.findById(dto.getCurrencyId()).orElse(null));
+            }
+
+            if (dto.getCostCenterId() != null) {
+                bonus.setCostCenter(costCenterRepository.findById(dto.getCostCenterId()).orElse(null));
+            }
+
+            bonus.setStartDate(dto.getStartDate());
+            bonus.setEndDate(dto.getEndDate());
+            bonus.setActive(true);
+
+            employeeBonusRepository.save(bonus);
+        }
     }
 
     private Employee findByIdAndCompany(UUID id) {
@@ -626,14 +859,76 @@ public class EmployeeService {
                 .build();
     }
 
+    private EmployeeJobStepDto toJobStepDto(Employee employee) {
+        // Get active job history record
+        EmployeeJobHistory jobHistory = employeeJobHistoryRepository
+                .findByEmployeeIdAndActiveTrue(employee.getId())
+                .orElse(null);
+
+        EmployeeJobStepDto.EmployeeJobStepDtoBuilder builder = EmployeeJobStepDto.builder()
+                .employeeId(employee.getId())
+                .firstName(employee.getFirstName())
+                .lastName(employee.getFirstLastName()
+                        + (employee.getSecondLastName() != null ? " " + employee.getSecondLastName() : ""))
+                .companyDomain(employee.getCompany() != null ? employee.getCompany().getAllowedDomain() : null)
+                .email(employee.getEmailCorporate());
+
+        if (jobHistory != null) {
+            builder.costCenterId(jobHistory.getCostCenter() != null ? jobHistory.getCostCenter().getId() : null)
+                    .departmentId(jobHistory.getDepartment() != null ? jobHistory.getDepartment().getId() : null)
+                    .locationId(jobHistory.getLocation() != null ? jobHistory.getLocation().getId() : null)
+                    .operationalCenterId(
+                            jobHistory.getOperationalCenter() != null ? jobHistory.getOperationalCenter().getId()
+                                    : null)
+                    .positionId(jobHistory.getPosition() != null ? jobHistory.getPosition().getId() : null)
+                    .managerId(jobHistory.getSupervisor() != null ? jobHistory.getSupervisor().getId() : null)
+                    .salary(jobHistory.getSalary())
+                    .currencyCode(jobHistory.getCurrency())
+                    .transportAid(jobHistory.getTransportAid());
+        }
+
+        // Load bonuses
+        builder.bonuses(loadEmployeeBonuses(employee.getId()));
+
+        return builder.build();
+    }
+
+    private List<EmployeeJobStepDto.EmployeeBonusDto> loadEmployeeBonuses(UUID employeeId) {
+        return employeeBonusRepository.findByEmployeeIdAndActiveTrue(employeeId).stream()
+                .map(bonus -> EmployeeJobStepDto.EmployeeBonusDto.builder()
+                        .id(bonus.getId())
+                        .compensationTypeId(bonus.getCompensationType().getId())
+                        .compensationTypeName(bonus.getCompensationType().getName())
+                        .amount(bonus.getAmount())
+                        .percentage(bonus.getPercentage())
+                        .currencyId(bonus.getCurrency() != null ? bonus.getCurrency().getId() : null)
+                        .currencyCode(bonus.getCurrency() != null ? bonus.getCurrency().getCode() : null)
+                        .periodicity(bonus.getPeriodicity() != null ? bonus.getPeriodicity().getCode() : null)
+                        .periodicityId(bonus.getPeriodicity() != null ? bonus.getPeriodicity().getId() : null)
+                        .startDate(bonus.getStartDate())
+                        .endDate(bonus.getEndDate())
+                        .costCenterId(bonus.getCostCenter() != null ? bonus.getCostCenter().getId() : null)
+                        .category(bonus.getCompensationType().getCategory().name())
+                        .isSalary(bonus.getCompensationType().getIsSalary())
+                        .isVariable(bonus.getCompensationType().getIsVariable())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     private EmployeeDocumentDto toDocumentDto(EmployeeDocument doc) {
         if (doc == null)
             return null;
+
+        // Formato estándar del proyecto para URLs de archivos privados
+        String path = doc.getFilePath().replace("companies/", "company/");
+        String apiUrl = "/api/private/assets/" + path;
+
         return EmployeeDocumentDto.builder()
                 .id(doc.getId())
                 .documentTypeId(doc.getDocumentType() != null ? doc.getDocumentType().getId() : null)
                 .documentTypeName(doc.getDocumentType() != null ? doc.getDocumentType().getName() : "Unificado")
-                .fileName(doc.getFileName())
+                .fileName(doc.getFileName()) // Nombre amigable (ej: "CV.pdf")
+                .filePath(apiUrl) // URL canónica (ej: "/api/private/assets/company/...")
                 .expirationDate(doc.getExpirationDate())
                 .isUnified(doc.getIsUnified())
                 .build();

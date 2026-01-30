@@ -49,8 +49,8 @@ On initialization, the following catalogs are fetched from the backend:
 | | `address` | Text | `Validators.required` (AddressBuilder) |
 | | `residenceNeighborhood` | Text | Optional |
 | **Residence** | `residenceCountry/State/City` | Select | Optional (Cascades) |
-| **Emergency** | `emergencyContacts` | Array | Items: Name, Relationship, Phone. |
-| **Family** | `familyNucleus` | Array | Items: Name, Relationship, BirthDate, Occupation, Dependent. |
+| **Emergency** | `emergencyContacts` | Array | Items: **First Name**, **Second Name**, **First Last Name**, **Second Last Name**, Relationship, Phone. |
+| **Family** | `familyNucleus` | Array | Items: **First Name**, **Second Name**, **First Last Name**, **Second Last Name**, Relationship, BirthDate, Occupation, Dependent. |
 | **Work Experience** | `workExperiences` | Array | Company, Position, Supervisor, Dates, **PDF Upload**. |
 | **Education** | `educations` | Array | **Inline Cards**: Level, Institution, Title, Year, **Location (Cascade)**, Phone, Hours, PDF. |
 | **Sizes** | `shirtSizeId`, `pantsSizeId`, `shoeSizeId` | Select | Optional (Global Catalog) |
@@ -81,9 +81,12 @@ On initialization, the following catalogs are fetched from the backend:
 - **Address Builder**: 
     - Uses `AddressBuilderComponent` for standardized formatting.
     - **UI Fix**: Edit button height perfectly matched to the input (`h-[52px]`) with centered icons.
-- **PDF Uploads**:
-    - **Work Experience**: `companies/{cid}/employees/{eid}/work_experience/certification_{timestamp}.pdf`
-    - **Education**: `companies/{cid}/employees/{eid}/education/education_{timestamp}.pdf`
+- **Education**: `companies/{cid}/employees/{eid}/education/education_{timestamp}.pdf`
+
+## 4. UI/UX Standards
+- **Validation Style**: Required fields show a subtle red border when invalid, without explicit error text.
+- **Global Feedback**: Display a top-level alert: *"Por favor completa todos los campos obligatorios resaltados en rojo."* when form is invalid.
+- **Buttons**: Consistent with all wizard steps: `REGRESAR` (Dark Ghost) and `GUARDAR Y CONTINUAR` (Primary).
 
 ## Backend: Step 1 API
 - **DTO**: `EmployeePersonalStepDto.java` containing all new fields and nested lists (`educations`, `workExperiences`).

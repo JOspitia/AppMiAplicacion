@@ -27,6 +27,11 @@ public class CatalogService {
     private final ContractTypeRepository contractTypeRepository;
     private final WorkScheduleRepository workScheduleRepository;
     private final DocumentTypeRepository documentTypeRepository;
+    private final CostCenterRepository costCenterRepository;
+    private final DepartmentRepository departmentRepository;
+    private final com.project.backend_api.repository.core.management.LocationRepository locationRepository;
+    private final OperationalCenterRepository operationalCenterRepository;
+    private final PositionRepository positionRepository;
     private final AuthService authService;
 
     @Transactional(readOnly = true)
@@ -132,6 +137,46 @@ public class CatalogService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<CostCenterDto> getActiveCostCenters() {
+        UUID companyId = authService.getSelectedCompanyId();
+        return costCenterRepository.findByCompanyIdAndActiveTrue(companyId).stream()
+                .map(this::toCostCenterDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<DepartmentDto> getActiveDepartments() {
+        UUID companyId = authService.getSelectedCompanyId();
+        return departmentRepository.findByCompanyIdAndActiveTrueOrderByCodeAsc(companyId).stream()
+                .map(this::toDepartmentDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.project.backend_api.dto.core.management.LocationDto> getActiveLocations() {
+        UUID companyId = authService.getSelectedCompanyId();
+        return locationRepository.findByCompanyIdAndActiveTrue(companyId).stream()
+                .map(this::toLocationDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<OperationalCenterDto> getActiveOperationalCenters() {
+        UUID companyId = authService.getSelectedCompanyId();
+        return operationalCenterRepository.findByCompanyIdAndActiveTrue(companyId).stream()
+                .map(this::toOperationalCenterDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PositionDto> getActivePositions() {
+        UUID companyId = authService.getSelectedCompanyId();
+        return positionRepository.findByCompanyIdAndActiveTrue(companyId).stream()
+                .map(this::toPositionDto)
+                .collect(Collectors.toList());
+    }
+
     // Mappers
     private RelationshipDto toRelationshipDto(Relationship entity) {
         return RelationshipDto.builder()
@@ -218,6 +263,67 @@ public class CatalogService {
                 .code(dt.getCode())
                 .isRequired(dt.getIsRequired())
                 .requiresExpiration(dt.getRequiresExpiration())
+                .build();
+    }
+
+    private CostCenterDto toCostCenterDto(CostCenter cc) {
+        return CostCenterDto.builder()
+                .id(cc.getId())
+                .code(cc.getCode())
+                .name(cc.getName())
+                .currencyId(cc.getCurrency() != null ? cc.getCurrency().getId() : null)
+                .currencyCode(cc.getCurrency() != null ? cc.getCurrency().getCode() : null)
+                .currencySymbol(cc.getCurrency() != null ? cc.getCurrency().getSymbol() : null)
+                .transportAidThreshold(cc.getTransportAidThreshold())
+                .description(cc.getDescription())
+                .active(cc.getActive())
+                .build();
+    }
+
+    private DepartmentDto toDepartmentDto(Department d) {
+        return DepartmentDto.builder()
+                .id(d.getId())
+                .code(d.getCode())
+                .name(d.getName())
+                .costCenterId(d.getCostCenter() != null ? d.getCostCenter().getId() : null)
+                .locationIds(d.getLocations().stream()
+                        .map(com.project.backend_api.model.core.management.Location::getId)
+                        .collect(Collectors.toList()))
+                .active(d.getActive())
+                .build();
+    }
+
+    private com.project.backend_api.dto.core.management.LocationDto toLocationDto(
+            com.project.backend_api.model.core.management.Location l) {
+        return com.project.backend_api.dto.core.management.LocationDto.builder()
+                .id(l.getId())
+                .name(l.getName())
+                .address(l.getAddress())
+                .city(l.getCity())
+                .department(l.getDepartment())
+                .country(l.getCountry())
+                .isMain(l.getIsMain())
+                .active(l.getActive())
+                .build();
+    }
+
+    private OperationalCenterDto toOperationalCenterDto(OperationalCenter oc) {
+        return OperationalCenterDto.builder()
+                .id(oc.getId())
+                .code(oc.getCode())
+                .name(oc.getName())
+                .locationId(oc.getLocation() != null ? oc.getLocation().getId() : null)
+                .active(oc.getActive())
+                .build();
+    }
+
+    private PositionDto toPositionDto(Position p) {
+        return PositionDto.builder()
+                .id(p.getId())
+                .code(p.getCode())
+                .name(p.getName())
+                .departmentId(p.getDepartment() != null ? p.getDepartment().getId() : null)
+                .active(p.getActive())
                 .build();
     }
 }

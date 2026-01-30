@@ -106,11 +106,14 @@ export class EmployeeContractFormComponent implements OnInit {
     loadExistingDocuments() {
         this.employeeService.getEmployeeDocuments(this.employeeId).subscribe(docs => {
             this.existingDocuments.set(docs);
-            // Check if any existing doc is unified
-            const unified = docs.find(d => d.isUnified);
+
+            // Check for unified document (by flag OR by path naming convention)
+            const unified = docs.find(d => d.isUnified || d.fileName?.toLowerCase().includes('unified') || d.id === 'unified');
+
             if (unified) {
                 this.isUnified.set(true);
             } else if (docs.length > 0) {
+                // If there are docs but none are unified, ensure it's false
                 this.isUnified.set(false);
             }
         });
@@ -290,15 +293,10 @@ export class EmployeeContractFormComponent implements OnInit {
     viewFile(input: string | File | null | undefined) {
         if (!input) return;
         if (typeof input === 'string') {
-            let url = input;
-            if (url.startsWith('private-assets/')) {
-                url = `${environment.apiUrl}/${url}`;
-            }
-            window.open(url, '_blank');
+            window.open(input, '_blank');
         } else {
             const url = URL.createObjectURL(input);
             window.open(url, '_blank');
-            // Clean up the URL after a delay
             setTimeout(() => URL.revokeObjectURL(url), 100);
         }
     }

@@ -80,8 +80,27 @@ export interface EmployeeDocumentDto {
     documentTypeId: string;
     documentTypeName: string;
     fileName: string;
+    filePath?: string;
     expirationDate?: string;
     isUnified: boolean;
+}
+
+export interface EmployeeJobStepDto {
+    employeeId?: string;
+    firstName?: string;
+    lastName?: string;
+    companyDomain?: string;
+    costCenterId: string;
+    departmentId: string;
+    locationId?: string;
+    operationalCenterId?: string;
+    positionId: string;
+    managerId?: string;
+    salary: number;
+    currencyCode: string;
+    transportAid?: boolean;
+    email: string;
+    bonuses?: any[];
 }
 
 @Injectable({
@@ -136,5 +155,17 @@ export class EmployeeService {
         }
 
         return this.http.post<void>(`${this.apiUrl}/${id}/step2`, formData);
+    }
+
+    getJobData(id: string): Observable<EmployeeJobStepDto> {
+        return this.http.get<EmployeeJobStepDto>(`${this.apiUrl}/${id}/job`);
+    }
+
+    suggestCorporateEmail(id: string): Observable<string> {
+        return this.http.get(`${this.apiUrl}/${id}/suggest-email`, { responseType: 'text' });
+    }
+
+    updateStep3(id: string, data: EmployeeJobStepDto): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/${id}/step3`, data);
     }
 }

@@ -1,0 +1,253 @@
+<div class="space-y-10 pb-20 animate-fade-in">
+    <!-- Header Section -->
+    <div
+        class="relative overflow-hidden rounded-[3.5rem] bg-white/80 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-slate-800 shadow-2xl p-10 md:p-12 mb-8">
+        <div class="absolute top-0 right-0 p-12 opacity-[0.03] dark:opacity-[0.07] pointer-events-none">
+            <app-icon name="pi-building" size="180"></app-icon>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+            <div
+                class="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center text-primary shadow-inner">
+                <app-icon name="pi-building" size="40"></app-icon>
+            </div>
+            <div class="flex-1 text-center md:text-left space-y-2">
+                <span class="text-primary font-bold tracking-[0.4em] text-[10px] uppercase block">Fase 3 de la
+                    Vinculación</span>
+                <h1 class="text-4xl font-black text-slate-900 dark:text-white">Información Corporativa</h1>
+                <p class="text-slate-500 dark:text-slate-400 font-medium max-w-2xl">Define la ubicación funcional del
+                    empleado en la estructura organizacional, compensación y cuentas corporativas.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div *ngIf="successMessage() || errorMessage()" class="w-full animate-fade-in space-y-4">
+        <app-alert *ngIf="successMessage()" type="success" [message]="successMessage()" [autoHide]="6000"
+            (closed)="successMessage.set(null)"></app-alert>
+        <app-alert *ngIf="errorMessage()" type="error" [message]="errorMessage()" [autoHide]="8000"
+            (closed)="errorMessage.set(null)"></app-alert>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+        <!-- SECTION 1: ESTRUCTURA ORGANIZACIONAL (Card 1) -->
+        <div class="lg:col-span-12">
+            <div class="glass-section space-y-10 h-full">
+                <div class="flex items-center gap-5">
+                    <div class="section-indicator"></div>
+                    <div>
+                        <h2 class="text-xl font-black text-slate-800 dark:text-white">Estructura Organizacional</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Jerarquía y
+                            ubicación del cargo.</p>
+                    </div>
+                    <app-icon name="sitemap" class="ml-auto text-slate-200 dark:text-white/5" size="40"></app-icon>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Centro de Costos -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Centro de Costos *</label>
+                        <div class="relative group">
+                            <app-icon name="pi-calculator"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 z-10 group-focus-within:text-primary transition-colors"></app-icon>
+                            <p-select [options]="costCenters()" formControlName="costCenterId" optionLabel="name"
+                                optionValue="id" placeholder="Seleccione C.C." class="premium-select select-with-icon"
+                                appendTo="body" [filter]="true" [styleClass]="'w-full'">
+                            </p-select>
+                        </div>
+                    </div>
+
+                    <!-- Departamento -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Departamento *</label>
+                        <div class="relative group">
+                            <app-icon name="pi-building"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 z-10 group-focus-within:text-primary transition-colors"></app-icon>
+                            <p-select [options]="filteredDepartments()" formControlName="departmentId"
+                                optionLabel="name" optionValue="id" placeholder="Seleccione Depto."
+                                class="premium-select select-with-icon" appendTo="body"
+                                [disabled]="!form.get('costCenterId')?.value" [filter]="true" [styleClass]="'w-full'">
+                            </p-select>
+                        </div>
+                    </div>
+
+                    <!-- Cargo (Position) -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Cargo / Posición *</label>
+                        <div class="relative group">
+                            <app-icon name="briefcase"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 z-10 group-focus-within:text-primary transition-colors"></app-icon>
+                            <p-select [options]="filteredPositions()" formControlName="positionId" optionLabel="name"
+                                optionValue="id" placeholder="Seleccione Cargo" class="premium-select select-with-icon"
+                                appendTo="body" [disabled]="!form.get('departmentId')?.value" [filter]="true"
+                                [styleClass]="'w-full'">
+                            </p-select>
+                        </div>
+                    </div>
+
+                    <!-- Sede (Location) -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Sede / Ubicación</label>
+                        <div class="relative group">
+                            <app-icon name="map-pin"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 z-10 group-focus-within:text-primary transition-colors"></app-icon>
+                            <p-select [options]="filteredLocations()" formControlName="locationId" optionLabel="name"
+                                optionValue="id" placeholder="Seleccione Sede" class="premium-select select-with-icon"
+                                appendTo="body" [disabled]="!form.get('departmentId')?.value" [styleClass]="'w-full'">
+                            </p-select>
+                        </div>
+                    </div>
+
+                    <!-- Centro Operacional -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Centro Operacional</label>
+                        <div class="relative group">
+                            <app-icon name="pi-box"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 z-10 group-focus-within:text-primary transition-colors"></app-icon>
+                            <p-select [options]="filteredOperationalCenters()" formControlName="operationalCenterId"
+                                optionLabel="name" optionValue="id" placeholder="Seleccione C. Op."
+                                class="premium-select select-with-icon" appendTo="body"
+                                [disabled]="!form.get('locationId')?.value" [styleClass]="'w-full'">
+                            </p-select>
+                        </div>
+                    </div>
+
+                    <!-- Jefe Inmediato -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Jefe Inmediato</label>
+                        <div class="relative group">
+                            <app-icon name="user-circle"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 z-10 group-focus-within:text-primary transition-colors"></app-icon>
+                            <p-select [options]="managers()" formControlName="managerId" optionLabel="fullName"
+                                optionValue="id" placeholder="Seleccione Supervisor"
+                                class="premium-select select-with-icon" appendTo="body" [filter]="true"
+                                [styleClass]="'w-full'">
+                            </p-select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: COMPENSACIÓN Y CUENTAS (Card 2) -->
+        <div class="lg:col-span-12">
+            <div class="glass-section space-y-10 h-full">
+                <div class="flex items-center gap-5">
+                    <div class="section-indicator"></div>
+                    <div>
+                        <h2 class="text-xl font-black text-slate-800 dark:text-white">Compensación y Cuentas</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Datos
+                            económicos y accesos.</p>
+                    </div>
+                    <app-icon name="currency-dollar" class="ml-auto text-slate-200 dark:text-white/5"
+                        size="40"></app-icon>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Salario -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Salario Base *</label>
+                        <div class="relative group">
+                            <app-icon name="currency-dollar"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors z-10"
+                                size="20"></app-icon>
+                            <p-inputNumber formControlName="salary" mode="decimal" [minFractionDigits]="2"
+                                [maxFractionDigits]="2" locale="es-CO" placeholder="0.00" styleClass="w-full"
+                                inputStyleClass="w-full pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl icon-padding-left">
+                            </p-inputNumber>
+                        </div>
+                    </div>
+
+                    <!-- Moneda -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Moneda de Pago *</label>
+                        <div class="relative group">
+                            <app-icon name="pi-money-bill"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 z-10 group-focus-within:text-primary transition-colors"></app-icon>
+                            <p-select [options]="currencies()" formControlName="currencyCode" optionLabel="name"
+                                optionValue="code" placeholder="Seleccione Moneda"
+                                class="premium-select select-with-icon" appendTo="body" [styleClass]="'w-full'">
+                                <ng-template pTemplate="selectedItem" let-selectedOption>
+                                    <div class="flex items-center gap-2" *ngIf="selectedOption">
+                                        <span class="font-bold text-primary">({{selectedOption.code}})</span>
+                                        <span>- {{selectedOption.name}}</span>
+                                    </div>
+                                </ng-template>
+                                <ng-template pTemplate="item" let-currency>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-primary">({{currency.code}})</span>
+                                        <span>- {{currency.name}}</span>
+                                    </div>
+                                </ng-template>
+                            </p-select>
+                        </div>
+                    </div>
+
+                    <!-- Auxilio de Transporte -->
+                    <div class="flex flex-col gap-4">
+                        <label class="premium-label">Auxilio de Transporte</label>
+                        <div
+                            class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 w-fit">
+                            <p-checkbox formControlName="transportAid" [binary]="true"
+                                inputId="transportAid"></p-checkbox>
+                            <label for="transportAid"
+                                class="text-sm font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
+                                Habilitar Auxilio
+                            </label>
+                        </div>
+
+                        <!-- Warning Alert -->
+                        <div *ngIf="showTransportAidWarning()"
+                            class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-3 animate-fade-in">
+                            <app-icon name="info" size="18" class="text-amber-500"></app-icon>
+                            <p class="text-[11px] text-amber-600 dark:text-amber-400 font-bold leading-tight">
+                                <span class="uppercase block text-[10px] mb-0.5">Aviso de Excepción</span>
+                                El salario ingresado supera el tope de auxilio para este C.C. ({{
+                                transportAidThreshold() | currency }})
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Email Corporativo -->
+                    <div class="flex flex-col gap-2">
+                        <label class="premium-label">Email Corporativo *</label>
+                        <div class="relative group">
+                            <app-icon name="pi-at"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors z-10"></app-icon>
+                            <input type="email" pInputText formControlName="email" placeholder="usuario@empresa.com"
+                                class="premium-input premium-input-with-icon pr-14" />
+
+                            <!-- Botón Mágico Generador -->
+                            <button type="button" (click)="generateCorporateEmail()"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl transition-all duration-300 shadow-sm hover:shadow-primary/20 group/magic"
+                                pTooltip="Generar correo institucional" tooltipPosition="left">
+                                <app-icon name="sparkles" size="18" class="group-hover/magic:animate-pulse"></app-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div
+            class="lg:col-span-12 flex items-center justify-between pt-10 border-t border-slate-200 dark:border-white/5">
+            <button type="button" (click)="onBack()"
+                class="flex items-center gap-3 px-10 py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/10 rounded-3xl transition-all font-black text-xs uppercase tracking-widest active:scale-95 border border-slate-200 dark:border-white/10">
+                <app-icon name="arrow-left" size="16"></app-icon>
+                Regresar
+            </button>
+
+            <button type="submit" [disabled]="loading()"
+                class="flex items-center gap-3 px-10 py-4 bg-primary text-white hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-3xl transition-all font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/30 active:scale-95">
+                <span *ngIf="!loading()">Guardar y Continuar</span>
+                <span *ngIf="loading()" class="animate-pulse">Procesando...</span>
+                <app-icon *ngIf="!loading()" name="arrow-right" size="16"></app-icon>
+                <div *ngIf="loading()"
+                    class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin">
+                </div>
+            </button>
+        </div>
+    </form>
+</div>
